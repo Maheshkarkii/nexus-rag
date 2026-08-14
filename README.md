@@ -13,12 +13,12 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 60 — Advanced Observability, SRE & Self-Healing Complete.**
+> **Current Phase: Stage 61 — Advanced Security & AI Red Teaming Complete.**
 >
-> The production RAG platform features advanced telemetry, operational alerts, and automated self-healing capabilities:
+> The production RAG platform features comprehensive threat modeling, prompt injection defense, and multi-tenant security verification:
 >
-> - **Distributed Telemetry & Latency Metrics** ([`observability.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/core/observability.py)): Span tracing (`TraceSpan`), correlation context propagation (`RequestCorrelationContext`), latency percentile calculations (`P50`/`P95`), and token usage tracking.
-> - **Operational Alerting & SLO Compliance** ([`reliability.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/core/reliability.py)): Automated error rate, P95 latency, queue backlog, and low storage alerting (`AlertManager`), SLO calculation (`SLICalculator`), and self-healing job recovery.
+> - **Prompt Injection & Red-Team Defense** ([`security.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/core/security.py)): Direct/indirect prompt injection detection (`PromptInjectionDetector`), path traversal protection (`FileSecurityValidator`), credential log masking (`LogSanitizer`), and multi-tenant IDOR verification (`ResourceAccessAuthorizer`).
+> - **Cross-Tenant & Agent Tool Isolation**: Strict project payload filtering across Qdrant vector collections, NetworkX knowledge graph nodes, and multi-agent tool execution bounds (`ToolRegistry.MAX_TOOL_CALLS`).
 > - **Comprehensive Test Suite & Evaluation**: 189 backend unit & integration tests passing with 0 failures (`pytest -v`), 100% evaluation pass rate (`run_eval.py`).
 
 ---
