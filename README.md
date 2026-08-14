@@ -13,13 +13,13 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 39 — Advanced Knowledge Graph, Entity Relationships & Research Knowledge Structuring Active.**
+> **Current Phase: Stage 40 — Advanced Research Evaluation, Quality Assurance & End-to-End RAG Benchmarking Active.**
 >
-> The repository features a structured knowledge graph layer supplementing vector RAG:
+> The repository features a comprehensive end-to-end benchmarking and evaluation suite:
 >
-> - **Entity & Relationship Models** ([`graph.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/db/models/graph.py)): Support for 10 entity types (`Person`, `Paper`, `Dataset`, `Model`, etc.) and 12 relationship types (`uses_method`, `evaluated_on`, `cites`, etc.).
-> - **Knowledge Graph Extraction & Query Service** ([`knowledge_graph.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/knowledge_graph.py)): Incremental entity extraction, canonical resolution, source provenance, bounded graph traversal, and document deletion cascades.
-> - **Visualization & Graph API** ([`graph.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/api/routes/graph.py)): Project-scoped node/edge visualization data endpoints and concept graph query routing.
+> - **Unified RAG Evaluator** ([`evaluator.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/evaluation/evaluator.py)): Evaluates retrieval metrics (`Recall@5`, `Precision@5`, `MRR`, `NDCG`), groundedness, claim support rates, and citation validity across golden datasets ([`golden_dataset.json`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/evaluation/golden_dataset.json)).
+> - **Automated Benchmark Runner** ([`run_eval.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/evaluation/run_eval.py)): Measures latency, pass rates, and outputs JSON metrics reports (`evaluation_results.json`).
+> - **Multi-Layer Reliability**: Rigorous evaluation covering ingestion, hybrid retrieval, agent tool routing, reports, knowledge graph, and security.
 > - **Comprehensive Test Suite**: 187 backend unit & integration tests passing with 0 failures (`pytest -v`).
 
 ---
