@@ -24,7 +24,6 @@ import {
   FileDown,
   FileCode,
   FileCheck,
-  Printer,
   Sparkles,
   X
 } from "lucide-react";
