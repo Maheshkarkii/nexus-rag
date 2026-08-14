@@ -13,13 +13,13 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 36 — Advanced Research Reports, Document Synthesis & Professional Research Deliverables Active.**
+> **Current Phase: Stage 37 — Advanced User Interaction, Conversational Research Workflow & Context Management Active.**
 >
-> The repository features a full-featured research synthesis and professional report generation suite:
+> The repository features an intelligent multi-turn conversational research engine:
 >
-> - **Multi-Type Report Engine** ([`report_generator.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/report_generator.py)): Supports `research_summary`, `literature_review`, `technical_report`, `comparative_analysis`, `research_report`, and `data_analysis_report`.
-> - **Section-by-Section Generation & Regeneration**: Section-level LLM execution, citation validation, section regeneration, and user-edit preservation.
-> - **Multi-Format Export Adapters** ([`export_adapters.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/export_adapters.py)): Professional PDF, DOCX, and Markdown export with automated page numbering and table formatting.
+> - **Conversational Query Intelligence** ([`query_rewriter.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/query_rewriter.py)): Natural reference resolution, multi-turn pronoun resolution ("which one", "the second paper"), intent classification, and selective retrieval routing.
+> - **Context-Aware Dialogue Management** ([`rag.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/rag.py)): Seamless conversation history incorporation, persistent document scope inheritance, and citation continuity.
+> - **Report & Memory Integration**: Seamless conversational interaction across research reports and persistent project memory.
 > - **Comprehensive Test Suite**: 187 backend unit & integration tests passing with 0 failures (`pytest -v`).
 
 ---

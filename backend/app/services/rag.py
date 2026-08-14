@@ -106,6 +106,18 @@ class RAGService:
             
             if history_dicts:
                 rewriter = ConversationQueryRewriter()
+                intent = rewriter.classify_intent(query, history_dicts)
+                needs_ret = rewriter.needs_retrieval(intent, query)
+                if not needs_ret:
+                    logger.info("Conversational greeting/thanks turn detected without retrieval requirement.")
+                    chat_resp = "You're welcome! Let me know if you have any more questions about your documents."
+                    await create_message(session=session, conversation_id=conversation_id, role="assistant", content=chat_resp)
+                    return {
+                        "query": query,
+                        "answer": chat_resp,
+                        "citations": [],
+                        "conversation_id": conversation_id,
+                    }
                 search_query = await rewriter.rewrite(history_dicts, query, llm_service)
 
         # 2. Stage 22 Deterministic Data Analysis Path

@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from app.services.llm import LLMService
 
@@ -63,6 +63,31 @@ class ConversationQueryRewriter:
         except Exception as exc:
             logger.error(f"Query rewriter LLM call failed: {exc}. Falling back to original query.")
             return current_query.strip()
+
+    def classify_intent(self, query: str, history: Optional[List[Dict[str, Any]]] = None) -> str:
+        """Classify conversational query intent."""
+        q_lower = query.strip().lower()
+
+        if any(w in q_lower for w in ["thanks", "thank you", "hello", "hi", "good morning"]):
+            return "general_conversation"
+        elif any(w in q_lower for w in ["regenerate", "make the section", "shorter", "add more evidence to", "edit section"]):
+            return "report_request"
+        elif any(w in q_lower for w in ["compare", "versus", "vs", "difference between"]):
+            return "comparison"
+        elif any(w in q_lower for w in ["summarize", "summary", "overview"]):
+            return "summarization"
+        elif any(w in q_lower for w in ["why", "how come", "explain further", "which one", "the second paper", "this paper"]):
+            return "follow_up"
+        return "direct_answer"
+
+    def needs_retrieval(self, intent: str, query: str) -> bool:
+        """Determine whether a message requires document retrieval."""
+        if intent == "general_conversation":
+            return False
+        q_lower = query.strip().lower()
+        if len(q_lower.split()) <= 2 and any(w in q_lower for w in ["thanks", "ok", "okay", "got it", "cool"]):
+            return False
+        return True
 
 
 # Singleton rewriter instance
