@@ -13,13 +13,13 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 47 — Advanced Knowledge Graph, Entity Resolution & Graph-RAG Intelligence Active.**
+> **Current Phase: Stage 48 — Advanced Document Intelligence, Multimodal RAG & Table/Image Understanding Active.**
 >
-> The repository features an entity-resolution and Graph-RAG intelligence framework:
+> The repository features a structured document intelligence and multimodal extraction pipeline:
 >
-> - **Canonical Entity Resolution & Normalization** ([`knowledge_graph.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/knowledge_graph.py)): Case normalization, noise suffix stripping (`normalize_entity_name`), and exact/alias canonical entity resolution (`resolve_entity`).
-> - **Typed Relationship Extraction & Graph Traversal**: 10 entity categories (`Person`, `Paper`, `Dataset`, `Model`, `Method`, etc.), 12 normalized relationship types (`authored_by`, `uses_method`, `cites`, etc.), and bounded multi-hop traversal (`query_graph`).
-> - **Graph Visualization & Explorer API** ([`graph.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/api/routes/graph.py)): Project-scoped node/edge visualization data endpoints and concept graph query routing.
+> - **Multimodal Document Processing Engine** ([`multimodal_intelligence.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/document_processing/multimodal_intelligence.py)): Element classification (`text`, `heading`, `table`, `figure`, `sheet`, `caption`), markdown table parsing (`TableExtractor`), figure caption detection (`FigureExtractor`), and dataset schema extraction (`SpreadsheetExtractor`).
+> - **Structured Dataset Processing**: Column/row relationship preservation for CSV/XLSX/JSON files with formula injection escaping (`sanitize_formula_cell`).
+> - **Provenance & Citation Maintenance**: Page numbers, element IDs, figure captions, and table metadata preserved across vector retrieval, research workflows, and formal report generation.
 > - **Comprehensive Test Suite**: 189 backend unit & integration tests passing with 0 failures (`pytest -v`).
 
 ---
