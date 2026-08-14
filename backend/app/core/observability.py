@@ -36,6 +36,19 @@ class TraceSpan:
         return False # Do not suppress exceptions
 
 
+class RequestCorrelationContext:
+    """Manages request and correlation IDs across asynchronous workflow spans."""
+
+    @staticmethod
+    def get_correlation_id(request_headers: Optional[Dict[str, str]] = None) -> str:
+        """Extract existing correlation ID or generate a new UUID4 string."""
+        if request_headers:
+            cid = request_headers.get("x-correlation-id") or request_headers.get("X-Correlation-ID")
+            if cid:
+                return cid
+        return f"corr_{uuid.uuid4().hex[:12]}"
+
+
 class RAGMetricsCollector:
     """In-memory metrics collector for application latency percentiles, tokens, and quality stats."""
 

@@ -13,13 +13,13 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 41 — Production Security, Privacy, Authorization & Data Governance Active.**
+> **Current Phase: Stage 42 — Production Observability, Monitoring, Logging & Performance Engineering Active.**
 >
-> The repository features a hardened production security & data governance framework:
+> The repository features an enterprise-grade observability, telemetry, and performance framework:
 >
-> - **Centralized Authorization & IDOR Protection** ([`security.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/core/security.py)): Resource access authorizer (`ResourceAccessAuthorizer`), project boundary isolation across vectors, memory, and graph data.
-> - **File & Ingestion Hardening**: Path traversal elimination (`sanitize_filename`), Excel/CSV formula injection escaping, and rate limiting (`RateLimitValidator`).
-> - **AI Security & Audit Logging**: Prompt injection detection (`PromptInjectionDetector`), log secret masking (`LogSanitizer`), and structured audit logging (`SecurityAuditLogger`).
+> - **Distributed Tracing & Correlation Context** ([`observability.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/core/observability.py)): Request correlation headers (`RequestCorrelationContext`), `TraceSpan` context managers, and structured JSON telemetry.
+> - **Real-Time Telemetry & Operational Dashboard** ([`reliability.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/core/reliability.py)): Live latency percentile metrics (P50/P95), token usage counters, SLI/SLO threshold monitoring, and `/observability/dashboard` APIs.
+> - **Probes & Readiness Probes** ([`health.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/api/routes/health.py)): Liveness check (`/health/liveness`) and readiness probes (`/health/ready`).
 > - **Comprehensive Test Suite**: 189 backend unit & integration tests passing with 0 failures (`pytest -v`).
 
 ---

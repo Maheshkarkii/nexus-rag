@@ -23,6 +23,12 @@ async def health_check(db: AsyncSession = Depends(get_db)):
     return {"status": "healthy"} if db_status == "healthy" else {"status": "degraded"}
 
 
+@router.get("/health/liveness", summary="Liveness Probe Check")
+async def liveness_check():
+    """Lightweight liveness probe verifying application process is alive."""
+    return {"status": "alive"}
+
+
 @router.get("/health/ready", summary="Readiness Check")
 async def readiness_check(db: AsyncSession = Depends(get_db)):
     """Readiness probe endpoint for container orchestration."""
