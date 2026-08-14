@@ -13,13 +13,13 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 45 — Advanced Research Agent, Multi-Step Reasoning & Autonomous Research Workflows Active.**
+> **Current Phase: Stage 46 — Research Report Generation, Document Synthesis & Professional Output System Active.**
 >
-> The repository features a controlled multi-step research agent and bounded workflow orchestrator:
+> The repository features a structured document synthesis and multi-format report generator:
 >
-> - **Structured Research Planning & Decomposition** ([`research.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/research.py)): Complexity classification (`simple`, `complex`), DAG dependency graph validation, and cycle detection (`ResearchPlanner`).
-> - **Bounded Workflow Orchestration & Tool Boundaries**: Approved tool registry (`ControlledToolRegistry`), parallel sub-question execution, dependency query rewriting, and context token budgeting (`RESEARCH_CONTEXT_BUDGET`).
-> - **Privacy-Preserving Telemetry & Progress Reporting**: Exposes safe progress states (`research_started`, `research_step_started`, `research_step_completed`) without disclosing internal chain-of-thought.
+> - **Template-Driven Report Generation** ([`report_generator.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/report_generator.py)): Support for 6 formal report types (`research_summary`, `literature_review`, `technical_report`, `comparative_analysis`, `research_report`, `data_analysis_report`).
+> - **Claim-Evidence Mapping & Citation Validation**: Section-by-section evidence context grounding, invalid citation stripping (`_validate_and_sanitize_citations`), and section-level regeneration (`regenerate_section`).
+> - **Multi-Format Export & API Endpoints**: Production exports for Markdown, PDF, and DOCX formats with full source attribution.
 > - **Comprehensive Test Suite**: 189 backend unit & integration tests passing with 0 failures (`pytest -v`).
 
 ---
