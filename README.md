@@ -13,13 +13,13 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 44 — Advanced RAG Optimization, Retrieval Quality & Intelligent Context Engineering Active.**
+> **Current Phase: Stage 45 — Advanced Research Agent, Multi-Step Reasoning & Autonomous Research Workflows Active.**
 >
-> The repository features an optimized hybrid retrieval & context engineering pipeline:
+> The repository features a controlled multi-step research agent and bounded workflow orchestrator:
 >
-> - **Intelligent Query Classification & Routing** ([`query_rewriter.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/query_rewriter.py)): Intent-based routing (`direct_answer`, `comparison`, `summarization`, `follow_up`) and contextual query reformulation.
-> - **Hybrid Fusion & Reciprocal Rank Fusion (RRF)** ([`hybrid_retrieval.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/hybrid_retrieval.py)): Multi-query expansion, normalized BM25 + vector scoring, RRF rank fusion, and Jaccard n-gram near-duplicate removal (`NearDuplicateDeduplicator`).
-> - **Context Optimization & Reranking** ([`retrieval_pipeline.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/retrieval_pipeline.py)): Cross-encoder reranking, per-document source diversification, and strict token budget enforcement.
+> - **Structured Research Planning & Decomposition** ([`research.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/research.py)): Complexity classification (`simple`, `complex`), DAG dependency graph validation, and cycle detection (`ResearchPlanner`).
+> - **Bounded Workflow Orchestration & Tool Boundaries**: Approved tool registry (`ControlledToolRegistry`), parallel sub-question execution, dependency query rewriting, and context token budgeting (`RESEARCH_CONTEXT_BUDGET`).
+> - **Privacy-Preserving Telemetry & Progress Reporting**: Exposes safe progress states (`research_started`, `research_step_started`, `research_step_completed`) without disclosing internal chain-of-thought.
 > - **Comprehensive Test Suite**: 189 backend unit & integration tests passing with 0 failures (`pytest -v`).
 
 ---
