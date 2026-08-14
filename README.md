@@ -13,12 +13,12 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 56 — Advanced Research Agent & Multi-Agent System Complete.**
+> **Current Phase: Stage 57 — Knowledge Graph & Advanced Knowledge Management Complete.**
 >
-> The production RAG platform features strongly typed multi-agent research orchestration, strict tool authorization, and verification gates:
+> The production RAG platform features multi-hop graph traversal, entity resolution, and hybrid graph+vector retrieval:
 >
-> - **Multi-Agent Research Orchestrator** ([`agentic_research.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/agentic_research.py)): Strongly typed state (`ResearchState`), task decomposition (`ResearchPlan`), specialized planner/verifier/synthesis agents, and strict tool authorization (`ToolRegistry`).
-> - **Claim Verification & Provenance**: Evidence normalization across text, tables, figures, and graph relationships with claim-evidence mapping and hallucination prevention.
+> - **Canonical Entity Resolution & Normalization** ([`knowledge_graph.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/knowledge_graph.py)): Canonical entity normalization (`normalize_entity_name`), entity resolution (`resolve_entity`), and multi-hop graph traversal bounded by project isolation (`project_id`).
+> - **Interactive Graph Visualization** ([`graph.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/api/routes/graph.py)): Project node/edge REST endpoints (`/projects/{project_id}/graph`), relationship confidence scoring, and source document provenance tracking.
 > - **Comprehensive Test Suite & Evaluation**: 189 backend unit & integration tests passing with 0 failures (`pytest -v`), 100% evaluation pass rate (`run_eval.py`).
 
 ---
