@@ -13,13 +13,13 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 35 — Advanced Answer Generation, Grounding, Citation Intelligence & Hallucination Prevention Active.**
+> **Current Phase: Stage 36 — Advanced Research Reports, Document Synthesis & Professional Research Deliverables Active.**
 >
-> The repository features an evidence-grounded generation and citation validation engine:
+> The repository features a full-featured research synthesis and professional report generation suite:
 >
-> - **Grounded Answer Generator** ([`answer_generation.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/answer_generation.py)): Evidence sufficiency evaluation, structured claim verification, hallucination repair, and invalid citation pruning.
-> - **Unified Hybrid Retrieval**: Combines dense vector search (Qdrant), lexical search (BM25), metadata filtering, cross-encoder reranking, and near-duplicate deduplication.
-> - **Security & Observability**: Strict prompt injection defenses and automated groundedness and citation correctness telemetry.
+> - **Multi-Type Report Engine** ([`report_generator.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/report_generator.py)): Supports `research_summary`, `literature_review`, `technical_report`, `comparative_analysis`, `research_report`, and `data_analysis_report`.
+> - **Section-by-Section Generation & Regeneration**: Section-level LLM execution, citation validation, section regeneration, and user-edit preservation.
+> - **Multi-Format Export Adapters** ([`export_adapters.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/export_adapters.py)): Professional PDF, DOCX, and Markdown export with automated page numbering and table formatting.
 > - **Comprehensive Test Suite**: 187 backend unit & integration tests passing with 0 failures (`pytest -v`).
 
 ---

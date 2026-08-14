@@ -30,36 +30,56 @@ class ReportGeneratorService:
 
     REPORT_TEMPLATES = {
         "research_summary": [
-            ("Executive Summary", "Summarize overall goals and main findings."),
+            ("Executive Summary", "Summarize overall research goals and main findings."),
             ("Key Research Findings", "Detail evidence-backed findings."),
             ("Limitations & Uncertainties", "Highlight missing context and document limitations."),
             ("Conclusion", "Provide high-level takeaway."),
-        ],
-        "comparative_report": [
-            ("Executive Summary", "High-level summary of comparative analysis."),
-            ("Methodology & Approach Comparison", "Compare techniques across documents."),
-            ("Performance & Result Metrics", "Contrast quantitative or qualitative results."),
-            ("Trade-offs & Key Differences", "Highlight advantages and disadvantages."),
-            ("Synthesis & Recommendations", "Conclude with evidence-grounded recommendations."),
+            ("References", "List verified source citations."),
         ],
         "literature_review": [
-            ("Introduction & Scope", "Outline research themes and scope."),
+            ("Introduction & Research Scope", "Outline research themes and document scope."),
             ("Major Research Themes", "Group findings into key thematic pillars."),
-            ("Methodological Trends", "Analyze common methodologies."),
+            ("Methodological Trends & Patterns", "Analyze common methodologies and techniques across sources."),
+            ("Agreements & Disagreements", "Contrast consensus points and conflicting findings across literature."),
             ("Identified Gaps & Limitations", "Report documented research gaps or limitations."),
-            ("Conclusion", "Synthesize state of research."),
+            ("Conclusion", "Synthesize overall state of research."),
+            ("References", "List verified source citations."),
         ],
-        "document_analysis": [
-            ("Document Overview", "Provide overview of document structure and main subject."),
-            ("Core Content Analysis", "Analyze main topics and findings in detail."),
-            ("Critical Evaluation", "Identify strengths, weaknesses, and evidence quality."),
-            ("Key Takeaways", "Summarize essential insights."),
+        "technical_report": [
+            ("Executive Summary", "High-level summary of technical specifications and findings."),
+            ("Introduction & Problem Statement", "Define technical objectives and problem space."),
+            ("Methodology & Implementation Details", "Explain architectures, data formats, and methods."),
+            ("Technical Findings & Results", "Present evidence-backed technical evaluations and findings."),
+            ("Limitations & Edge Cases", "Identify system boundaries, assumptions, and edge cases."),
+            ("Conclusion & Recommendations", "Synthesize technical recommendations grounded in evidence."),
+            ("References", "List verified source citations."),
         ],
-        "data_analysis_summary": [
-            ("Dataset & Metadata Overview", "Report row/column counts, schema details, and parameters."),
-            ("Statistical Findings & Patterns", "Summarize numerical metrics and trends."),
-            ("Data Quality & Missing Information", "Highlight missing values or dataset constraints."),
-            ("Summary Matrix", "Provide a structured summary of data insights."),
+        "comparative_analysis": [
+            ("Executive Summary", "High-level summary of comparative analysis."),
+            ("Comparison Overview & Criteria", "Define evaluation criteria across documents."),
+            ("Methodology & Approach Comparison", "Compare techniques and architectures across documents."),
+            ("Performance & Result Metrics", "Contrast quantitative or qualitative results."),
+            ("Trade-offs & Key Differences", "Highlight advantages, disadvantages, and conflicting findings."),
+            ("Conclusion & Synthesis", "Provide final evidence-grounded comparative synthesis."),
+            ("References", "List verified source citations."),
+        ],
+        "research_report": [
+            ("Executive Summary", "Comprehensive executive overview."),
+            ("Introduction & Objectives", "Outline background and objectives."),
+            ("Methodology & Search Scope", "Detail analyzed documents and retrieval scope."),
+            ("Detailed Research Findings", "Synthesize key findings with source attribution."),
+            ("Discussion & Critical Evaluation", "Evaluate evidence quality and research implications."),
+            ("Limitations & Gaps", "Highlight uncertainties and unaddressed areas."),
+            ("Conclusion", "Final research conclusions."),
+            ("References", "List verified source citations."),
+        ],
+        "data_analysis_report": [
+            ("Dataset Overview & Scope", "Report row/column counts, schema details, and parameters."),
+            ("Exploratory Data Findings", "Summarize initial distributions and data structures."),
+            ("Statistical Findings & Trends", "Analyze quantitative metrics, trends, and patterns."),
+            ("Data Quality & Missing Values", "Highlight missing information or dataset constraints."),
+            ("Analytical Synthesis & Conclusions", "Provide data-driven conclusions."),
+            ("References", "List verified source citations."),
         ],
     }
 
@@ -254,6 +274,69 @@ class ReportGeneratorService:
             report.status = "failed"
             await session.commit()
             raise RuntimeError(f"Report generation failed: {exc}") from exc
+
+    async def regenerate_section(
+        self,
+        session: AsyncSession,
+        project_id: uuid.UUID,
+        report_id: uuid.UUID,
+        section_id: str,
+    ) -> Report:
+        """Regenerate a single section of a report while preserving user edits and other sections."""
+        stmt = select(Report).where(Report.id == report_id, Report.project_id == project_id)
+        res = await session.execute(stmt)
+        report = res.scalar_one_or_none()
+        if not report or not report.content_json:
+            raise NotFoundException("Report or report content not found.")
+
+        sections = report.content_json.get("sections", [])
+        target_sec = None
+        for sec in sections:
+            if sec.get("id") == section_id:
+                target_sec = sec
+                break
+
+        if not target_sec:
+            raise NotFoundException(f"Section with ID '{section_id}' not found in report.")
+
+        # Re-execute targeted retrieval for section objective
+        sec_title = target_sec.get("title", "Section")
+        sec_purpose = target_sec.get("purpose", "")
+        query = f"{sec_title}: {sec_purpose}"
+
+        candidates = await self.pipeline.retrieve_optimized(
+            session=session,
+            project_id=project_id,
+            query=query,
+            retrieval_service=self.retrieval_service,
+            reranking_service=self.reranking_service,
+            qdrant_service=self.qdrant_service,
+            embedding_service=self.embedding_service,
+            top_k=5,
+        )
+
+        registry = SourceRegistry()
+        for c in candidates:
+            registry.register(c)
+
+        valid_sids = set(registry._registry.keys())
+
+        new_content = await self._generate_section_content(
+            sec_title=sec_title,
+            sec_purpose=sec_purpose,
+            context_chunks=candidates,
+            registry=registry,
+        )
+        new_content_validated = self._validate_and_sanitize_citations(new_content, valid_sids)
+
+        target_sec["content"] = new_content_validated
+        target_sec["is_user_edited"] = False
+
+        report.content_json["sections"] = sections
+        session.add(report)
+        await session.commit()
+        await session.refresh(report)
+        return report
 
     async def _generate_section_content(
         self,

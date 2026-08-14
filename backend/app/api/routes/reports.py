@@ -230,3 +230,67 @@ async def export_report(
         )
     else:
         raise HTTPException(status_code=400, detail="Unsupported export format. Supported formats: markdown, pdf, docx.")
+
+
+@router.post(
+    "/projects/{project_id}/reports/{report_id}/sections/{section_id}/regenerate",
+    response_model=ReportResponse,
+    summary="Regenerate a specific report section",
+)
+async def regenerate_report_section(
+    project_id: uuid.UUID,
+    report_id: uuid.UUID,
+    section_id: str,
+    db: AsyncSession = Depends(get_db),
+    generator: ReportGeneratorService = Depends(get_report_generator_service),
+):
+    """Regenerate a single section of a research report."""
+    return await generator.regenerate_section(
+        session=db,
+        project_id=project_id,
+        report_id=report_id,
+        section_id=section_id,
+    )
+
+
+class EditSectionRequest(BaseModel):
+    content: str = Field(description="Updated user-edited section markdown content")
+
+
+@router.put(
+    "/projects/{project_id}/reports/{report_id}/sections/{section_id}",
+    response_model=ReportResponse,
+    summary="User edit a report section",
+)
+async def edit_report_section(
+    project_id: uuid.UUID,
+    report_id: uuid.UUID,
+    section_id: str,
+    payload: EditSectionRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """Save manual user edits to a report section and flag it as user-edited."""
+    stmt = select(Report).where(Report.id == report_id, Report.project_id == project_id)
+    res = await db.execute(stmt)
+    report = res.scalar_one_or_none()
+    if not report or not report.content_json:
+        raise HTTPException(status_code=404, detail="Report not found.")
+
+    sections = report.content_json.get("sections", [])
+    target_sec = None
+    for sec in sections:
+        if sec.get("id") == section_id:
+            target_sec = sec
+            break
+
+    if not target_sec:
+        raise HTTPException(status_code=404, detail=f"Section '{section_id}' not found.")
+
+    target_sec["content"] = payload.content
+    target_sec["is_user_edited"] = True
+
+    report.content_json["sections"] = sections
+    db.add(report)
+    await db.commit()
+    await db.refresh(report)
+    return report
