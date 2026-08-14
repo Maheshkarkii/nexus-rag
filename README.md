@@ -13,12 +13,12 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 57 — Knowledge Graph & Advanced Knowledge Management Complete.**
+> **Current Phase: Stage 58 — Enterprise Features & Governance Complete.**
 >
-> The production RAG platform features multi-hop graph traversal, entity resolution, and hybrid graph+vector retrieval:
+> The production RAG platform features multi-tenant organization boundaries, role-based access control (RBAC), and immutable security audit logging:
 >
-> - **Canonical Entity Resolution & Normalization** ([`knowledge_graph.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/knowledge_graph.py)): Canonical entity normalization (`normalize_entity_name`), entity resolution (`resolve_entity`), and multi-hop graph traversal bounded by project isolation (`project_id`).
-> - **Interactive Graph Visualization** ([`graph.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/api/routes/graph.py)): Project node/edge REST endpoints (`/projects/{project_id}/graph`), relationship confidence scoring, and source document provenance tracking.
+> - **Enterprise Tenant Isolation & RBAC** ([`security.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/core/security.py)): Resource access verification (`ResourceAccessAuthorizer.verify_project_scope`), prompt injection detection (`PromptInjectionDetector`), file formula sanitization, and structured audit logging (`SecurityAuditLogger`).
+> - **Configurable Research Quotas & Policy Engine**: Rate limiting (`RateLimitValidator`), token budgeting (`RESEARCH_CONTEXT_BUDGET`), and data retention minimization across vectors, graph nodes, and database artifacts.
 > - **Comprehensive Test Suite & Evaluation**: 189 backend unit & integration tests passing with 0 failures (`pytest -v`), 100% evaluation pass rate (`run_eval.py`).
 
 ---
