@@ -10,7 +10,29 @@ logger = logging.getLogger("ai_research_assistant.evaluation")
 
 
 class RAGEvaluator:
-    """Evaluates RAG pipeline quality across golden benchmark datasets."""
+    """Evaluates RAG pipeline quality across golden benchmark datasets, drift detection, and experiment tracking."""
+
+    @staticmethod
+    def detect_quality_drift(baseline_results: Dict[str, Any], current_results: Dict[str, Any], threshold_percent: float = 5.0) -> Dict[str, Any]:
+        """Compare current benchmark results against baseline metrics to detect quality drift."""
+        base_pass = baseline_results.get("pass_rate_percent", 100.0)
+        curr_pass = current_results.get("pass_rate_percent", 100.0)
+        drift_delta = round(base_pass - curr_pass, 2)
+        has_drift = drift_delta > threshold_percent
+
+        base_ground = baseline_results.get("summary_metrics", {}).get("avg_groundedness_score", 1.0)
+        curr_ground = current_results.get("summary_metrics", {}).get("avg_groundedness_score", 1.0)
+        ground_delta = round(base_ground - curr_ground, 2)
+
+        return {
+            "has_quality_drift": has_drift,
+            "pass_rate_baseline": base_pass,
+            "pass_rate_current": curr_pass,
+            "pass_rate_degradation": drift_delta,
+            "groundedness_degradation": ground_delta,
+            "status": "DRIFT_DETECTED" if has_drift else "STABLE",
+            "recommendation": "Review recent retrieval or prompt configuration changes." if has_drift else "Baseline stability maintained.",
+        }
 
     def __init__(self, dataset_path: Optional[str] = None) -> None:
         if not dataset_path:
