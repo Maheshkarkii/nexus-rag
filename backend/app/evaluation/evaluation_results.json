@@ -1,9 +1,9 @@
 {
-  "evaluation_timestamp": 1786707940.9065485,
+  "evaluation_timestamp": 1786708200.0915294,
   "total_test_cases": 4,
   "passed_test_cases": 4,
   "pass_rate_percent": 100.0,
-  "duration_ms": 0.28,
+  "duration_ms": 0.33,
   "summary_metrics": {
     "avg_recall_at_5": 0.75,
     "avg_precision_at_5": 0.75,
