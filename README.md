@@ -13,12 +13,12 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 64 — Advanced Data Engineering & Knowledge Pipeline Complete.**
+> **Current Phase: Stage 65 — Advanced MLOps, Model Lifecycle & Experiment Management Complete.**
 >
-> The production RAG platform features idempotent ingestion, document content hashing, and versioned chunk lineage tracking:
+> The production RAG platform features model registry tracking, model lifecycle approval gates, and quality drift rollback protection:
 >
-> - **Idempotent Ingestion & Change Detection** ([`document.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/document.py)): SHA-256 document content hashing, duplicate detection, and incremental change tracking preventing redundant processing.
-> - **Versioned Pipeline & Chunk Lineage** ([`indexing.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/indexing.py)): Deterministic chunk ID generation (`chunk_{doc_id}_{index}`), embedding version tracking (`text-embedding-3-small`), and full source-to-evidence provenance mapping.
+> - **Model Registry & Provider Routing** ([`llm.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/llm.py)): Configurable LLM provider routing (`OpenAI`, `Groq`), versioned prompt templates (`PromptBuilder`), and model parameter management.
+> - **Quality Drift & Release Approval Gates** ([`evaluator.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/evaluation/evaluator.py)): Automated quality drift detection (`detect_quality_drift`), approval workflows (`APPROVED`, `DEPLOYED`), and instant rollback to previous stable versions.
 > - **Comprehensive Test Suite & Evaluation**: 189 backend unit & integration tests passing with 0 failures (`pytest -v`), 100% evaluation pass rate (`run_eval.py`).
 
 ---
