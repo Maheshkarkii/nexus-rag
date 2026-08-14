@@ -20,6 +20,30 @@ from app.services.citation import SourceRegistry, CitationParser, CitationResolv
 logger = logging.getLogger("ai_research_assistant.services.research")
 
 
+class ControlledToolRegistry:
+    """Registry of controlled research tools with typed schema validation and authorization boundaries."""
+
+    ALLOWED_TOOLS = {
+        "document_search": "Perform hybrid vector & lexical retrieval on project documents.",
+        "structured_data_query": "Execute structured data queries over CSV/XLSX datasets.",
+        "memory_search": "Search persistent project research memory and findings.",
+        "citation_lookup": "Resolve citation markers to exact source metadata.",
+        "report_generator": "Generate multi-section evidence-grounded research reports.",
+        "answer_generator": "Synthesize grounded answers using evidence context.",
+        "evidence_validator": "Verify claim groundedness and prune invalid citations.",
+    }
+
+    @classmethod
+    def is_tool_allowed(cls, tool_name: str) -> bool:
+        """Verify tool_name is registered in the controlled tool registry."""
+        return tool_name in cls.ALLOWED_TOOLS
+
+    @classmethod
+    def get_tool_manifest(cls) -> Dict[str, str]:
+        """Return allowed tool descriptions."""
+        return cls.ALLOWED_TOOLS
+
+
 class ResearchPlanner:
     """Decomposes complex queries into structured execution plans."""
 

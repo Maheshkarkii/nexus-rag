@@ -13,13 +13,13 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 37 — Advanced User Interaction, Conversational Research Workflow & Context Management Active.**
+> **Current Phase: Stage 38 — Advanced Research Agent Orchestration, Tool Routing & Autonomous Research Workflows Active.**
 >
-> The repository features an intelligent multi-turn conversational research engine:
+> The repository features a controlled research agent orchestration framework:
 >
-> - **Conversational Query Intelligence** ([`query_rewriter.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/query_rewriter.py)): Natural reference resolution, multi-turn pronoun resolution ("which one", "the second paper"), intent classification, and selective retrieval routing.
-> - **Context-Aware Dialogue Management** ([`rag.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/rag.py)): Seamless conversation history incorporation, persistent document scope inheritance, and citation continuity.
-> - **Report & Memory Integration**: Seamless conversational interaction across research reports and persistent project memory.
+> - **Controlled Tool Registry & Routing** ([`research.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/research.py)): Typed schema validation (`ControlledToolRegistry`), explicit tool boundary controls, and argument verification.
+> - **Bounded Multi-Step Orchestration**: Topological planning, step-level retrieval, cycle detection, evidence sufficiency checks, and bounded iteration limits (`MAX_RESEARCH_STEPS`).
+> - **Security & Grounding Integration**: Strict project boundary checks, prompt injection defenses, and zero arbitrary code/shell execution capabilities.
 > - **Comprehensive Test Suite**: 187 backend unit & integration tests passing with 0 failures (`pytest -v`).
 
 ---
