@@ -26,6 +26,7 @@ from app.services.conversation import (
 from app.services.query_rewriter import ConversationQueryRewriter
 from app.services.research import ResearchOrchestrator
 from app.services.data_analysis import DataAnalysisService
+from app.services.answer_generation import GroundedAnswerGenerator, ClaimVerifier, EvidenceSufficiencyEvaluator
 from app.core.observability import TraceSpan, GroundednessEvaluator, default_metrics_collector
 
 logger = logging.getLogger("ai_research_assistant.services.rag")
@@ -188,13 +189,17 @@ class RAGService:
         )
 
         try:
-            answer = await llm_service.generate(
+            answer_gen = GroundedAnswerGenerator(llm_service)
+            gen_result = await answer_gen.generate_grounded_answer(
+                query=query,
+                context_chunks=context_chunks,
                 system_prompt=system_prompt,
                 user_prompt=user_prompt,
+                registry=registry,
             )
-            answer_clean = answer.strip()
-            cited_ids = self.parser.parse(answer_clean)
-            citations = self.resolver.resolve(cited_ids, registry)
+
+            answer_clean = gen_result["answer"]
+            citations = gen_result["citations"]
             
             if conversation_id:
                 serializable_citations = []
@@ -208,7 +213,11 @@ class RAGService:
                     conversation_id=conversation_id,
                     role="assistant",
                     content=answer_clean,
-                    metadata_json={"citations": serializable_citations},
+                    metadata_json={
+                        "citations": serializable_citations,
+                        "grounding_metrics": gen_result["metrics"],
+                        "sufficiency": gen_result["sufficiency"],
+                    },
                 )
             
             return {
@@ -216,6 +225,8 @@ class RAGService:
                 "answer": answer_clean,
                 "citations": citations,
                 "conversation_id": conversation_id,
+                "grounding_metrics": gen_result["metrics"],
+                "sufficiency": gen_result["sufficiency"],
             }
 
         except Exception as exc:

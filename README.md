@@ -13,13 +13,13 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 34 — Advanced Search, Hybrid Retrieval, Query Expansion & Research Discovery Active.**
+> **Current Phase: Stage 35 — Advanced Answer Generation, Grounding, Citation Intelligence & Hallucination Prevention Active.**
 >
-> The repository features a unified hybrid retrieval & discovery engine:
+> The repository features an evidence-grounded generation and citation validation engine:
 >
-> - **Unified Retrieval Pipeline** ([`retrieval_pipeline.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/retrieval_pipeline.py)): Integrates vector search (Qdrant), lexical BM25 search, metadata filtering, cross-encoder reranking, and near-duplicate deduplication.
-> - **Query Intelligence**: Intent classification, query rewriting, domain term expansion, and bounded multi-query generation.
-> - **Research Memory & Multimodal Retrieval**: Seamlessly routes structured queries to data analysis and incorporates project memory findings.
+> - **Grounded Answer Generator** ([`answer_generation.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/answer_generation.py)): Evidence sufficiency evaluation, structured claim verification, hallucination repair, and invalid citation pruning.
+> - **Unified Hybrid Retrieval**: Combines dense vector search (Qdrant), lexical search (BM25), metadata filtering, cross-encoder reranking, and near-duplicate deduplication.
+> - **Security & Observability**: Strict prompt injection defenses and automated groundedness and citation correctness telemetry.
 > - **Comprehensive Test Suite**: 187 backend unit & integration tests passing with 0 failures (`pytest -v`).
 
 ---
