@@ -1,9 +1,9 @@
 {
-  "evaluation_timestamp": 1786707068.5863845,
+  "evaluation_timestamp": 1786707610.4599142,
   "total_test_cases": 4,
   "passed_test_cases": 4,
   "pass_rate_percent": 100.0,
-  "duration_ms": 0.39,
+  "duration_ms": 0.2,
   "summary_metrics": {
     "avg_recall_at_5": 0.75,
     "avg_precision_at_5": 0.75,
@@ -16,7 +16,7 @@
       "category": "direct_fact",
       "question": "What accuracy does ResNet-50 achieve on the ImageNet classification benchmark?",
       "is_answerable": true,
-      "latency_ms": 0.01,
+      "latency_ms": 0.0,
       "retrieval_metrics": {
         "hit_rate": 1.0,
         "recall_at_k": 1.0,
@@ -44,7 +44,7 @@
       "category": "comparison",
       "question": "Compare the evaluation datasets and reported results between BERT-large and ResNet-50.",
       "is_answerable": true,
-      "latency_ms": 0.01,
+      "latency_ms": 0.0,
       "retrieval_metrics": {
         "hit_rate": 1.0,
         "recall_at_k": 1.0,
