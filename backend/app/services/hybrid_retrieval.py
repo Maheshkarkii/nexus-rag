@@ -59,6 +59,28 @@ class MultiQueryExpander:
 
         return list(dict.fromkeys(queries))[:3]
 
+    @staticmethod
+    def fuse_rrf(rankings: List[List[Dict[str, Any]]], k: int = 60) -> List[Dict[str, Any]]:
+        """Reciprocal Rank Fusion (RRF) across candidate lists."""
+        rrf_scores: Dict[str, float] = {}
+        chunk_map: Dict[str, Dict[str, Any]] = {}
+
+        for rank_list in rankings:
+            for rank, chunk in enumerate(rank_list):
+                cid = str(chunk.get("chunk_id") or chunk.get("id") or hash(chunk.get("text", "")))
+                chunk_map[cid] = chunk
+                score = 1.0 / (k + rank + 1)
+                rrf_scores[cid] = rrf_scores.get(cid, 0.0) + score
+
+        fused = []
+        for cid, score in rrf_scores.items():
+            c = dict(chunk_map[cid])
+            c["rrf_score"] = round(score, 4)
+            fused.append(c)
+
+        fused.sort(key=lambda x: x.get("rrf_score", 0.0), reverse=True)
+        return fused
+
 
 class SourceDiversifier:
     """Caps maximum chunks per document to ensure source diversity in context window."""

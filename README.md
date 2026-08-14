@@ -13,13 +13,13 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 43 — Production Deployment, Containerization, CI/CD & Environment Management Active.**
+> **Current Phase: Stage 44 — Advanced RAG Optimization, Retrieval Quality & Intelligent Context Engineering Active.**
 >
-> The repository features a reproducible production deployment, containerization, and CI/CD pipeline:
+> The repository features an optimized hybrid retrieval & context engineering pipeline:
 >
-> - **Containerized Microservices** ([`docker-compose.yml`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/docker-compose.yml)): Multistage Debian-slim backend image ([`Dockerfile`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/Dockerfile)), Node 22 standalone Next.js frontend image ([`Dockerfile`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/frontend/Dockerfile)), PostgreSQL 16, and Qdrant vector engine.
-> - **Automated GitHub Actions CI/CD** ([`ci.yml`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/.github/workflows/ci.yml)): Automated ruff linting, pytest suite execution, Next.js build validation, Stage 41 security scans, and Docker container build checks.
-> - **Deployment & Environment Documentation** ([`DEPLOYMENT.md`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/DEPLOYMENT.md)): Operational runbooks covering environment profiles (`dev`, `test`, `staging`, `prod`), secret management, backup/restore procedures, and rollback strategies.
+> - **Intelligent Query Classification & Routing** ([`query_rewriter.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/query_rewriter.py)): Intent-based routing (`direct_answer`, `comparison`, `summarization`, `follow_up`) and contextual query reformulation.
+> - **Hybrid Fusion & Reciprocal Rank Fusion (RRF)** ([`hybrid_retrieval.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/hybrid_retrieval.py)): Multi-query expansion, normalized BM25 + vector scoring, RRF rank fusion, and Jaccard n-gram near-duplicate removal (`NearDuplicateDeduplicator`).
+> - **Context Optimization & Reranking** ([`retrieval_pipeline.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/retrieval_pipeline.py)): Cross-encoder reranking, per-document source diversification, and strict token budget enforcement.
 > - **Comprehensive Test Suite**: 189 backend unit & integration tests passing with 0 failures (`pytest -v`).
 
 ---
