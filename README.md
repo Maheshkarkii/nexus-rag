@@ -13,12 +13,12 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 62 — Advanced RAG Quality & Evaluation Complete.**
+> **Current Phase: Stage 64 — Advanced Data Engineering & Knowledge Pipeline Complete.**
 >
-> The production RAG platform features comprehensive golden dataset benchmarking, automated quality drift detection, and release quality gates:
+> The production RAG platform features idempotent ingestion, document content hashing, and versioned chunk lineage tracking:
 >
-> - **Golden Dataset & Quality Evaluator** ([`evaluator.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/evaluation/evaluator.py)): Automated calculation of retrieval metrics (`Recall@5: 0.75`, `Precision@5: 0.75`, `MRR: 0.75`), groundedness score (`1.00`), citation verification, and quality drift detection (`detect_quality_drift`).
-> - **Automated Release Quality Gates**: 100% pass rate threshold across multi-doc, comparison, multi-hop, and unanswerable hallucination test categories.
+> - **Idempotent Ingestion & Change Detection** ([`document.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/document.py)): SHA-256 document content hashing, duplicate detection, and incremental change tracking preventing redundant processing.
+> - **Versioned Pipeline & Chunk Lineage** ([`indexing.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/indexing.py)): Deterministic chunk ID generation (`chunk_{doc_id}_{index}`), embedding version tracking (`text-embedding-3-small`), and full source-to-evidence provenance mapping.
 > - **Comprehensive Test Suite & Evaluation**: 189 backend unit & integration tests passing with 0 failures (`pytest -v`), 100% evaluation pass rate (`run_eval.py`).
 
 ---
