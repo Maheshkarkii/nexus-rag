@@ -37,7 +37,7 @@ EXPOSE 8000
 
 # Health check configuration inside the container
 HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8000/api/v1/health || exit 1
+    CMD curl -f http://localhost:8000/api/v1/health/liveness || exit 1
 
-# Launch FastAPI using Uvicorn with auto-reload in development
+# Launch FastAPI using Uvicorn
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
