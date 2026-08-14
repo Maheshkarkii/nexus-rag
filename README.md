@@ -13,13 +13,13 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 38 — Advanced Research Agent Orchestration, Tool Routing & Autonomous Research Workflows Active.**
+> **Current Phase: Stage 39 — Advanced Knowledge Graph, Entity Relationships & Research Knowledge Structuring Active.**
 >
-> The repository features a controlled research agent orchestration framework:
+> The repository features a structured knowledge graph layer supplementing vector RAG:
 >
-> - **Controlled Tool Registry & Routing** ([`research.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/research.py)): Typed schema validation (`ControlledToolRegistry`), explicit tool boundary controls, and argument verification.
-> - **Bounded Multi-Step Orchestration**: Topological planning, step-level retrieval, cycle detection, evidence sufficiency checks, and bounded iteration limits (`MAX_RESEARCH_STEPS`).
-> - **Security & Grounding Integration**: Strict project boundary checks, prompt injection defenses, and zero arbitrary code/shell execution capabilities.
+> - **Entity & Relationship Models** ([`graph.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/db/models/graph.py)): Support for 10 entity types (`Person`, `Paper`, `Dataset`, `Model`, etc.) and 12 relationship types (`uses_method`, `evaluated_on`, `cites`, etc.).
+> - **Knowledge Graph Extraction & Query Service** ([`knowledge_graph.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/knowledge_graph.py)): Incremental entity extraction, canonical resolution, source provenance, bounded graph traversal, and document deletion cascades.
+> - **Visualization & Graph API** ([`graph.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/api/routes/graph.py)): Project-scoped node/edge visualization data endpoints and concept graph query routing.
 > - **Comprehensive Test Suite**: 187 backend unit & integration tests passing with 0 failures (`pytest -v`).
 
 ---

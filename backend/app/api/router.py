@@ -8,6 +8,7 @@ from app.api.routes.conversations import router as conversations_router
 from app.api.routes.reports import router as reports_router
 from app.api.routes.jobs import router as jobs_router
 from app.api.routes.memory import router as memory_router
+from app.api.routes.graph import router as graph_router
 
 api_router = APIRouter()
 
@@ -34,3 +35,6 @@ api_router.include_router(jobs_router, prefix="", tags=["jobs"])
 
 # Mount persistent workspace memory endpoints
 api_router.include_router(memory_router, prefix="", tags=["memory"])
+
+# Mount Knowledge Graph endpoints
+api_router.include_router(graph_router, prefix="", tags=["graph"])
