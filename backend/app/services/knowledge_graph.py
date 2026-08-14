@@ -29,6 +29,26 @@ class KnowledgeGraphService:
         "compares_with", "extends", "improves", "cites"
     ]
 
+    @staticmethod
+    def normalize_entity_name(raw_name: str) -> str:
+        """Normalize raw entity names by stripping whitespace, corporate suffixes, and unifying casing."""
+        if not raw_name:
+            return ""
+        clean = raw_name.strip()
+        # Remove common corporate/entity noise suffixes for canonical matching
+        clean = re.sub(r"\b(Inc\.|Corp\.|LLC|Ltd\.|Co\.)\b", "", clean, flags=re.IGNORECASE).strip()
+        return clean
+
+    @staticmethod
+    def resolve_entity(cname: str, existing_names: List[str]) -> Optional[str]:
+        """Resolve entity name against existing canonical names using exact and normalized matching."""
+        norm_input = KnowledgeGraphService.normalize_entity_name(cname).lower()
+        for name in existing_names:
+            norm_existing = KnowledgeGraphService.normalize_entity_name(name).lower()
+            if norm_input == norm_existing:
+                return name
+        return None
+
     def __init__(self, llm_service: LLMService) -> None:
         self.llm = llm_service
 

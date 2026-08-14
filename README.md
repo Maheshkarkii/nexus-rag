@@ -13,13 +13,13 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 46 — Research Report Generation, Document Synthesis & Professional Output System Active.**
+> **Current Phase: Stage 47 — Advanced Knowledge Graph, Entity Resolution & Graph-RAG Intelligence Active.**
 >
-> The repository features a structured document synthesis and multi-format report generator:
+> The repository features an entity-resolution and Graph-RAG intelligence framework:
 >
-> - **Template-Driven Report Generation** ([`report_generator.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/report_generator.py)): Support for 6 formal report types (`research_summary`, `literature_review`, `technical_report`, `comparative_analysis`, `research_report`, `data_analysis_report`).
-> - **Claim-Evidence Mapping & Citation Validation**: Section-by-section evidence context grounding, invalid citation stripping (`_validate_and_sanitize_citations`), and section-level regeneration (`regenerate_section`).
-> - **Multi-Format Export & API Endpoints**: Production exports for Markdown, PDF, and DOCX formats with full source attribution.
+> - **Canonical Entity Resolution & Normalization** ([`knowledge_graph.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/knowledge_graph.py)): Case normalization, noise suffix stripping (`normalize_entity_name`), and exact/alias canonical entity resolution (`resolve_entity`).
+> - **Typed Relationship Extraction & Graph Traversal**: 10 entity categories (`Person`, `Paper`, `Dataset`, `Model`, `Method`, etc.), 12 normalized relationship types (`authored_by`, `uses_method`, `cites`, etc.), and bounded multi-hop traversal (`query_graph`).
+> - **Graph Visualization & Explorer API** ([`graph.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/api/routes/graph.py)): Project-scoped node/edge visualization data endpoints and concept graph query routing.
 > - **Comprehensive Test Suite**: 189 backend unit & integration tests passing with 0 failures (`pytest -v`).
 
 ---
