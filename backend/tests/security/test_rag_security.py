@@ -95,6 +95,26 @@ def test_prompt_instruction_data_isolation() -> None:
     assert "Ignore instructions" in user_prompt
 
 
+def test_resource_access_authorizer() -> None:
+    from app.core.security import ResourceAccessAuthorizer
+    p1 = uuid.uuid4()
+    p2 = uuid.uuid4()
+
+    assert ResourceAccessAuthorizer.verify_project_scope(p1, p1) is True
+    assert ResourceAccessAuthorizer.verify_project_scope(p1, p2) is False
+
+
+def test_rate_limit_validator() -> None:
+    from app.core.security import RateLimitValidator
+    limiter = RateLimitValidator(max_requests=2, window_seconds=60)
+    client_id = "127.0.0.1"
+
+    t0 = 1000.0
+    assert limiter.is_rate_limited(client_id, t0) is False
+    assert limiter.is_rate_limited(client_id, t0 + 1) is False
+    assert limiter.is_rate_limited(client_id, t0 + 2) is True
+
+
 class MagicMockRegistry:
     def register(self, chunk):
         return "S1"

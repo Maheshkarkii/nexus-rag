@@ -124,6 +124,42 @@ class LogSanitizer:
         return sanitized
 
 
+class ResourceAccessAuthorizer:
+    """Centralized authorization validator enforcing project boundaries and resource ownership."""
+
+    @staticmethod
+    def verify_project_scope(resource_project_id: uuid.UUID, target_project_id: uuid.UUID) -> bool:
+        """Enforce strict project workspace boundaries. Rejects cross-project IDOR access attempts."""
+        if not resource_project_id or not target_project_id:
+            return False
+        return resource_project_id == target_project_id
+
+
+class RateLimitValidator:
+    """In-memory rate limiter protecting expensive API endpoints from resource exhaustion attacks."""
+
+    def __init__(self, max_requests: int = 100, window_seconds: int = 60) -> None:
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self._history: Dict[str, List[float]] = {}
+
+    def is_rate_limited(self, client_identifier: str, current_timestamp: float) -> bool:
+        """Check whether a client identifier has exceeded rate limits."""
+        if client_identifier not in self._history:
+            self._history[client_identifier] = []
+
+        timestamps = self._history[client_identifier]
+        cutoff = current_timestamp - self.window_seconds
+        valid_timestamps = [t for t in timestamps if t > cutoff]
+
+        if len(valid_timestamps) >= self.max_requests:
+            return True
+
+        valid_timestamps.append(current_timestamp)
+        self._history[client_identifier] = valid_timestamps
+        return False
+
+
 class SecurityAuditLogger:
     """Logs security audit events safely without exposing raw user document content."""
 

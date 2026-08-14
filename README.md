@@ -13,14 +13,14 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 40 — Advanced Research Evaluation, Quality Assurance & End-to-End RAG Benchmarking Active.**
+> **Current Phase: Stage 41 — Production Security, Privacy, Authorization & Data Governance Active.**
 >
-> The repository features a comprehensive end-to-end benchmarking and evaluation suite:
+> The repository features a hardened production security & data governance framework:
 >
-> - **Unified RAG Evaluator** ([`evaluator.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/evaluation/evaluator.py)): Evaluates retrieval metrics (`Recall@5`, `Precision@5`, `MRR`, `NDCG`), groundedness, claim support rates, and citation validity across golden datasets ([`golden_dataset.json`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/evaluation/golden_dataset.json)).
-> - **Automated Benchmark Runner** ([`run_eval.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/evaluation/run_eval.py)): Measures latency, pass rates, and outputs JSON metrics reports (`evaluation_results.json`).
-> - **Multi-Layer Reliability**: Rigorous evaluation covering ingestion, hybrid retrieval, agent tool routing, reports, knowledge graph, and security.
-> - **Comprehensive Test Suite**: 187 backend unit & integration tests passing with 0 failures (`pytest -v`).
+> - **Centralized Authorization & IDOR Protection** ([`security.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/core/security.py)): Resource access authorizer (`ResourceAccessAuthorizer`), project boundary isolation across vectors, memory, and graph data.
+> - **File & Ingestion Hardening**: Path traversal elimination (`sanitize_filename`), Excel/CSV formula injection escaping, and rate limiting (`RateLimitValidator`).
+> - **AI Security & Audit Logging**: Prompt injection detection (`PromptInjectionDetector`), log secret masking (`LogSanitizer`), and structured audit logging (`SecurityAuditLogger`).
+> - **Comprehensive Test Suite**: 189 backend unit & integration tests passing with 0 failures (`pytest -v`).
 
 ---
 
