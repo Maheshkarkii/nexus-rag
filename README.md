@@ -13,13 +13,13 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 48 — Advanced Document Intelligence, Multimodal RAG & Table/Image Understanding Active.**
+> **Current Phase: Stage 49 — Advanced Evaluation, Benchmarking, Quality Assurance & Automated RAG Testing Active.**
 >
-> The repository features a structured document intelligence and multimodal extraction pipeline:
+> The repository features an automated benchmarking and end-to-end evaluation pipeline:
 >
-> - **Multimodal Document Processing Engine** ([`multimodal_intelligence.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/document_processing/multimodal_intelligence.py)): Element classification (`text`, `heading`, `table`, `figure`, `sheet`, `caption`), markdown table parsing (`TableExtractor`), figure caption detection (`FigureExtractor`), and dataset schema extraction (`SpreadsheetExtractor`).
-> - **Structured Dataset Processing**: Column/row relationship preservation for CSV/XLSX/JSON files with formula injection escaping (`sanitize_formula_cell`).
-> - **Provenance & Citation Maintenance**: Page numbers, element IDs, figure captions, and table metadata preserved across vector retrieval, research workflows, and formal report generation.
+> - **Unified Evaluation Benchmark Pipeline** ([`evaluator.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/evaluation/evaluator.py)): Evaluation metrics for Recall@5, Precision@5, Mean Reciprocal Rank (MRR), Groundedness (`GroundednessEvaluator`), and Citation Correctness (`evaluate_citations`).
+> - **Golden Dataset & Quality Gates** ([`golden_dataset.json`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/evaluation/golden_dataset.json)): Versioned benchmark cases covering multi-document RAG, unanswerable questions, and citation validation (`100% Pass Rate`, `0.75 Recall@5`, `0.75 Precision@5`, `0.75 MRR`).
+> - **Automated Benchmark Execution CLI** ([`run_eval.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/evaluation/run_eval.py)): Automated JSON report generation with regression prevention gates.
 > - **Comprehensive Test Suite**: 189 backend unit & integration tests passing with 0 failures (`pytest -v`).
 
 ---
