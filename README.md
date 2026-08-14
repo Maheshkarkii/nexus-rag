@@ -13,12 +13,12 @@ The **AI Research Assistant** is a full-stack, portfolio-grade system designed t
 ## 2. Current Status
 
 > [!NOTE]
-> **Current Phase: Stage 53 — Advanced Performance & Cost Optimization Complete.**
+> **Current Phase: Stage 54 — Distributed & Horizontally Scalable RAG Architecture Complete.**
 >
-> The production RAG platform features advanced performance, token budget, and latency optimizations:
+> The production RAG platform features stateless API nodes, distributed background workers, and horizontal scaling capabilities:
 >
-> - **Hybrid RRF & Context Deduplication** ([`hybrid_retrieval.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/hybrid_retrieval.py)): Multi-query expansion, normalized BM25 + vector scoring, Reciprocal Rank Fusion (`fuse_rrf`), and Near-Duplicate Deduplication (`NearDuplicateDeduplicator`).
-> - **Source Diversification & Token Budgeting**: Enforces strict per-document context caps (`SourceDiversifier`), strict token budgeting (`RESEARCH_CONTEXT_BUDGET`), and sub-second retrieval latency (59.20s full test suite run).
+> - **Stateless API & Distributed Workers** ([`jobs.py`](file:///C:/Users/Mahesh%20Karki/Downloads/Mahesh/AI%20Research%20Assistant/backend/app/services/jobs.py)): Decoupled background task execution (`BackgroundJobManager`) with job leasing, automatic retries, and bounded queue backpressure.
+> - **Distributed Vector & Graph Partitioning**: Strict project-level payload filtering (`project_id`) across Qdrant vector collections and NetworkX knowledge graph instances.
 > - **Comprehensive Test Suite & Evaluation**: 189 backend unit & integration tests passing with 0 failures (`pytest -v`), 100% evaluation pass rate (`run_eval.py`).
 
 ---
