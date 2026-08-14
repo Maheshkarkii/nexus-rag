@@ -1,0 +1,38 @@
+[
+  {
+    "id": "tc_001",
+    "category": "direct_fact",
+    "question": "What accuracy does ResNet-50 achieve on the ImageNet classification benchmark?",
+    "expected_sources": ["resnet_paper.pdf"],
+    "expected_keywords": ["ResNet-50", "93.4%", "ImageNet"],
+    "expected_citations": ["S1"],
+    "is_answerable": true
+  },
+  {
+    "id": "tc_002",
+    "category": "comparison",
+    "question": "Compare the evaluation datasets and reported results between BERT-large and ResNet-50.",
+    "expected_sources": ["bert_paper.pdf", "resnet_paper.pdf"],
+    "expected_keywords": ["BERT-large", "ResNet-50", "SQuAD", "ImageNet"],
+    "expected_citations": ["S1", "S2"],
+    "is_answerable": true
+  },
+  {
+    "id": "tc_003",
+    "category": "unanswerable",
+    "question": "What is the warp speed capability of the Starship Enterprise under quantum propulsion?",
+    "expected_sources": [],
+    "expected_keywords": ["insufficient information"],
+    "expected_citations": [],
+    "is_answerable": false
+  },
+  {
+    "id": "tc_004",
+    "category": "structured_data",
+    "question": "What is the average salary in the AI department from employees.csv?",
+    "expected_sources": ["employees.csv"],
+    "expected_keywords": ["150"],
+    "expected_citations": [],
+    "is_answerable": true
+  }
+]

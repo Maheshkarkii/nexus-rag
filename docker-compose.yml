@@ -1,0 +1,150 @@
+# ==============================================================================
+# AI Research Assistant — Stage 1–8 Docker Compose Development Environment
+# ==============================================================================
+# Services:
+#   1. frontend   - Next.js 15 (Port 3000)
+#   2. backend    - FastAPI Python 3.13 (Port 8000)
+#   3. postgres   - PostgreSQL 16 Relational Database (Port 5432)
+#   4. qdrant     - Qdrant Vector Engine (Ports 6333 REST / 6334 gRPC)
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. PostgreSQL Relational Database Service
+  # ----------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: ai-research-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ai_research_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_dev_password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-ai_research_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - ai-research-network
+
+  # ----------------------------------------------------------------------------
+  # 2. Qdrant Vector Search Service
+  # ----------------------------------------------------------------------------
+  qdrant:
+    image: qdrant/qdrant:v1.13.2
+    container_name: ai-research-qdrant
+    restart: unless-stopped
+    environment:
+      QDRANT__SERVICE__HTTP_PORT: 6333
+      QDRANT__SERVICE__GRPC_PORT: 6334
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+      - "${QDRANT_GRPC_PORT:-6334}:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:6333/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    networks:
+      - ai-research-network
+
+  # ----------------------------------------------------------------------------
+  # 3. FastAPI Backend Service
+  # ----------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ai-research-backend
+    restart: unless-stopped
+    environment:
+      APP_NAME: ${APP_NAME:-AI Research Assistant}
+      APP_ENV: ${APP_ENV:-development}
+      DEBUG: ${DEBUG:-true}
+      API_V1_STR: ${API_V1_STR:-/api/v1}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      BACKEND_HOST: 0.0.0.0
+      BACKEND_PORT: 8000
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-["http://localhost:3000","http://127.0.0.1:3000","http://localhost:8000"]}
+      POSTGRES_SERVER: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-ai_research_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_dev_password}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://postgres:postgres_dev_password@postgres:5432/ai_research_db}
+      STORAGE_PATH: ${STORAGE_PATH:-storage}
+      MAX_UPLOAD_SIZE_MB: ${MAX_UPLOAD_SIZE_MB:-50}
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: 6333
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_API_KEY: ${QDRANT_API_KEY:-}
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./backend/app:/app/app:ro
+      - storage_data:/app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - ai-research-network
+
+  # ----------------------------------------------------------------------------
+  # 4. Next.js Frontend Service
+  # ----------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    container_name: ai-research-frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      NODE_ENV: development
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      - backend
+    networks:
+      - ai-research-network
+
+# ------------------------------------------------------------------------------
+# Persistent Storage Volumes
+# ------------------------------------------------------------------------------
+volumes:
+  postgres_data:
+    name: ai_research_postgres_data
+    driver: local
+  qdrant_data:
+    name: ai_research_qdrant_data
+    driver: local
+  storage_data:
+    name: ai_research_storage_data
+    driver: local
+
+# ------------------------------------------------------------------------------
+# Shared Docker Network
+# ------------------------------------------------------------------------------
+networks:
+  ai-research-network:
+    name: ai-research-network
+    driver: bridge

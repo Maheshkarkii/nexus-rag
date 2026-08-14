@@ -1,0 +1,10 @@
+langchain
+langchain-community
+chromadb
+sentence-transformers
+pypdf
+python-dotenv
+fastapi
+unicorn
+groq
+python-dotenv
