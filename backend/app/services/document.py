@@ -1,12 +1,14 @@
 """Service and repository operations for research document ingestion and metadata lifecycle."""
 
 import logging
-from pathlib import Path
-from typing import Optional, Sequence, Tuple
 import uuid
+from collections.abc import Sequence
+from pathlib import Path
+
 from fastapi import UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.config import get_settings
 from app.core.exceptions import BadRequestException, NotFoundException
 from app.db.models.document import Document
@@ -16,7 +18,7 @@ from app.services.storage import StorageService
 logger = logging.getLogger("ai_research_assistant.documents")
 
 
-def validate_uploaded_file(upload_file: UploadFile) -> Tuple[str, str]:
+def validate_uploaded_file(upload_file: UploadFile) -> tuple[str, str]:
     """Validate that the uploaded file has a valid name, allowed extension, and content type."""
     if not upload_file.filename or not upload_file.filename.strip():
         raise BadRequestException(message="File must have a valid non-empty filename.")
@@ -114,7 +116,7 @@ async def get_documents_by_project(
 
 async def get_document_by_id(
     session: AsyncSession, project_id: uuid.UUID, document_id: uuid.UUID
-) -> Optional[Document]:
+) -> Document | None:
     """Retrieve a single document metadata record verifying that it belongs to the target project."""
     # Verify project exists
     project_stmt = select(Project).where(Project.id == project_id)
@@ -148,8 +150,9 @@ async def delete_document(
 
     # 1. Delete Qdrant points if Qdrant is running
     try:
-        from app.services.qdrant import default_qdrant_service
         from qdrant_client.http import models as qmodels
+
+        from app.services.qdrant import default_qdrant_service
 
         if default_qdrant_service.health_check() and default_qdrant_service.collection_exists():
             default_qdrant_service.delete_points(

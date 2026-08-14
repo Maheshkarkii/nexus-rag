@@ -1,8 +1,8 @@
 import logging
-import re
 import os
+import re
 import uuid
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 logger = logging.getLogger("ai_research_assistant.security")
 
@@ -24,7 +24,7 @@ class PromptInjectionDetector:
     ]
 
     @classmethod
-    def analyze_text(cls, text: str) -> Dict[str, Any]:
+    def analyze_text(cls, text: str) -> dict[str, Any]:
         """Analyze text for prompt injection patterns and return risk assessment."""
         if not text:
             return {"risk_level": "none", "patterns_detected": []}
@@ -70,7 +70,7 @@ class FileSecurityValidator:
         return clean_name if clean_name else f"upload_{uuid.uuid4().hex[:8]}"
 
     @classmethod
-    def validate_upload(cls, filename: str, file_size: int) -> Dict[str, Any]:
+    def validate_upload(cls, filename: str, file_size: int) -> dict[str, Any]:
         """Validate filename, extension, and file size boundaries."""
         sanitized = cls.sanitize_filename(filename)
         _, ext = os.path.splitext(sanitized.lower())
@@ -141,7 +141,7 @@ class RateLimitValidator:
     def __init__(self, max_requests: int = 100, window_seconds: int = 60) -> None:
         self.max_requests = max_requests
         self.window_seconds = window_seconds
-        self._history: Dict[str, List[float]] = {}
+        self._history: dict[str, list[float]] = {}
 
     def is_rate_limited(self, client_identifier: str, current_timestamp: float) -> bool:
         """Check whether a client identifier has exceeded rate limits."""
@@ -164,7 +164,7 @@ class SecurityAuditLogger:
     """Logs security audit events safely without exposing raw user document content."""
 
     @staticmethod
-    def log_event(event_type: str, user_id: Optional[str], resource_id: Optional[str], details: Optional[Dict[str, Any]] = None) -> None:
+    def log_event(event_type: str, user_id: str | None, resource_id: str | None, details: dict[str, Any] | None = None) -> None:
         safe_details = details or {}
         logger.info(
             f"[SECURITY_AUDIT] Event: {event_type} | User: {user_id or 'anonymous'} | Resource: {resource_id or 'N/A'} | Details: {safe_details}"

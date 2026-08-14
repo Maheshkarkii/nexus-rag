@@ -1,8 +1,9 @@
 """Pydantic schemas for research documents, extraction content, and metadata."""
 
-from datetime import datetime
-from typing import Any, Dict, Optional
 import uuid
+from datetime import datetime
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -44,21 +45,21 @@ class DocumentResponse(BaseModel):
         description="Current lifecycle state: uploaded, processing, ready, failed",
         examples=["ready"],
     )
-    extracted_character_count: Optional[int] = Field(
+    extracted_character_count: int | None = Field(
         default=None,
         description="Total character count of extracted normalized text",
         examples=[45120],
     )
-    extracted_word_count: Optional[int] = Field(
+    extracted_word_count: int | None = Field(
         default=None,
         description="Total word count of extracted normalized text",
         examples=[6820],
     )
-    processing_error: Optional[str] = Field(
+    processing_error: str | None = Field(
         default=None,
         description="Sanitized explanation if text extraction failed",
     )
-    processed_at: Optional[datetime] = Field(
+    processed_at: datetime | None = Field(
         default=None,
         description="UTC timestamp when document processing was completed",
     )
@@ -84,15 +85,15 @@ class DocumentContentResponse(BaseModel):
     file_extension: str = Field(..., description="File extension")
     file_size: int = Field(..., description="File size in bytes")
     status: str = Field(..., description="Processing status: uploaded, processing, ready, failed")
-    extracted_text: Optional[str] = Field(
+    extracted_text: str | None = Field(
         default=None,
         description="Normalized extracted textual content ready for Stage 10 chunking",
     )
-    extracted_character_count: Optional[int] = Field(default=None)
-    extracted_word_count: Optional[int] = Field(default=None)
-    extracted_metadata: Optional[Dict[str, Any]] = Field(default=None)
-    processing_error: Optional[str] = Field(default=None)
-    processed_at: Optional[datetime] = Field(default=None)
+    extracted_character_count: int | None = Field(default=None)
+    extracted_word_count: int | None = Field(default=None)
+    extracted_metadata: dict[str, Any] | None = Field(default=None)
+    processing_error: str | None = Field(default=None)
+    processed_at: datetime | None = Field(default=None)
     created_at: datetime = Field(...)
     updated_at: datetime = Field(...)
 

@@ -1,7 +1,7 @@
 import logging
 import re
 import uuid
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger("ai_research_assistant.services.citation")
 
@@ -10,9 +10,9 @@ class SourceRegistry:
     """Request-scoped registry mapping stable temporary source IDs to actual retrieved document chunks."""
 
     def __init__(self) -> None:
-        self._registry: Dict[str, Dict[str, Any]] = {}
+        self._registry: dict[str, dict[str, Any]] = {}
 
-    def register(self, chunk: Dict[str, Any]) -> str:
+    def register(self, chunk: dict[str, Any]) -> str:
         """Register a chunk and return its stable temporary source ID (e.g. S1)."""
         # If already registered (e.g. unique chunks check), return existing key
         chunk_id = chunk.get("chunk_id") or chunk.get("id")
@@ -27,11 +27,11 @@ class SourceRegistry:
         self._registry[source_id] = chunk
         return source_id
 
-    def resolve(self, source_id: str) -> Optional[Dict[str, Any]]:
+    def resolve(self, source_id: str) -> dict[str, Any] | None:
         """Resolve a temporary source ID back to the original chunk metadata."""
         return self._registry.get(source_id)
 
-    def get_all_sources(self) -> List[Dict[str, Any]]:
+    def get_all_sources(self) -> list[dict[str, Any]]:
         """Get all registered chunks in this request context."""
         return list(self._registry.values())
 
@@ -39,7 +39,7 @@ class SourceRegistry:
 class CitationParser:
     """Parser to extract structured source identifiers from LLM generated text."""
 
-    def parse(self, text: str) -> List[str]:
+    def parse(self, text: str) -> list[str]:
         """Extract citations (e.g. [S1], [S2]) from text, returning unique IDs in first-appearance order."""
         if not text:
             return []
@@ -61,7 +61,7 @@ class CitationParser:
 class CitationResolver:
     """Resolver converting text citation keys back to backend metadata structures."""
 
-    def resolve(self, source_ids: List[str], registry: SourceRegistry) -> List[Dict[str, Any]]:
+    def resolve(self, source_ids: list[str], registry: SourceRegistry) -> list[dict[str, Any]]:
         """Convert a list of citation keys to structured metadata dictionaries, filtering out invalid ones."""
         resolved = []
         for sid in source_ids:

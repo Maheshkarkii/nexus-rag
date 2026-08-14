@@ -1,13 +1,13 @@
-from datetime import datetime
-from typing import Optional
 import uuid
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
 class ConversationCreate(BaseModel):
     """Payload to start a new multi-turn conversation session."""
 
-    title: Optional[str] = Field(
+    title: str | None = Field(
         None,
         max_length=255,
         description="Optional custom title for the research conversation session",
@@ -34,7 +34,7 @@ class MessageResponse(BaseModel):
     role: str = Field(..., description="Dialogue role (user, assistant, system)")
     content: str = Field(..., description="Factual text contents of the message turn")
     created_at: datetime = Field(..., description="Creation UTC timestamp")
-    metadata_json: Optional[dict] = Field(
+    metadata_json: dict | None = Field(
         None,
         description="Optional structured metadata (sources, citations, latencies)",
     )

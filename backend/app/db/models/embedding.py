@@ -1,10 +1,15 @@
 """SQLAlchemy model for chunk embeddings, storing raw vectors and model metadata."""
 
 import uuid
-from typing import Optional
-from sqlalchemy import Boolean, ForeignKey, Integer, JSON, String, Text
+from typing import TYPE_CHECKING
+
+from sqlalchemy import JSON, Boolean, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db.base import BaseModel
+
+if TYPE_CHECKING:
+    from app.db.models.document_chunk import DocumentChunk
 
 
 class ChunkEmbedding(BaseModel):
@@ -46,7 +51,7 @@ class ChunkEmbedding(BaseModel):
         default="pending",
         doc="Current embedding generation state: pending, completed, failed",
     )
-    processing_error: Mapped[Optional[str]] = mapped_column(
+    processing_error: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
         doc="Sanitized error description if embedding generation fails",

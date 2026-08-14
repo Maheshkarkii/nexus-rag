@@ -1,6 +1,8 @@
-from typing import List, Dict, Any
+from typing import Any
+
 from app.db.models.document import Document
 from app.services.document_processing.chunking.strategy import ChunkingStrategy
+
 
 def count_tokens(text: str) -> int:
     """
@@ -19,10 +21,10 @@ class RecursiveChunkingStrategy(ChunkingStrategy):
     paragraphs (\\n\\n), lines (\\n), sentences (. , ? , ! ), words ( ), and characters.
     """
 
-    def __init__(self, separators: List[str] = None):
+    def __init__(self, separators: list[str] = None):
         self.separators = separators or ["\n\n", "\n", ". ", "? ", "! ", " ", ""]
 
-    def _split_text(self, text: str, separators: List[str], max_size: int) -> List[str]:
+    def _split_text(self, text: str, separators: list[str], max_size: int) -> list[str]:
         if not text:
             return []
 
@@ -49,10 +51,7 @@ class RecursiveChunkingStrategy(ChunkingStrategy):
         for i, part in enumerate(parts):
             # Keep separator at the end of the split if it's punctuation, or reconstruct it
             # Except for the last part if it didn't originally end with the separator
-            if separator and i < len(parts) - 1:
-                part_with_sep = part + separator
-            else:
-                part_with_sep = part
+            part_with_sep = part + separator if separator and i < len(parts) - 1 else part
 
             if not part_with_sep:
                 continue
@@ -66,7 +65,7 @@ class RecursiveChunkingStrategy(ChunkingStrategy):
 
         return splits
 
-    def chunk(self, text: str, document: Document, chunk_size: int, chunk_overlap: int) -> List[Dict[str, Any]]:
+    def chunk(self, text: str, document: Document, chunk_size: int, chunk_overlap: int) -> list[dict[str, Any]]:
         if not text or not text.strip():
             return []
 

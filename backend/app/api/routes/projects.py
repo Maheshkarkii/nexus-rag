@@ -1,15 +1,18 @@
 """REST API route handlers for Research Project workspace management."""
 
-from typing import List
 import uuid
+
 from fastapi import APIRouter, Depends, Response, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.exceptions import NotFoundException
 from app.db.session import get_db
 from app.schemas.project import ProjectCreate, ProjectResponse, ProjectUpdate
-from app.schemas.retrieval import RetrievalRequest, RetrievalResponse
 from app.schemas.rag import AskRequest, RAGResponse
+from app.schemas.retrieval import RetrievalRequest, RetrievalResponse
+from app.services.embedding import EmbeddingService, get_embedding_service
+from app.services.llm import LLMService, get_llm_service
 from app.services.project import (
     create_project,
     delete_project,
@@ -17,14 +20,12 @@ from app.services.project import (
     get_projects,
     update_project,
 )
-from app.services.retrieval import RetrievalService, get_retrieval_service
-from app.services.embedding import EmbeddingService, get_embedding_service
-from app.services.qdrant import QdrantService, get_qdrant_service
-from app.services.reranking import RerankingService, get_reranking_service
-from app.services.retrieval_pipeline import RetrievalPipeline, get_retrieval_pipeline
 from app.services.prompt_builder import PromptBuilder, get_prompt_builder
-from app.services.llm import LLMService, get_llm_service
+from app.services.qdrant import QdrantService, get_qdrant_service
 from app.services.rag import RAGService, get_rag_service
+from app.services.reranking import RerankingService, get_reranking_service
+from app.services.retrieval import RetrievalService, get_retrieval_service
+from app.services.retrieval_pipeline import RetrievalPipeline, get_retrieval_pipeline
 
 router = APIRouter()
 
@@ -47,14 +48,14 @@ async def create_new_project(
 
 @router.get(
     "",
-    response_model=List[ProjectResponse],
+    response_model=list[ProjectResponse],
     status_code=status.HTTP_200_OK,
     summary="List Research Projects",
     description="Retrieve all research projects ordered by creation date descending.",
 )
 async def list_all_projects(
     session: AsyncSession = Depends(get_db),
-) -> List[ProjectResponse]:
+) -> list[ProjectResponse]:
     """List all available research project workspaces."""
     projects = await get_projects(session=session)
     return [ProjectResponse.model_validate(p) for p in projects]

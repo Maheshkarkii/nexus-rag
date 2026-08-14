@@ -1,8 +1,8 @@
 """Pydantic request and response schemas for research projects."""
 
-from datetime import datetime
-from typing import Optional
 import uuid
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
@@ -16,7 +16,7 @@ class ProjectBase(BaseModel):
         description="User-facing title or name of the research project workspace",
         examples=["Attention & Transformer Synthesis"],
     )
-    description: Optional[str] = Field(
+    description: str | None = Field(
         default=None,
         max_length=5000,
         description="Optional detailed description or research goals for the project",
@@ -36,7 +36,7 @@ class ProjectBase(BaseModel):
 
     @field_validator("description", mode="before")
     @classmethod
-    def validate_and_strip_description(cls, value: Optional[str]) -> Optional[str]:
+    def validate_and_strip_description(cls, value: str | None) -> str | None:
         """Strip surrounding whitespace on description and convert empty strings to None."""
         if value is None:
             return None
@@ -54,14 +54,14 @@ class ProjectCreate(ProjectBase):
 class ProjectUpdate(BaseModel):
     """Request payload schema for updating an existing research project."""
 
-    name: Optional[str] = Field(
+    name: str | None = Field(
         default=None,
         min_length=1,
         max_length=255,
         description="Updated project title",
         examples=["Updated Deep Learning Review"],
     )
-    description: Optional[str] = Field(
+    description: str | None = Field(
         default=None,
         max_length=5000,
         description="Updated project description",
@@ -70,7 +70,7 @@ class ProjectUpdate(BaseModel):
 
     @field_validator("name", mode="before")
     @classmethod
-    def validate_and_strip_update_name(cls, value: Optional[str]) -> Optional[str]:
+    def validate_and_strip_update_name(cls, value: str | None) -> str | None:
         """Validate non-blank name when provided for update."""
         if value is None:
             return None
@@ -83,7 +83,7 @@ class ProjectUpdate(BaseModel):
 
     @field_validator("description", mode="before")
     @classmethod
-    def validate_and_strip_update_description(cls, value: Optional[str]) -> Optional[str]:
+    def validate_and_strip_update_description(cls, value: str | None) -> str | None:
         """Strip description string when provided for update."""
         if value is None:
             return None

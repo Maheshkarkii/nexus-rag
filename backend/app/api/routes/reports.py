@@ -1,49 +1,48 @@
-import uuid
-import json
 import asyncio
-from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query
-from fastapi.responses import StreamingResponse, Response
-from pydantic import BaseModel, Field
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+import json
+import uuid
+from typing import Any
 
-from app.db.session import get_db
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import Response, StreamingResponse
+from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.db.models.report import Report
-from app.db.models.project import Project
-from app.services.llm import get_llm_service, LLMService
-from app.services.retrieval_pipeline import RetrievalPipeline
-from app.services.retrieval import get_retrieval_service, RetrievalService
-from app.services.reranking import get_reranking_service, RerankingService
-from app.services.qdrant import get_qdrant_service, QdrantService
-from app.services.embedding import get_embedding_service, EmbeddingService
-from app.services.prompt_builder import default_prompt_builder, PromptBuilder
+from app.db.session import get_db
+from app.services.embedding import EmbeddingService, get_embedding_service
+from app.services.export_adapters import DOCXExporter, MarkdownExporter, PDFExporter
+from app.services.llm import LLMService, get_llm_service
+from app.services.prompt_builder import default_prompt_builder
+from app.services.qdrant import QdrantService, get_qdrant_service
 from app.services.report_generator import ReportGeneratorService
-from app.services.export_adapters import MarkdownExporter, PDFExporter, DOCXExporter
+from app.services.reranking import RerankingService, get_reranking_service
+from app.services.retrieval import RetrievalService, get_retrieval_service
+from app.services.retrieval_pipeline import RetrievalPipeline
 
 router = APIRouter(tags=["Reports"])
 
 
 class GenerateReportRequest(BaseModel):
     report_type: str = Field(default="research_summary", description="Type of report to generate")
-    query: Optional[str] = Field(default=None, description="Optional custom research query/objective")
-    conversation_id: Optional[uuid.UUID] = Field(default=None, description="Associated research conversation ID")
-    document_ids: Optional[List[uuid.UUID]] = Field(default=None, description="Optional document scope list")
+    query: str | None = Field(default=None, description="Optional custom research query/objective")
+    conversation_id: uuid.UUID | None = Field(default=None, description="Associated research conversation ID")
+    document_ids: list[uuid.UUID] | None = Field(default=None, description="Optional document scope list")
 
 
-from pydantic import BaseModel, Field, ConfigDict
 
 class ReportResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
     project_id: uuid.UUID
-    conversation_id: Optional[uuid.UUID]
+    conversation_id: uuid.UUID | None
     title: str
     report_type: str
     status: str
     version: int
-    content_json: Optional[Dict[str, Any]]
+    content_json: dict[str, Any] | None
     created_at: Any
 
 
@@ -134,7 +133,7 @@ async def stream_report_generation(
 
 @router.get(
     "/projects/{project_id}/reports",
-    response_model=List[ReportResponse],
+    response_model=list[ReportResponse],
     summary="List project research reports",
 )
 async def list_reports(
@@ -194,7 +193,7 @@ async def delete_report(
 async def export_report(
     project_id: uuid.UUID,
     report_id: uuid.UUID,
-    format: str,
+    export_format: str,
     db: AsyncSession = Depends(get_db),
 ):
     """Export a structured research report into Markdown, PDF, or DOCX formats."""
@@ -204,7 +203,7 @@ async def export_report(
     if not report or not report.content_json:
         raise HTTPException(status_code=404, detail="Report or report content not found.")
 
-    fmt = format.lower()
+    fmt = export_format.lower()
     title_slug = report.title.lower().replace(" ", "_")
 
     if fmt == "markdown" or fmt == "md":

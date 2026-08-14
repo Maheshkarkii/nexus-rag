@@ -1,5 +1,6 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 import torch
 from sentence_transformers import CrossEncoder
 
@@ -13,16 +14,16 @@ class RerankingService:
 
     def __init__(
         self,
-        model_name: Optional[str] = None,
-        device: Optional[str] = None,
-        batch_size: Optional[int] = None,
+        model_name: str | None = None,
+        device: str | None = None,
+        batch_size: int | None = None,
     ) -> None:
         settings = get_settings()
         self.model_name = model_name or settings.RERANKER_MODEL_NAME
         self.config_device = device or settings.EMBEDDING_DEVICE  # Reuse embedding device setting
         self.batch_size = batch_size or settings.RERANKER_BATCH_SIZE
-        self._model: Optional[CrossEncoder] = None
-        self._resolved_device: Optional[str] = None
+        self._model: CrossEncoder | None = None
+        self._resolved_device: str | None = None
 
     def _resolve_device(self) -> str:
         """Resolve config device target to a real hardware target (cpu/cuda)."""
@@ -58,7 +59,7 @@ class RerankingService:
 
         return self._model
 
-    def rerank(self, query: str, candidates: List[Dict[str, Any]], top_k: int) -> List[Dict[str, Any]]:
+    def rerank(self, query: str, candidates: list[dict[str, Any]], top_k: int) -> list[dict[str, Any]]:
         """Compute cross-encoder relevance scores for (query, chunk_text) pairs and sort candidates descending."""
         if not candidates:
             return []
@@ -80,7 +81,7 @@ class RerankingService:
                 scores = [float(scores)]
 
             # Assign scores
-            for candidate, score in zip(candidates, scores):
+            for candidate, score in zip(candidates, scores, strict=False):
                 if "vector_score" not in candidate:
                     candidate["vector_score"] = candidate.get("score", 0.0)
                 candidate["reranker_score"] = float(score)

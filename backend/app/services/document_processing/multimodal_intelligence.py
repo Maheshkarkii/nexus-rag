@@ -1,7 +1,8 @@
 import logging
-import uuid
 import re
-from typing import Any, Dict, List, Optional
+import uuid
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger("ai_research_assistant.multimodal_intelligence")
@@ -13,10 +14,10 @@ class DocumentElement(BaseModel):
     element_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     element_type: str  # text, heading, table, figure, caption, sheet, dataset
     document_id: str
-    page_number: Optional[int] = None
-    section_title: Optional[str] = None
+    page_number: int | None = None
+    section_title: str | None = None
     content: str
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 # --- Multimodal Extractors ---
@@ -25,7 +26,7 @@ class TableExtractor:
     """Extracts, structures, and formats tables from document text/PDFs."""
 
     @staticmethod
-    def extract_tables(raw_text: str, document_id: str) -> List[DocumentElement]:
+    def extract_tables(raw_text: str, document_id: str) -> list[DocumentElement]:
         elements = []
         # Pattern to detect markdown/ASCII tables
         table_pattern = r"(\|[^\n]+\|\n\|[-:\s|]+\|\n(?:\|[^\n]+\|\n?)+)"
@@ -52,7 +53,7 @@ class FigureExtractor:
     """Detects figure references, captions, and visual chart metadata."""
 
     @staticmethod
-    def extract_figures(raw_text: str, document_id: str) -> List[DocumentElement]:
+    def extract_figures(raw_text: str, document_id: str) -> list[DocumentElement]:
         elements = []
         # Pattern to detect Figure captions (e.g. Figure 1: Accuracy comparison)
         fig_pattern = r"(Figure\s+\d+[:\s][^\n]+)"
@@ -79,7 +80,7 @@ class SpreadsheetExtractor:
     """Extracts structured sheet and dataset schema metadata."""
 
     @staticmethod
-    def extract_sheets(metadata: Dict[str, Any], document_id: str) -> List[DocumentElement]:
+    def extract_sheets(metadata: dict[str, Any], document_id: str) -> list[DocumentElement]:
         elements = []
         filename = metadata.get("source_filename", "dataset")
         sheets = metadata.get("sheets", [])
@@ -112,10 +113,10 @@ class DocumentIntelligenceEngine:
         cls,
         document_id: str,
         raw_text: str,
-        extracted_metadata: Optional[Dict[str, Any]] = None,
-    ) -> List[DocumentElement]:
+        extracted_metadata: dict[str, Any] | None = None,
+    ) -> list[DocumentElement]:
         metadata = extracted_metadata or {}
-        elements: List[DocumentElement] = []
+        elements: list[DocumentElement] = []
 
         # 1. Extract Headings & Text Blocks
         paragraphs = [p.strip() for p in raw_text.split("\n\n") if p.strip()]

@@ -1,38 +1,38 @@
-import logging
-import uuid
-import time
 import asyncio
-from typing import Any, Dict, List, Optional
+import logging
+import time
+import uuid
+from typing import Any
+
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
 from app.core.config import get_settings
-settings = get_settings()
-from app.core.exceptions import NotFoundException, BadRequestException
-from app.db.models.message import Message
-from app.services.embedding import EmbeddingService
-from app.services.qdrant import QdrantService
-from app.services.retrieval import RetrievalService
-from app.services.reranking import RerankingService
-from app.services.retrieval_pipeline import RetrievalPipeline
-from app.services.prompt_builder import PromptBuilder
-from app.services.llm import LLMService
-from app.services.citation import SourceRegistry, CitationParser, CitationResolver
+from app.core.exceptions import BadRequestException, NotFoundException
+from app.services.answer_generation import (
+    GroundedAnswerGenerator,
+)
+from app.services.citation import CitationParser, CitationResolver, SourceRegistry
 from app.services.conversation import (
-    get_conversation_by_id,
     create_message,
+    get_conversation_by_id,
     get_conversation_messages,
 )
-from app.services.query_rewriter import ConversationQueryRewriter
-from app.services.research import ResearchOrchestrator
 from app.services.data_analysis import DataAnalysisService
-from app.services.answer_generation import GroundedAnswerGenerator, ClaimVerifier, EvidenceSufficiencyEvaluator
-from app.core.observability import TraceSpan, GroundednessEvaluator, default_metrics_collector
+from app.services.embedding import EmbeddingService
+from app.services.llm import LLMService
+from app.services.prompt_builder import PromptBuilder
+from app.services.qdrant import QdrantService
+from app.services.query_rewriter import ConversationQueryRewriter
+from app.services.reranking import RerankingService
+from app.services.research import ResearchOrchestrator
+from app.services.retrieval import RetrievalService
+from app.services.retrieval_pipeline import RetrievalPipeline
 
 logger = logging.getLogger("ai_research_assistant.services.rag")
+settings = get_settings()
 
 
-async def get_conversation_document_scope(session: AsyncSession, conversation_id: uuid.UUID) -> Optional[List[uuid.UUID]]:
+async def get_conversation_document_scope(session: AsyncSession, conversation_id: uuid.UUID) -> list[uuid.UUID] | None:
     """Scan conversation messages chronologically to find the most recent user-selected document scope."""
     db_messages = await get_conversation_messages(session, conversation_id, limit=100)
     for msg in reversed(db_messages):
@@ -63,10 +63,10 @@ class RAGService:
         prompt_builder: PromptBuilder,
         llm_service: LLMService,
         top_k: int = 5,
-        document_ids: Optional[List[uuid.UUID]] = None,
-        file_types: Optional[List[str]] = None,
-        conversation_id: Optional[uuid.UUID] = None,
-    ) -> Dict[str, Any]:
+        document_ids: list[uuid.UUID] | None = None,
+        file_types: list[str] | None = None,
+        conversation_id: uuid.UUID | None = None,
+    ) -> dict[str, Any]:
         """Orchestrate RAG flow: retrieve matching chunks, build prompt, run LLM inference, return grounded answer."""
         
         # 1. Validation and history loading
@@ -258,9 +258,9 @@ class RAGService:
         prompt_builder: PromptBuilder,
         llm_service: LLMService,
         top_k: int = 5,
-        document_ids: Optional[List[uuid.UUID]] = None,
-        file_types: Optional[List[str]] = None,
-        conversation_id: Optional[uuid.UUID] = None,
+        document_ids: list[uuid.UUID] | None = None,
+        file_types: list[str] | None = None,
+        conversation_id: uuid.UUID | None = None,
     ):
         """Asynchronously orchestrate and stream retrieval, context, and LLM text generation steps."""
         start_time = time.time()

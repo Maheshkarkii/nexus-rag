@@ -1,8 +1,8 @@
 import logging
-from typing import Any, List, Optional
+from typing import Any
+
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as qmodels
-from qdrant_client.http.exceptions import UnexpectedResponse
 
 from app.core.config import get_settings
 
@@ -14,17 +14,17 @@ class QdrantService:
 
     def __init__(
         self,
-        url: Optional[str] = None,
-        api_key: Optional[str] = None,
-        collection_name: Optional[str] = None,
-        timeout: Optional[int] = None,
+        url: str | None = None,
+        api_key: str | None = None,
+        collection_name: str | None = None,
+        timeout: int | None = None,
     ) -> None:
         settings = get_settings()
         self.url = url or settings.QDRANT_URL
         self.api_key = api_key or settings.QDRANT_API_KEY
         self.collection_name = collection_name or settings.QDRANT_COLLECTION_NAME
         self.timeout = timeout or settings.QDRANT_TIMEOUT
-        self._client: Optional[QdrantClient] = None
+        self._client: QdrantClient | None = None
 
     def connect(self) -> QdrantClient:
         """Initialize the Qdrant HTTP client (cached)."""
@@ -92,14 +92,14 @@ class QdrantService:
                         f"Incompatible distance metric in collection '{self.collection_name}'. "
                         f"Expected {metric}, found {actual_distance}."
                     )
-                logger.info(f"Collection compatibility check passed.")
+                logger.info("Collection compatibility check passed.")
             except ValueError:
                 raise
             except Exception as exc:
                 logger.error(f"Failed to retrieve Qdrant collection configuration: {exc}")
                 raise RuntimeError(f"Failed to verify Qdrant collection: {exc}") from exc
 
-    def upsert_points(self, points: List[Any]) -> None:
+    def upsert_points(self, points: list[Any]) -> None:
         """Upsert a batch of points into Qdrant."""
         client = self.connect()
         try:

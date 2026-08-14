@@ -1,12 +1,14 @@
-from typing import List, TYPE_CHECKING
 import uuid
+from typing import TYPE_CHECKING
+
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db.base import BaseModel
 
 if TYPE_CHECKING:
-    from app.db.models.project import Project
     from app.db.models.message import Message
+    from app.db.models.project import Project
 
 
 class Conversation(BaseModel):
@@ -27,7 +29,7 @@ class Conversation(BaseModel):
 
     # Relationships
     project: Mapped["Project"] = relationship("Project", back_populates="conversations")
-    messages: Mapped[List["Message"]] = relationship(
+    messages: Mapped[list["Message"]] = relationship(
         "Message",
         back_populates="conversation",
         cascade="all, delete-orphan",

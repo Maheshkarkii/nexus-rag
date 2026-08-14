@@ -1,20 +1,24 @@
 import logging
-from typing import List, Dict, Any, Optional
 import uuid
-from sqlalchemy import select, delete
+from typing import Any
+
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.exceptions import NotFoundException
 from app.db.models.document import Document
 from app.db.models.document_chunk import DocumentChunk
-from app.services.document_processing.chunking.recursive import RecursiveChunkingStrategy, count_tokens
+from app.services.document_processing.chunking.recursive import (
+    RecursiveChunkingStrategy,
+    count_tokens,
+)
 from app.services.document_processing.chunking.structural import (
-    PDFChunkingStrategy,
-    DocxChunkingStrategy,
     CSVChunkingStrategy,
+    DocxChunkingStrategy,
     ExcelChunkingStrategy,
     JSONChunkingStrategy,
+    PDFChunkingStrategy,
 )
 
 logger = logging.getLogger("ai_research_assistant.processing.chunking")
@@ -45,9 +49,9 @@ class ChunkingService:
         session: AsyncSession,
         project_id: uuid.UUID,
         document_id: uuid.UUID,
-        chunk_size: Optional[int] = None,
-        chunk_overlap: Optional[int] = None,
-    ) -> Dict[str, Any]:
+        chunk_size: int | None = None,
+        chunk_overlap: int | None = None,
+    ) -> dict[str, Any]:
         """
         Retrieves extracted text, chunks it using the format-specific strategy, and persists results.
         """
@@ -95,7 +99,7 @@ class ChunkingService:
         raw_chunks = strategy.chunk(document.extracted_text, document, c_size, c_overlap)
 
         # 4. Filter empty/whitespace-only chunks and build model instances
-        chunks_to_save: List[DocumentChunk] = []
+        chunks_to_save: list[DocumentChunk] = []
         total_chars = 0
         total_tokens = 0
 

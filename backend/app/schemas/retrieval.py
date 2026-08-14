@@ -1,5 +1,6 @@
 import uuid
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -18,17 +19,17 @@ class RetrievalRequest(BaseModel):
         le=100,
         description="Maximum number of relevant chunks to return",
     )
-    score_threshold: Optional[float] = Field(
+    score_threshold: float | None = Field(
         0.0,
         ge=0.0,
         le=1.0,
         description="Minimum similarity score threshold to include a chunk in outcomes",
     )
-    document_ids: Optional[List[uuid.UUID]] = Field(
+    document_ids: list[uuid.UUID] | None = Field(
         None,
         description="Optional list of document UUIDs to filter results within",
     )
-    file_types: Optional[List[str]] = Field(
+    file_types: list[str] | None = Field(
         None,
         description="Optional list of file extensions (e.g. .pdf, .txt) to narrow search scope",
     )
@@ -49,10 +50,10 @@ class RetrievalResultResponse(BaseModel):
     project_id: uuid.UUID = Field(..., description="UUID of the parent Project")
     text: str = Field(..., description="Raw text segment of the chunk")
     score: float = Field(..., description="Calculated primary relevance coefficient score")
-    vector_score: Optional[float] = Field(None, description="Raw semantic vector similarity score")
-    reranker_score: Optional[float] = Field(None, description="Calculated cross-encoder model relevance score")
+    vector_score: float | None = Field(None, description="Raw semantic vector similarity score")
+    reranker_score: float | None = Field(None, description="Calculated cross-encoder model relevance score")
     chunk_index: int = Field(..., description="Index order value of the chunk within the document")
-    metadata: Dict[str, Any] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict,
         description="Associated structured file headers, positions, and tags",
     )
@@ -62,7 +63,7 @@ class RetrievalResponse(BaseModel):
     """Top-level collection returned by the semantic query pipeline."""
 
     query: str = Field(..., description="Echo of the input query string")
-    results: List[RetrievalResultResponse] = Field(
+    results: list[RetrievalResultResponse] = Field(
         ...,
         description="Descending sorted list of semantically matching chunks",
     )

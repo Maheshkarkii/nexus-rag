@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger("ai_research_assistant.services.prompt_builder")
 
@@ -37,9 +37,9 @@ class PromptBuilder:
     def build_user_prompt(
         self,
         query: str,
-        context_chunks: List[Dict[str, Any]],
+        context_chunks: list[dict[str, Any]],
         registry: Any,
-        history: Optional[List[Dict[str, Any]]] = None,
+        history: list[dict[str, Any]] | None = None,
     ) -> str:
         """Format the retrieved chunks into a structured evidence context and register them in the registry."""
         evidence_blocks = []

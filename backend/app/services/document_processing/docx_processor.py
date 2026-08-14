@@ -2,8 +2,9 @@
 
 import logging
 from pathlib import Path
-from typing import List
+
 import docx
+
 from app.db.models.document import Document
 from app.services.document_processing.base import BaseDocumentProcessor, ExtractionResult
 
@@ -22,7 +23,7 @@ class DocxProcessor(BaseDocumentProcessor):
         except Exception as e:
             raise ValueError(f"Failed to parse DOCX document structure: {e}") from e
 
-        content_blocks: List[str] = []
+        content_blocks: list[str] = []
         paragraph_count = 0
         table_count = 0
 
@@ -40,7 +41,7 @@ class DocxProcessor(BaseDocumentProcessor):
         # 2. Extract tables in readable markdown-style tabular format
         for t_idx, table in enumerate(doc.tables, start=1):
             table_count += 1
-            table_rows: List[str] = []
+            table_rows: list[str] = []
             for row in table.rows:
                 row_cells = [cell.text.strip().replace("\n", " ") for cell in row.cells]
                 # Filter out redundant merged cell text repetitions

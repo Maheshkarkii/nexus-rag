@@ -1,16 +1,17 @@
 """API endpoints for Knowledge Graph exploration, entity inspection, and graph visualization."""
 
 import uuid
-from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, ConfigDict
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from typing import Any
 
-from app.db.session import get_db
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel, ConfigDict
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.db.models.graph import Entity, Relationship
-from app.services.llm import get_llm_service, LLMService
+from app.db.session import get_db
 from app.services.knowledge_graph import KnowledgeGraphService
+from app.services.llm import LLMService, get_llm_service
 
 router = APIRouter(tags=["Knowledge Graph"])
 
@@ -22,7 +23,7 @@ class EntityResponse(BaseModel):
     project_id: uuid.UUID
     canonical_name: str
     entity_type: str
-    description: Optional[str]
+    description: str | None
     created_at: Any
 
 
@@ -35,13 +36,13 @@ class RelationshipResponse(BaseModel):
     target_entity_id: uuid.UUID
     relationship_type: str
     confidence: float
-    document_id: Optional[uuid.UUID]
-    evidence_text: Optional[str]
+    document_id: uuid.UUID | None
+    evidence_text: str | None
 
 
 class GraphVisualizationResponse(BaseModel):
-    nodes: List[Dict[str, Any]]
-    edges: List[Dict[str, Any]]
+    nodes: list[dict[str, Any]]
+    edges: list[dict[str, Any]]
 
 
 @router.get(
@@ -89,7 +90,7 @@ async def get_project_graph(
 
 @router.get(
     "/projects/{project_id}/graph/entities",
-    response_model=List[EntityResponse],
+    response_model=list[EntityResponse],
     summary="List project entities",
 )
 async def list_entities(

@@ -1,26 +1,24 @@
+import asyncio
 import logging
 import uuid
-import re
-import json
-import asyncio
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
+
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
 
 from app.core.config import get_settings
-from app.db.models.report import Report
+from app.core.exceptions import NotFoundException
 from app.db.models.project import Project
-from app.db.models.conversation import Conversation
-from app.services.llm import LLMService
-from app.services.retrieval_pipeline import RetrievalPipeline
-from app.services.retrieval import RetrievalService
-from app.services.reranking import RerankingService
-from app.services.qdrant import QdrantService
+from app.db.models.report import Report
+from app.services.citation import CitationParser, CitationResolver, SourceRegistry
 from app.services.embedding import EmbeddingService
+from app.services.llm import LLMService
 from app.services.prompt_builder import PromptBuilder
-from app.services.citation import SourceRegistry, CitationParser, CitationResolver
+from app.services.qdrant import QdrantService
+from app.services.reranking import RerankingService
 from app.services.research import ResearchOrchestrator
-from app.core.exceptions import NotFoundException, BadRequestException
+from app.services.retrieval import RetrievalService
+from app.services.retrieval_pipeline import RetrievalPipeline
 
 logger = logging.getLogger("ai_research_assistant.services.report_generator")
 
@@ -108,14 +106,14 @@ class ReportGeneratorService:
         session: AsyncSession,
         project_id: uuid.UUID,
         report_type: str = "research_summary",
-        query: Optional[str] = None,
-        conversation_id: Optional[uuid.UUID] = None,
-        document_ids: Optional[List[uuid.UUID]] = None,
+        query: str | None = None,
+        conversation_id: uuid.UUID | None = None,
+        document_ids: list[uuid.UUID] | None = None,
         is_streaming: bool = False,
-        event_queue: Optional[asyncio.Queue] = None,
+        event_queue: asyncio.Queue | None = None,
     ) -> Report:
         """Generate a complete structured research report."""
-        settings = get_settings()
+        get_settings()
 
         # Validate project
         stmt = select(Project).where(Project.id == project_id)
@@ -342,7 +340,7 @@ class ReportGeneratorService:
         self,
         sec_title: str,
         sec_purpose: str,
-        context_chunks: List[Dict[str, Any]],
+        context_chunks: list[dict[str, Any]],
         registry: SourceRegistry,
     ) -> str:
         """Generate content for a specific report section using context chunks."""

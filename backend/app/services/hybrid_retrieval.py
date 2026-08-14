@@ -1,8 +1,9 @@
+import hashlib
 import logging
 import re
-import hashlib
 import time
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
+
 from rank_bm25 import BM25Okapi
 
 from app.core.config import get_settings
@@ -10,7 +11,7 @@ from app.core.config import get_settings
 logger = logging.getLogger("ai_research_assistant.services.hybrid_retrieval")
 
 
-def tokenize_text(text: str) -> List[str]:
+def tokenize_text(text: str) -> list[str]:
     """Tokenize text into lowercase alphanumeric terms for BM25 lexical matching."""
     if not text:
         return []
@@ -21,7 +22,7 @@ class LexicalSearchService:
     """BM25 lexical keyword search matcher for exact technical terms and abbreviations."""
 
     @staticmethod
-    def score_chunks(query: str, chunks: List[Dict[str, Any]]) -> List[float]:
+    def score_chunks(query: str, chunks: list[dict[str, Any]]) -> list[float]:
         """Compute BM25 scores for a query across candidate chunks."""
         if not chunks or not query.strip():
             return [0.0] * len(chunks)
@@ -45,7 +46,7 @@ class MultiQueryExpander:
     """Expands queries into bounded search variations without hallucinating facts."""
 
     @staticmethod
-    def expand_query(query: str) -> List[str]:
+    def expand_query(query: str) -> list[str]:
         """Generate safe, bounded query variations."""
         queries = [query]
         q_lower = query.lower()
@@ -60,10 +61,10 @@ class MultiQueryExpander:
         return list(dict.fromkeys(queries))[:3]
 
     @staticmethod
-    def fuse_rrf(rankings: List[List[Dict[str, Any]]], k: int = 60) -> List[Dict[str, Any]]:
+    def fuse_rrf(rankings: list[list[dict[str, Any]]], k: int = 60) -> list[dict[str, Any]]:
         """Reciprocal Rank Fusion (RRF) across candidate lists."""
-        rrf_scores: Dict[str, float] = {}
-        chunk_map: Dict[str, Dict[str, Any]] = {}
+        rrf_scores: dict[str, float] = {}
+        chunk_map: dict[str, dict[str, Any]] = {}
 
         for rank_list in rankings:
             for rank, chunk in enumerate(rank_list):
@@ -88,9 +89,9 @@ class SourceDiversifier:
     MAX_CHUNKS_PER_DOC = 3
 
     @classmethod
-    def diversify(cls, chunks: List[Dict[str, Any]], top_k: int = 5) -> List[Dict[str, Any]]:
+    def diversify(cls, chunks: list[dict[str, Any]], top_k: int = 5) -> list[dict[str, Any]]:
         """Slice chunks enforcing per-document max limits."""
-        doc_counts: Dict[str, int] = {}
+        doc_counts: dict[str, int] = {}
         diversified = []
 
         for chunk in chunks:
@@ -111,7 +112,7 @@ class HybridFusionService:
     """Fuses semantic vector scores and lexical BM25 scores using score normalization and weighted linear combination."""
 
     @staticmethod
-    def normalize_bm25(scores: List[float]) -> List[float]:
+    def normalize_bm25(scores: list[float]) -> list[float]:
         """Normalize BM25 scores relative to max score."""
         if not scores:
             return []
@@ -123,16 +124,16 @@ class HybridFusionService:
     @classmethod
     def fuse_scores(
         cls,
-        chunks: List[Dict[str, Any]],
-        semantic_scores: List[float],
-        lexical_scores: List[float],
+        chunks: list[dict[str, Any]],
+        semantic_scores: list[float],
+        lexical_scores: list[float],
         query: str,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Fuse normalized semantic and lexical scores, applying exact-keyword boosts."""
         settings = get_settings()
         norm_lexical = cls.normalize_bm25(lexical_scores)
 
-        query_lc = query.lower()
+        query.lower()
         exact_terms = [t for t in tokenize_text(query) if len(t) > 3]
 
         fused_chunks = []
@@ -171,7 +172,7 @@ class NearDuplicateDeduplicator:
     """Detects and removes near-duplicate text fragments using Jaccard token n-gram overlap."""
 
     @staticmethod
-    def get_ngrams(text: str, n: int = 3) -> Set[str]:
+    def get_ngrams(text: str, n: int = 3) -> set[str]:
         tokens = tokenize_text(text)
         if len(tokens) < n:
             return {" ".join(tokens)}
@@ -188,15 +189,12 @@ class NearDuplicateDeduplicator:
         ngram_sim = len(set1.intersection(set2)) / len(set1.union(set2)) if (set1 and set2) else 0.0
 
         # Substring / token containment check
-        if w1 and w2:
-            containment = len(w1.intersection(w2)) / min(len(w1), len(w2))
-        else:
-            containment = 0.0
+        containment = len(w1.intersection(w2)) / min(len(w1), len(w2)) if w1 and w2 else 0.0
 
         return max(word_sim, ngram_sim, containment)
 
     @classmethod
-    def deduplicate(cls, chunks: List[Dict[str, Any]], similarity_threshold: float = 0.75) -> List[Dict[str, Any]]:
+    def deduplicate(cls, chunks: list[dict[str, Any]], similarity_threshold: float = 0.75) -> list[dict[str, Any]]:
         """Remove near-duplicate chunks that exceed similarity threshold."""
         unique_chunks = []
         for chunk in chunks:
@@ -216,16 +214,16 @@ class RetrievalCache:
     """In-memory cache for retrieval results with automatic TTL and project invalidation."""
 
     def __init__(self, ttl_seconds: int = 300) -> None:
-        self._cache: Dict[str, Tuple[float, str, List[Dict[str, Any]]]] = {}
-        self._project_keys: Dict[str, Set[str]] = {}
+        self._cache: dict[str, tuple[float, str, list[dict[str, Any]]]] = {}
+        self._project_keys: dict[str, set[str]] = {}
         self.ttl = ttl_seconds
 
-    def _make_key(self, project_id: str, query: str, doc_ids: Optional[List[str]]) -> str:
+    def _make_key(self, project_id: str, query: str, doc_ids: list[str] | None) -> str:
         doc_str = ",".join(sorted(doc_ids)) if doc_ids else "all"
         raw = f"{project_id}:{query.strip().lower()}:{doc_str}"
         return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
-    def get(self, project_id: str, query: str, doc_ids: Optional[List[str]] = None) -> Optional[List[Dict[str, Any]]]:
+    def get(self, project_id: str, query: str, doc_ids: list[str] | None = None) -> list[dict[str, Any]] | None:
         settings = get_settings()
         if not settings.ENABLE_RETRIEVAL_CACHE:
             return None
@@ -243,7 +241,7 @@ class RetrievalCache:
                     self._project_keys[p_str].discard(key)
         return None
 
-    def put(self, project_id: str, query: str, chunks: List[Dict[str, Any]], doc_ids: Optional[List[str]] = None) -> None:
+    def put(self, project_id: str, query: str, chunks: list[dict[str, Any]], doc_ids: list[str] | None = None) -> None:
         settings = get_settings()
         if not settings.ENABLE_RETRIEVAL_CACHE:
             return

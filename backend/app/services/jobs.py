@@ -1,8 +1,9 @@
-import logging
-import uuid
-import time
 import asyncio
-from typing import Any, Callable, Dict, List, Optional, Tuple
+import logging
+import time
+import uuid
+from collections.abc import Callable
+from typing import Any
 
 from app.core.config import get_settings
 
@@ -21,9 +22,9 @@ class Job:
         self.current_stage: str = "Queued"
         self.created_at: float = time.time()
         self.updated_at: float = time.time()
-        self.error_message: Optional[str] = None
+        self.error_message: str | None = None
         self.retries: int = 0
-        self.result: Optional[Dict[str, Any]] = None
+        self.result: dict[str, Any] | None = None
 
     def update_progress(self, percent: float, stage: str) -> None:
         """Update job progress percentage and current stage label."""
@@ -31,7 +32,7 @@ class Job:
         self.current_stage = stage
         self.updated_at = time.time()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "job_id": str(self.id),
             "project_id": str(self.project_id),
@@ -51,10 +52,10 @@ class BackgroundJobManager:
     """In-memory task manager for async background job execution, retries, and progress tracking."""
 
     def __init__(self) -> None:
-        self._jobs: Dict[str, Job] = {}
+        self._jobs: dict[str, Job] = {}
         self._queue: asyncio.Queue = asyncio.Queue()
-        self._worker_task: Optional[asyncio.Task] = None
-        self._semaphore: Optional[asyncio.Semaphore] = None
+        self._worker_task: asyncio.Task | None = None
+        self._semaphore: asyncio.Semaphore | None = None
 
     def _ensure_worker(self) -> None:
         settings = get_settings()
@@ -72,7 +73,7 @@ class BackgroundJobManager:
         logger.info(f"Submitted background job {job.id} (type: {job_type}) for project {project_id}")
         return job
 
-    def get_job(self, project_id: uuid.UUID, job_id: uuid.UUID) -> Optional[Job]:
+    def get_job(self, project_id: uuid.UUID, job_id: uuid.UUID) -> Job | None:
         """Retrieve job record with project-level authorization check."""
         job = self._jobs.get(str(job_id))
         if job and job.project_id == project_id:

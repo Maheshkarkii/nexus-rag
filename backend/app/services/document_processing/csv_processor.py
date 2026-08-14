@@ -4,7 +4,7 @@ import csv
 import io
 import logging
 from pathlib import Path
-from typing import List
+
 from app.db.models.document import Document
 from app.services.document_processing.base import BaseDocumentProcessor, ExtractionResult
 
@@ -44,7 +44,7 @@ class CSVProcessor(BaseDocumentProcessor):
             delimiter = ","
 
         reader = csv.reader(io.StringIO(decoded_text), delimiter=delimiter)
-        rows: List[List[str]] = [row for row in reader if any(cell.strip() for cell in row)]
+        rows: list[list[str]] = [row for row in reader if any(cell.strip() for cell in row)]
 
         if not rows:
             raise ValueError("CSV document contains no tabular rows or columns.")
@@ -52,7 +52,7 @@ class CSVProcessor(BaseDocumentProcessor):
         header = rows[0]
         data_rows = rows[1:]
 
-        output_lines: List[str] = [
+        output_lines: list[str] = [
             f"Columns: {' | '.join(header)}",
             "",
         ]

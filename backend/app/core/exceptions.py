@@ -1,7 +1,8 @@
 """Application-level exception hierarchy and centralized FastAPI error handlers."""
 
 import logging
-from typing import Any, Optional
+from typing import Any
+
 from fastapi import FastAPI, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
@@ -23,7 +24,7 @@ class AppException(Exception):
         message: str,
         code: str = "APP_ERROR",
         status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
-        details: Optional[Any] = None,
+        details: Any | None = None,
     ) -> None:
         super().__init__(message)
         self.message = message
@@ -39,7 +40,7 @@ class NotFoundException(AppException):
         self,
         message: str = "Resource not found",
         code: str = "NOT_FOUND",
-        details: Optional[Any] = None,
+        details: Any | None = None,
     ) -> None:
         super().__init__(
             message=message,
@@ -56,7 +57,7 @@ class BadRequestException(AppException):
         self,
         message: str = "Bad request",
         code: str = "BAD_REQUEST",
-        details: Optional[Any] = None,
+        details: Any | None = None,
     ) -> None:
         super().__init__(
             message=message,
@@ -73,7 +74,7 @@ class ValidationException(AppException):
         self,
         message: str = "Validation failed",
         code: str = "VALIDATION_ERROR",
-        details: Optional[Any] = None,
+        details: Any | None = None,
     ) -> None:
         super().__init__(
             message=message,
@@ -91,7 +92,7 @@ class ServiceException(AppException):
         message: str = "Service temporarily unavailable",
         code: str = "SERVICE_UNAVAILABLE",
         status_code: int = status.HTTP_503_SERVICE_UNAVAILABLE,
-        details: Optional[Any] = None,
+        details: Any | None = None,
     ) -> None:
         super().__init__(
             message=message,

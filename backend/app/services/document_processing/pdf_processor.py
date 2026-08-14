@@ -2,8 +2,9 @@
 
 import logging
 from pathlib import Path
-from typing import List
+
 from pypdf import PdfReader
+
 from app.db.models.document import Document
 from app.services.document_processing.base import BaseDocumentProcessor, ExtractionResult
 
@@ -26,7 +27,7 @@ class PDFProcessor(BaseDocumentProcessor):
         if total_pages == 0:
             raise ValueError("PDF document contains 0 pages.")
 
-        page_texts: List[str] = []
+        page_texts: list[str] = []
         page_metadata = []
         warnings = []
 

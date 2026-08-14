@@ -1,10 +1,12 @@
 """Service and repository operations for Research Projects."""
 
-from datetime import datetime, timezone
-from typing import Optional, Sequence
 import uuid
+from collections.abc import Sequence
+from datetime import UTC, datetime
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.db.models.project import Project
 from app.schemas.project import ProjectCreate, ProjectUpdate
 
@@ -28,7 +30,7 @@ async def get_projects(session: AsyncSession) -> Sequence[Project]:
     return result.scalars().all()
 
 
-async def get_project_by_id(session: AsyncSession, project_id: uuid.UUID) -> Optional[Project]:
+async def get_project_by_id(session: AsyncSession, project_id: uuid.UUID) -> Project | None:
     """Retrieve a single research project by its UUID primary key."""
     stmt = select(Project).where(Project.id == project_id)
     result = await session.execute(stmt)
@@ -44,7 +46,7 @@ async def update_project(
     if payload.description is not None:
         project.description = payload.description
 
-    project.updated_at = datetime.now(timezone.utc)
+    project.updated_at = datetime.now(UTC)
     session.add(project)
     await session.commit()
     await session.refresh(project)

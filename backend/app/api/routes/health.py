@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.session import get_db
 from app.core.observability import default_metrics_collector
 from app.core.reliability import ReliabilityDashboardService
+from app.db.session import get_db
 
 router = APIRouter(tags=["Observability & Health"])
 
@@ -18,7 +18,7 @@ async def health_check(db: AsyncSession = Depends(get_db)):
     except Exception:
         db_status = "unhealthy"
 
-    metrics = default_metrics_collector.get_summary()
+    default_metrics_collector.get_summary()
 
     return {"status": "healthy"} if db_status == "healthy" else {"status": "degraded"}
 

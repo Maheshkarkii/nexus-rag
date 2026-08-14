@@ -1,18 +1,19 @@
 """Document processing service orchestrating parsing, normalization, and metadata persistence."""
 
 import logging
-from pathlib import Path
 import time
 import uuid
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.exceptions import NotFoundException
 from app.db.base import utc_now
 from app.db.models.document import Document
 from app.db.models.project import Project
 from app.services.document_processing.normalizer import normalize_extracted_text
 from app.services.document_processing.registry import get_processor_for_document
-from app.services.storage import StorageService, get_storage_service
+from app.services.storage import StorageService
 
 logger = logging.getLogger("ai_research_assistant.processing")
 

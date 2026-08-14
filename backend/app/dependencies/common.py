@@ -1,7 +1,9 @@
 """Common reusable FastAPI dependencies."""
 
 from typing import Annotated
-from fastapi import Depends, Header, Request
+
+from fastapi import Depends, Header
+
 from app.core.config import Settings, get_settings
 
 

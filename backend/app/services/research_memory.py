@@ -1,7 +1,7 @@
 import logging
-import uuid
 import time
-from typing import Any, Dict, List, Optional
+import uuid
+
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger("ai_research_assistant.research_memory")
@@ -12,9 +12,9 @@ logger = logging.getLogger("ai_research_assistant.research_memory")
 class ResearchFinding(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     project_id: str
-    user_id: Optional[str] = None
+    user_id: str | None = None
     statement: str
-    source_ids: List[str] = Field(default_factory=list)
+    source_ids: list[str] = Field(default_factory=list)
     confidence: float = 1.0
     status: str = "active"  # active, superseded, disputed, archived
     created_at: float = Field(default_factory=time.time)
@@ -24,10 +24,10 @@ class ResearchFinding(BaseModel):
 class ResearchNote(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     project_id: str
-    user_id: Optional[str] = None
+    user_id: str | None = None
     title: str
     content: str
-    source_ids: List[str] = Field(default_factory=list)
+    source_ids: list[str] = Field(default_factory=list)
     is_ai_generated: bool = False
     created_at: float = Field(default_factory=time.time)
     updated_at: float = Field(default_factory=time.time)
@@ -36,11 +36,11 @@ class ResearchNote(BaseModel):
 class SavedSource(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     project_id: str
-    user_id: Optional[str] = None
+    user_id: str | None = None
     document_id: str
     filename: str
-    page_number: Optional[int] = None
-    section_title: Optional[str] = None
+    page_number: int | None = None
+    section_title: str | None = None
     excerpt: str
     created_at: float = Field(default_factory=time.time)
 
@@ -48,8 +48,8 @@ class SavedSource(BaseModel):
 class ResearchSummary(BaseModel):
     project_id: str
     objective: str
-    key_findings: List[str] = Field(default_factory=list)
-    open_questions: List[str] = Field(default_factory=list)
+    key_findings: list[str] = Field(default_factory=list)
+    open_questions: list[str] = Field(default_factory=list)
     updated_at: float = Field(default_factory=time.time)
 
 
@@ -62,10 +62,10 @@ class ResearchMemoryService:
     MAX_MEMORY_TOKENS = 1000
 
     def __init__(self) -> None:
-        self._findings: Dict[str, List[ResearchFinding]] = {}
-        self._notes: Dict[str, List[ResearchNote]] = {}
-        self._sources: Dict[str, List[SavedSource]] = {}
-        self._summaries: Dict[str, ResearchSummary] = {}
+        self._findings: dict[str, list[ResearchFinding]] = {}
+        self._notes: dict[str, list[ResearchNote]] = {}
+        self._sources: dict[str, list[SavedSource]] = {}
+        self._summaries: dict[str, ResearchSummary] = {}
 
     def save_finding(self, finding: ResearchFinding) -> ResearchFinding:
         p_id = finding.project_id
@@ -74,7 +74,7 @@ class ResearchMemoryService:
         self._findings[p_id].append(finding)
         return finding
 
-    def get_findings(self, project_id: str) -> List[ResearchFinding]:
+    def get_findings(self, project_id: str) -> list[ResearchFinding]:
         return [f for f in self._findings.get(project_id, []) if f.status == "active"]
 
     def delete_finding(self, project_id: str, finding_id: str) -> bool:
@@ -91,7 +91,7 @@ class ResearchMemoryService:
         self._notes[p_id].append(note)
         return note
 
-    def get_notes(self, project_id: str) -> List[ResearchNote]:
+    def get_notes(self, project_id: str) -> list[ResearchNote]:
         return self._notes.get(project_id, [])
 
     def delete_note(self, project_id: str, note_id: str) -> bool:
@@ -108,7 +108,7 @@ class ResearchMemoryService:
         self._sources[p_id].append(source)
         return source
 
-    def get_sources(self, project_id: str) -> List[SavedSource]:
+    def get_sources(self, project_id: str) -> list[SavedSource]:
         return self._sources.get(project_id, [])
 
     def build_memory_context(self, project_id: str, query: str) -> str:

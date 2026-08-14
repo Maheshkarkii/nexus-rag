@@ -1,7 +1,7 @@
 import logging
 import uuid
-from typing import List, Optional
-from sqlalchemy import select, delete
+
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.conversation import Conversation
@@ -13,7 +13,7 @@ logger = logging.getLogger("ai_research_assistant.services.conversation")
 async def create_conversation(
     session: AsyncSession,
     project_id: uuid.UUID,
-    title: Optional[str] = None,
+    title: str | None = None,
 ) -> Conversation:
     """Create a new conversation session record linked to a project workspace."""
     db_conv = Conversation(
@@ -30,7 +30,7 @@ async def create_conversation(
 async def get_conversations(
     session: AsyncSession,
     project_id: uuid.UUID,
-) -> List[Conversation]:
+) -> list[Conversation]:
     """Retrieve all conversations for a specific project workspace."""
     stmt = (
         select(Conversation)
@@ -44,7 +44,7 @@ async def get_conversations(
 async def get_conversation_by_id(
     session: AsyncSession,
     conversation_id: uuid.UUID,
-) -> Optional[Conversation]:
+) -> Conversation | None:
     """Look up a conversation session record by its UUID."""
     stmt = select(Conversation).where(Conversation.id == conversation_id)
     res = await session.execute(stmt)
@@ -68,7 +68,7 @@ async def create_message(
     conversation_id: uuid.UUID,
     role: str,
     content: str,
-    metadata_json: Optional[dict] = None,
+    metadata_json: dict | None = None,
 ) -> Message:
     """Persist a user/assistant dialogue turn message to the database."""
     db_msg = Message(
@@ -89,7 +89,7 @@ async def get_conversation_messages(
     conversation_id: uuid.UUID,
     limit: int = 50,
     offset: int = 0,
-) -> List[Message]:
+) -> list[Message]:
     """Retrieve dialogue messages in chronological order, with limit/offset pagination support."""
     stmt = (
         select(Message)

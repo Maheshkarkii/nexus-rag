@@ -1,15 +1,17 @@
 """SQLAlchemy model for research documents and uploaded file metadata."""
 
-from datetime import datetime
-from typing import List, Optional, TYPE_CHECKING
 import uuid
-from sqlalchemy import BigInteger, ForeignKey, JSON, String, Text
+from datetime import datetime
+from typing import TYPE_CHECKING
+
+from sqlalchemy import JSON, BigInteger, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db.base import BaseModel, UTCDateTime
 
 if TYPE_CHECKING:
-    from app.db.models.project import Project
     from app.db.models.document_chunk import DocumentChunk
+    from app.db.models.project import Project
 
 
 class Document(BaseModel):
@@ -65,48 +67,48 @@ class Document(BaseModel):
     # --------------------------------------------------------------------------
     # Stage 9: Extracted Text Content & Ingestion Metadata
     # --------------------------------------------------------------------------
-    extracted_text: Mapped[Optional[str]] = mapped_column(
+    extracted_text: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
         doc="Normalized extracted textual content ready for downstream chunking",
     )
-    extracted_character_count: Mapped[Optional[int]] = mapped_column(
+    extracted_character_count: Mapped[int | None] = mapped_column(
         BigInteger,
         nullable=True,
         doc="Total character count of the normalized extracted text",
     )
-    extracted_word_count: Mapped[Optional[int]] = mapped_column(
+    extracted_word_count: Mapped[int | None] = mapped_column(
         BigInteger,
         nullable=True,
         doc="Total word count of the normalized extracted text",
     )
-    extracted_metadata: Mapped[Optional[dict]] = mapped_column(
+    extracted_metadata: Mapped[dict | None] = mapped_column(
         JSON,
         nullable=True,
         doc="Structured metadata such as page counts, sheet headers, or row statistics",
     )
-    processing_error: Mapped[Optional[str]] = mapped_column(
+    processing_error: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
         doc="Sanitized human-readable error explanation if extraction fails",
     )
-    processed_at: Mapped[Optional[datetime]] = mapped_column(
+    processed_at: Mapped[datetime | None] = mapped_column(
         UTCDateTime(),
         nullable=True,
         doc="UTC timestamp when extraction pipeline completed",
     )
-    indexing_status: Mapped[Optional[str]] = mapped_column(
+    indexing_status: Mapped[str | None] = mapped_column(
         String(32),
         nullable=True,
         default="pending",
         doc="Current Qdrant vector store indexing state: pending, indexing, indexed, failed",
     )
-    indexed_at: Mapped[Optional[datetime]] = mapped_column(
+    indexed_at: Mapped[datetime | None] = mapped_column(
         UTCDateTime(),
         nullable=True,
         doc="UTC timestamp when indexing pipeline completed",
     )
-    indexing_error: Mapped[Optional[str]] = mapped_column(
+    indexing_error: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
         doc="Sanitized error description if indexing fails",
@@ -117,7 +119,7 @@ class Document(BaseModel):
         "Project",
         back_populates="documents",
     )
-    chunks: Mapped[List["DocumentChunk"]] = relationship(
+    chunks: Mapped[list["DocumentChunk"]] = relationship(
         "DocumentChunk",
         back_populates="document",
         cascade="all, delete-orphan",

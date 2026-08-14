@@ -1,8 +1,9 @@
 import re
-from typing import List, Dict, Any
+from typing import Any
+
 from app.db.models.document import Document
-from app.services.document_processing.chunking.strategy import ChunkingStrategy
 from app.services.document_processing.chunking.recursive import RecursiveChunkingStrategy
+from app.services.document_processing.chunking.strategy import ChunkingStrategy
 
 
 class PDFChunkingStrategy(RecursiveChunkingStrategy):
@@ -10,7 +11,7 @@ class PDFChunkingStrategy(RecursiveChunkingStrategy):
     Chunks PDF text page-by-page, preserving page numbers in metadata for citations.
     """
 
-    def chunk(self, text: str, document: Document, chunk_size: int, chunk_overlap: int) -> List[Dict[str, Any]]:
+    def chunk(self, text: str, document: Document, chunk_size: int, chunk_overlap: int) -> list[dict[str, Any]]:
         # PDFProcessor formats page markers as "--- Page {idx} ---"
         pattern = r"--- Page (\d+) ---\n"
         matches = list(re.finditer(pattern, text))
@@ -46,7 +47,7 @@ class DocxChunkingStrategy(RecursiveChunkingStrategy):
     Chunks Word document text by section headings, preserving hierarchy paths.
     """
 
-    def chunk(self, text: str, document: Document, chunk_size: int, chunk_overlap: int) -> List[Dict[str, Any]]:
+    def chunk(self, text: str, document: Document, chunk_size: int, chunk_overlap: int) -> list[dict[str, Any]]:
         # DocxProcessor prefixes headings with "## "
         lines = text.split("\n")
         chunks = []
@@ -106,7 +107,7 @@ class CSVChunkingStrategy(ChunkingStrategy):
     Chunks CSV datasets row-by-row, keeping column headers on each chunk and tracking row ranges.
     """
 
-    def chunk(self, text: str, document: Document, chunk_size: int, chunk_overlap: int) -> List[Dict[str, Any]]:
+    def chunk(self, text: str, document: Document, chunk_size: int, chunk_overlap: int) -> list[dict[str, Any]]:
         lines = text.split("\n")
         if not lines:
             return []
@@ -181,7 +182,7 @@ class ExcelChunkingStrategy(ChunkingStrategy):
     Chunks multi-sheet Excel files sheet-by-sheet to avoid cross-sheet pollution.
     """
 
-    def chunk(self, text: str, document: Document, chunk_size: int, chunk_overlap: int) -> List[Dict[str, Any]]:
+    def chunk(self, text: str, document: Document, chunk_size: int, chunk_overlap: int) -> list[dict[str, Any]]:
         sheet_blocks = text.split("\n\n---\n\n")
         chunks = []
 
@@ -272,7 +273,7 @@ class JSONChunkingStrategy(RecursiveChunkingStrategy):
     Chunks hierarchical JSON representations, maintaining path scopes (e.g. root.users[0].profile).
     """
 
-    def chunk(self, text: str, document: Document, chunk_size: int, chunk_overlap: int) -> List[Dict[str, Any]]:
+    def chunk(self, text: str, document: Document, chunk_size: int, chunk_overlap: int) -> list[dict[str, Any]]:
         if len(text) <= chunk_size:
             return [{"text": text, "metadata": {"json_path": "root"}}]
 
@@ -335,10 +336,10 @@ class JSONChunkingStrategy(RecursiveChunkingStrategy):
                 # Respect overlap
                 overlap_lines = []
                 overlap_len = 0
-                for l in reversed(current_chunk_lines):
-                    if overlap_len + len(l) + 1 <= chunk_overlap:
-                        overlap_lines.insert(0, l)
-                        overlap_len += len(l) + 1
+                for line in reversed(current_chunk_lines):
+                    if overlap_len + len(line) + 1 <= chunk_overlap:
+                        overlap_lines.insert(0, line)
+                        overlap_len += len(line) + 1
                     else:
                         break
 

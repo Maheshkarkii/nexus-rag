@@ -1,6 +1,7 @@
-from datetime import datetime
-from typing import Any, Dict, Optional
 import uuid
+from datetime import datetime
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -23,7 +24,7 @@ class DocumentChunkResponse(BaseModel):
     text: str = Field(..., description="Normalized chunk text content")
     token_count: int = Field(..., description="Calculated token count of this chunk")
     character_count: int = Field(..., description="Character count of this chunk")
-    metadata: Optional[Dict[str, Any]] = Field(
+    metadata: dict[str, Any] | None = Field(
         default=None,
         validation_alias="metadata_",
         description="Structured citation metadata (page_number, section_title, etc.)",

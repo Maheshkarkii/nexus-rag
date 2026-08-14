@@ -1,5 +1,5 @@
+
 from fastapi import APIRouter, HTTPException, status
-from typing import List
 
 from app.services.research_memory import (
     ResearchFinding,
@@ -18,7 +18,7 @@ async def save_finding(project_id: str, finding: ResearchFinding):
     return research_memory_service.save_finding(finding)
 
 
-@router.get("/findings", response_model=List[ResearchFinding], summary="Get Project Findings")
+@router.get("/findings", response_model=list[ResearchFinding], summary="Get Project Findings")
 async def get_findings(project_id: str):
     """Retrieve active research findings for project workspace."""
     return research_memory_service.get_findings(project_id)
@@ -39,7 +39,7 @@ async def save_note(project_id: str, note: ResearchNote):
     return research_memory_service.save_note(note)
 
 
-@router.get("/notes", response_model=List[ResearchNote], summary="Get Project Notes")
+@router.get("/notes", response_model=list[ResearchNote], summary="Get Project Notes")
 async def get_notes(project_id: str):
     """Retrieve user research notes for project workspace."""
     return research_memory_service.get_notes(project_id)
@@ -60,7 +60,7 @@ async def save_source(project_id: str, source: SavedSource):
     return research_memory_service.save_source(source)
 
 
-@router.get("/sources", response_model=List[SavedSource], summary="Get Saved Sources")
+@router.get("/sources", response_model=list[SavedSource], summary="Get Saved Sources")
 async def get_sources(project_id: str):
     """Retrieve bookmarked sources for project workspace."""
     return research_memory_service.get_sources(project_id)

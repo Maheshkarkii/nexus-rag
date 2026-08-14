@@ -1,15 +1,16 @@
 """Knowledge Graph extraction, resolution, and traversal service."""
 
-import logging
-import uuid
 import json
+import logging
 import re
-from typing import Any, Dict, List, Optional, Set, Tuple
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, delete
+import uuid
+from typing import Any
 
-from app.db.models.graph import Entity, Relationship
+from sqlalchemy import delete, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.db.models.document_chunk import DocumentChunk
+from app.db.models.graph import Entity, Relationship
 from app.services.llm import LLMService
 
 logger = logging.getLogger("ai_research_assistant.services.knowledge_graph")
@@ -40,7 +41,7 @@ class KnowledgeGraphService:
         return clean
 
     @staticmethod
-    def resolve_entity(cname: str, existing_names: List[str]) -> Optional[str]:
+    def resolve_entity(cname: str, existing_names: list[str]) -> str | None:
         """Resolve entity name against existing canonical names using exact and normalized matching."""
         norm_input = KnowledgeGraphService.normalize_entity_name(cname).lower()
         for name in existing_names:
@@ -57,8 +58,8 @@ class KnowledgeGraphService:
         session: AsyncSession,
         project_id: uuid.UUID,
         document_id: uuid.UUID,
-        chunks: List[DocumentChunk],
-    ) -> Dict[str, int]:
+        chunks: list[DocumentChunk],
+    ) -> dict[str, int]:
         """Extract entities and relationships from document chunks incrementally."""
         extracted_entities_count = 0
         extracted_rels_count = 0
@@ -147,7 +148,7 @@ class KnowledgeGraphService:
         project_id: uuid.UUID,
         query: str,
         max_depth: int = 2,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Query knowledge graph for entities and connected relationships matching a search query."""
         stmt = select(Entity).where(Entity.project_id == project_id)
         res = await session.execute(stmt)

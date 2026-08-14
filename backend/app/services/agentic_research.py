@@ -1,14 +1,14 @@
 import logging
 import uuid
-import time
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 from pydantic import BaseModel, Field
 
-from app.services.retrieval_pipeline import default_retrieval_pipeline
-from app.services.prompt_builder import default_prompt_builder
-from app.services.llm import default_llm_service
-from app.services.citation import SourceRegistry, CitationParser, CitationResolver
+from app.services.citation import SourceRegistry
 from app.services.data_analysis import data_analysis_service
+from app.services.llm import default_llm_service
+from app.services.prompt_builder import default_prompt_builder
+from app.services.retrieval_pipeline import default_retrieval_pipeline
 
 logger = logging.getLogger("ai_research_assistant.agentic_research")
 
@@ -21,30 +21,30 @@ class ResearchTask(BaseModel):
     purpose: str
     required_evidence: str
     status: str = "pending"  # pending, running, completed, failed
-    result: Optional[Dict[str, Any]] = None
+    result: dict[str, Any] | None = None
 
 
 class ResearchPlan(BaseModel):
     objective: str
     mode: str = "standard"  # quick, standard, deep
-    tasks: List[ResearchTask] = Field(default_factory=list)
+    tasks: list[ResearchTask] = Field(default_factory=list)
 
 
 class ResearchState(BaseModel):
     research_id: str
     project_id: str
-    user_id: Optional[str] = None
+    user_id: str | None = None
     question: str
-    plan: Optional[ResearchPlan] = None
+    plan: ResearchPlan | None = None
     current_task_index: int = 0
-    evidence: List[Dict[str, Any]] = Field(default_factory=list)
-    findings: List[Dict[str, Any]] = Field(default_factory=list)
-    gaps: List[str] = Field(default_factory=list)
-    conflicts: List[Dict[str, Any]] = Field(default_factory=list)
+    evidence: list[dict[str, Any]] = Field(default_factory=list)
+    findings: list[dict[str, Any]] = Field(default_factory=list)
+    gaps: list[str] = Field(default_factory=list)
+    conflicts: list[dict[str, Any]] = Field(default_factory=list)
     iterations: int = 0
     tool_calls: int = 0
     status: str = "planning"  # planning, executing, evaluating, synthesizing, completed, failed
-    final_report: Optional[str] = None
+    final_report: str | None = None
 
 
 # --- Tool Registry ---
@@ -61,7 +61,7 @@ class ToolRegistry:
         project_id: str,
         query: str,
         top_k: int = 5,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Bounded document search tool executing existing hybrid retrieval pipeline."""
         capped_k = min(top_k, cls.MAX_TOP_K)
         p_id = uuid.UUID(project_id) if isinstance(project_id, str) else project_id
@@ -91,7 +91,7 @@ class ToolRegistry:
         project_id: str,
         document_id: str,
         question: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Deterministic pandas data analysis tool for CSV/XLSX datasets."""
         p_id = uuid.UUID(project_id) if isinstance(project_id, str) else project_id
         doc_id = uuid.UUID(document_id) if isinstance(document_id, str) else document_id
@@ -158,7 +158,7 @@ class GapDetector:
     """Evaluates collected evidence to detect gaps or conflicting information."""
 
     @staticmethod
-    def evaluate(evidence: List[Dict[str, Any]], question: str) -> Dict[str, Any]:
+    def evaluate(evidence: list[dict[str, Any]], question: str) -> dict[str, Any]:
         if not evidence:
             return {"gaps": ["No relevant evidence found"], "conflicts": []}
 

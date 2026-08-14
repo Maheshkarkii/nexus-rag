@@ -1,6 +1,5 @@
 import json
 import os
-import sys
 
 from app.evaluation.evaluator import RAGEvaluator
 

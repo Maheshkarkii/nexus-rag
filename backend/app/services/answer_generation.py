@@ -1,12 +1,10 @@
 import logging
 import re
-import uuid
-import time
-from typing import Any, Dict, List, Optional, Tuple, Set
+from typing import Any
 
-from app.services.citation import SourceRegistry, CitationParser, CitationResolver
-from app.services.llm import LLMService
 from app.core.observability import GroundednessEvaluator
+from app.services.citation import CitationParser, CitationResolver, SourceRegistry
+from app.services.llm import LLMService
 
 logger = logging.getLogger("ai_research_assistant.services.answer_generation")
 
@@ -15,7 +13,7 @@ class EvidenceSufficiencyEvaluator:
     """Evaluates whether retrieved evidence is sufficient, partial, or insufficient to answer the user query."""
 
     @staticmethod
-    def evaluate(query: str, context_chunks: List[Dict[str, Any]]) -> str:
+    def evaluate(query: str, context_chunks: list[dict[str, Any]]) -> str:
         """Determine sufficiency state: 'sufficient', 'partially_sufficient', or 'insufficient'."""
         if not context_chunks:
             return "insufficient"
@@ -41,7 +39,7 @@ class ClaimVerifier:
     """Extracts claims and verifies them against retrieved evidence and source citations."""
 
     @staticmethod
-    def extract_claims(answer: str) -> List[Dict[str, Any]]:
+    def extract_claims(answer: str) -> list[dict[str, Any]]:
         """Deconstruct answer text into sentence-level claims with associated citation IDs."""
         raw_sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", answer) if len(s.strip()) > 5]
         claims = []
@@ -61,8 +59,8 @@ class ClaimVerifier:
     def verify_and_repair_citations(
         answer: str,
         registry: SourceRegistry,
-        context_chunks: List[Dict[str, Any]],
-    ) -> Tuple[str, List[Dict[str, Any]], Dict[str, Any]]:
+        context_chunks: list[dict[str, Any]],
+    ) -> tuple[str, list[dict[str, Any]], dict[str, Any]]:
         """
         Validate generated citations against registered sources.
         Removes hallucinated citation tags ([S99] that don't exist) from answer text,
@@ -123,11 +121,11 @@ class GroundedAnswerGenerator:
     async def generate_grounded_answer(
         self,
         query: str,
-        context_chunks: List[Dict[str, Any]],
+        context_chunks: list[dict[str, Any]],
         system_prompt: str,
         user_prompt: str,
         registry: SourceRegistry,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Generate answer with evidence verification and hallucination repair."""
         sufficiency = EvidenceSufficiencyEvaluator.evaluate(query, context_chunks)
 

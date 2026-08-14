@@ -1,8 +1,8 @@
 """SQLAlchemy 2.x Declarative Base, UTC DateTime type decorator, and reusable model mixins."""
 
-from datetime import datetime, timezone
-from typing import Optional
 import uuid
+from datetime import UTC, datetime
+
 from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncAttrs
@@ -12,7 +12,7 @@ from sqlalchemy.types import DateTime, TypeDecorator
 
 def utc_now() -> datetime:
     """Return timezone-aware current UTC datetime."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class UTCDateTime(TypeDecorator):
@@ -21,18 +21,18 @@ class UTCDateTime(TypeDecorator):
     impl = DateTime(timezone=True)
     cache_ok = True
 
-    def process_bind_param(self, value: Optional[datetime], dialect) -> Optional[datetime]:
+    def process_bind_param(self, value: datetime | None, dialect) -> datetime | None:
         if value is not None:
             if value.tzinfo is None:
-                value = value.replace(tzinfo=timezone.utc)
-            return value.astimezone(timezone.utc)
+                value = value.replace(tzinfo=UTC)
+            return value.astimezone(UTC)
         return None
 
-    def process_result_value(self, value: Optional[datetime], dialect) -> Optional[datetime]:
+    def process_result_value(self, value: datetime | None, dialect) -> datetime | None:
         if value is not None:
             if value.tzinfo is None:
-                return value.replace(tzinfo=timezone.utc)
-            return value.astimezone(timezone.utc)
+                return value.replace(tzinfo=UTC)
+            return value.astimezone(UTC)
         return None
 
 

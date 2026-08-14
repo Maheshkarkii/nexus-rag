@@ -1,10 +1,8 @@
 import logging
-import uuid
-import time
-import json
 import re
-from typing import Any, Dict, List, Optional, Set
-from contextlib import contextmanager
+import time
+import uuid
+from typing import Any
 
 logger = logging.getLogger("ai_research_assistant.observability")
 
@@ -18,8 +16,8 @@ class TraceSpan:
         self.start_time: float = 0.0
         self.end_time: float = 0.0
         self.duration_ms: float = 0.0
-        self.metadata: Dict[str, Any] = {}
-        self.error: Optional[str] = None
+        self.metadata: dict[str, Any] = {}
+        self.error: str | None = None
 
     def __enter__(self):
         self.start_time = time.time()
@@ -40,7 +38,7 @@ class RequestCorrelationContext:
     """Manages request and correlation IDs across asynchronous workflow spans."""
 
     @staticmethod
-    def get_correlation_id(request_headers: Optional[Dict[str, str]] = None) -> str:
+    def get_correlation_id(request_headers: dict[str, str] | None = None) -> str:
         """Extract existing correlation ID or generate a new UUID4 string."""
         if request_headers:
             cid = request_headers.get("x-correlation-id") or request_headers.get("X-Correlation-ID")
@@ -53,12 +51,12 @@ class RAGMetricsCollector:
     """In-memory metrics collector for application latency percentiles, tokens, and quality stats."""
 
     def __init__(self) -> None:
-        self.latencies_ms: List[float] = []
-        self.token_counts: List[int] = []
-        self.errors: Dict[str, int] = {}
+        self.latencies_ms: list[float] = []
+        self.token_counts: list[int] = []
+        self.errors: dict[str, int] = {}
         self.request_count: int = 0
 
-    def record_request(self, latency_ms: float, tokens: int = 0, error_type: Optional[str] = None) -> None:
+    def record_request(self, latency_ms: float, tokens: int = 0, error_type: str | None = None) -> None:
         """Safely record a request event without throwing exceptions."""
         try:
             self.request_count += 1
@@ -71,7 +69,7 @@ class RAGMetricsCollector:
         except Exception as e:
             logger.warning(f"Metrics collection failed: {e}")
 
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> dict[str, Any]:
         """Compute latency percentiles (P50, P95) and aggregated counts."""
         valid_lat = [float(x) for x in self.latencies_ms if isinstance(x, (int, float))]
         if not valid_lat:
@@ -105,7 +103,7 @@ class GroundednessEvaluator:
     """Evaluates answer groundedness and citation validity against retrieved evidence chunks."""
 
     @staticmethod
-    def evaluate_groundedness(answer: str, context_chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def evaluate_groundedness(answer: str, context_chunks: list[dict[str, Any]]) -> dict[str, Any]:
         """Evaluate if claims in the generated answer are grounded in context chunks."""
         if not answer.strip() or not context_chunks:
             return {"groundedness_score": 0.0, "is_grounded": False, "reason": "Empty answer or context"}
@@ -138,7 +136,7 @@ class GroundednessEvaluator:
         }
 
     @staticmethod
-    def evaluate_citations(answer: str, valid_source_ids: Set[str]) -> Dict[str, Any]:
+    def evaluate_citations(answer: str, valid_source_ids: set[str]) -> dict[str, Any]:
         """Evaluate citation correctness and completeness."""
         cited_tags = re.findall(r"\[S(\d+)\]", answer)
         cited_ids = {f"S{m}" for m in cited_tags}
@@ -162,10 +160,10 @@ class BenchmarkEvaluator:
 
     @staticmethod
     def compute_retrieval_metrics(
-        expected_source_filenames: List[str],
-        retrieved_chunks: List[Dict[str, Any]],
+        expected_source_filenames: list[str],
+        retrieved_chunks: list[dict[str, Any]],
         top_k: int = 5,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Compute Recall@K, Precision@K, MRR, and Hit Rate for a retrieval query."""
         if not expected_source_filenames:
             return {"recall_at_k": 0.0, "precision_at_k": 0.0, "mrr": 0.0, "hit_rate": 0.0}

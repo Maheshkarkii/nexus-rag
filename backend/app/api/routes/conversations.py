@@ -1,24 +1,24 @@
 import logging
 import uuid
-from typing import List
+
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import NotFoundException
 from app.db.session import get_db
-from app.core.exceptions import NotFoundException, BadRequestException
 from app.schemas.conversation import (
     ConversationCreate,
     ConversationResponse,
     MessageResponse,
 )
-from app.services.project import get_project_by_id
 from app.services.conversation import (
     create_conversation,
-    get_conversations,
-    get_conversation_by_id,
     delete_conversation,
+    get_conversation_by_id,
     get_conversation_messages,
+    get_conversations,
 )
+from app.services.project import get_project_by_id
 
 logger = logging.getLogger("ai_research_assistant.api.routes.conversations")
 
@@ -52,7 +52,7 @@ async def create_new_session(
 
 @router.get(
     "/projects/{project_id}/conversations",
-    response_model=List[ConversationResponse],
+    response_model=list[ConversationResponse],
     status_code=status.HTTP_200_OK,
     summary="List Research Sessions",
     description="Retrieve lightweight metadata for all conversation sessions within a project workspace.",
@@ -60,7 +60,7 @@ async def create_new_session(
 async def list_project_sessions(
     project_id: uuid.UUID,
     session: AsyncSession = Depends(get_db),
-) -> List[ConversationResponse]:
+) -> list[ConversationResponse]:
     """List conversations in a project."""
     project = await get_project_by_id(session=session, project_id=project_id)
     if not project:
@@ -72,7 +72,7 @@ async def list_project_sessions(
 
 @router.get(
     "/conversations/{conversation_id}/messages",
-    response_model=List[MessageResponse],
+    response_model=list[MessageResponse],
     status_code=status.HTTP_200_OK,
     summary="Get Message History",
     description="Retrieve chronologically ordered dialogue history messages for a conversation session.",
@@ -82,7 +82,7 @@ async def get_session_history(
     limit: int = Query(50, ge=1, le=200, description="Pagination limit"),
     offset: int = Query(0, ge=0, description="Pagination offset"),
     session: AsyncSession = Depends(get_db),
-) -> List[MessageResponse]:
+) -> list[MessageResponse]:
     """Retrieve paginated conversation messages."""
     conv = await get_conversation_by_id(session=session, conversation_id=conversation_id)
     if not conv:

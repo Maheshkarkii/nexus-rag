@@ -1,23 +1,22 @@
 import io
 import re
-from typing import Any, Dict, List, Optional
-import docx
-from docx.shared import Inches, Pt, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.table import WD_TABLE_ALIGNMENT
+from typing import Any
 
-from reportlab.lib.pagesizes import letter
+import docx
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.shared import Inches, Pt, RGBColor
 from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.pdfgen import canvas
 from reportlab.platypus import (
-    SimpleDocTemplate,
+    HRFlowable,
     Paragraph,
+    SimpleDocTemplate,
     Spacer,
     Table,
     TableStyle,
-    HRFlowable,
 )
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.pdfgen import canvas
 
 
 class NumberedCanvas(canvas.Canvas):
@@ -53,7 +52,7 @@ class MarkdownExporter:
     """Exports structured report JSON into standard Markdown format."""
 
     @staticmethod
-    def export(content_json: Dict[str, Any]) -> str:
+    def export(content_json: dict[str, Any]) -> str:
         title = content_json.get("title", "Research Report")
         report_type = content_json.get("report_type", "research_summary").replace("_", " ").title()
         sections = content_json.get("sections", [])
@@ -87,7 +86,7 @@ class PDFExporter:
     """Exports structured report JSON into a formatted PDF document."""
 
     @staticmethod
-    def export(content_json: Dict[str, Any]) -> bytes:
+    def export(content_json: dict[str, Any]) -> bytes:
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(
             buffer,
@@ -205,7 +204,7 @@ class DOCXExporter:
     """Exports structured report JSON into a formatted Word (.docx) document."""
 
     @staticmethod
-    def export(content_json: Dict[str, Any]) -> bytes:
+    def export(content_json: dict[str, Any]) -> bytes:
         doc = docx.Document()
 
         # Set page margins

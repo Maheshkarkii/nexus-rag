@@ -2,8 +2,9 @@
 
 import logging
 from pathlib import Path
-from typing import List
+
 import openpyxl
+
 from app.db.models.document import Document
 from app.services.document_processing.base import BaseDocumentProcessor, ExtractionResult
 
@@ -25,13 +26,13 @@ class ExcelProcessor(BaseDocumentProcessor):
         except Exception as e:
             raise ValueError(f"Failed to load Excel workbook: {e}") from e
 
-        sheet_blocks: List[str] = []
+        sheet_blocks: list[str] = []
         sheet_summaries = []
 
         try:
             for sheet_name in workbook.sheetnames:
                 sheet = workbook[sheet_name]
-                rows_data: List[List[str]] = []
+                rows_data: list[list[str]] = []
 
                 for row in sheet.iter_rows(values_only=True):
                     # Filter out purely empty rows

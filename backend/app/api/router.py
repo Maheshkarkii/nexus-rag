@@ -1,14 +1,15 @@
 """Central master API router registering versioned application endpoints."""
 
 from fastapi import APIRouter
-from app.api.routes.documents import router as documents_router
-from app.api.routes.health import router as health_router
-from app.api.routes.projects import router as projects_router
+
 from app.api.routes.conversations import router as conversations_router
-from app.api.routes.reports import router as reports_router
+from app.api.routes.documents import router as documents_router
+from app.api.routes.graph import router as graph_router
+from app.api.routes.health import router as health_router
 from app.api.routes.jobs import router as jobs_router
 from app.api.routes.memory import router as memory_router
-from app.api.routes.graph import router as graph_router
+from app.api.routes.projects import router as projects_router
+from app.api.routes.reports import router as reports_router
 
 api_router = APIRouter()
 

@@ -1,11 +1,12 @@
 """Application settings and environment configuration management using Pydantic Settings."""
 
-from functools import lru_cache
 import json
 import logging
-from pathlib import Path
-from typing import List, Literal, Optional, Union
 import uuid
+from functools import lru_cache
+from pathlib import Path
+from typing import Literal
+
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -42,7 +43,7 @@ class Settings(BaseSettings):
     # --------------------------------------------------------------------------
     # 3. CORS Settings
     # --------------------------------------------------------------------------
-    BACKEND_CORS_ORIGINS: List[str] = [
+    BACKEND_CORS_ORIGINS: list[str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:8000",
@@ -50,7 +51,7 @@ class Settings(BaseSettings):
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
-    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+    def assemble_cors_origins(cls, v: str | list[str]) -> list[str]:
         """Parse CORS origins from JSON array, comma-separated string, or Python list."""
         if isinstance(v, str):
             v_trimmed = v.strip()
@@ -74,7 +75,7 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = "ai_research_db"
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres_dev_password"
-    DATABASE_URL: Optional[str] = None
+    DATABASE_URL: str | None = None
 
     @property
     def async_database_url(self) -> str:
@@ -107,7 +108,7 @@ class Settings(BaseSettings):
     # --------------------------------------------------------------------------
     STORAGE_PATH: str = "storage"
     MAX_UPLOAD_SIZE_MB: int = 50
-    ALLOWED_EXTENSIONS: List[str] = [
+    ALLOWED_EXTENSIONS: list[str] = [
         ".pdf",
         ".docx",
         ".txt",
@@ -146,7 +147,7 @@ class Settings(BaseSettings):
     QDRANT_PORT: int = 6333
     QDRANT_GRPC_PORT: int = 6334
     QDRANT_URL: str = "http://qdrant:6333"
-    QDRANT_API_KEY: Optional[str] = None
+    QDRANT_API_KEY: str | None = None
     QDRANT_COLLECTION_NAME: str = "research_documents"
     QDRANT_UPSERT_BATCH_SIZE: int = 100
     QDRANT_TIMEOUT: int = 60
@@ -156,7 +157,7 @@ class Settings(BaseSettings):
     # --------------------------------------------------------------------------
     RERANKER_MODEL_NAME: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
     RERANKER_BATCH_SIZE: int = 32
-    RERANKER_SCORE_THRESHOLD: Optional[float] = None
+    RERANKER_SCORE_THRESHOLD: float | None = None
     RETRIEVAL_CANDIDATE_K: int = 20
     FINAL_CONTEXT_K: int = 5
     MAX_CONTEXT_TOKENS: int = 2048
@@ -201,9 +202,9 @@ class Settings(BaseSettings):
     # --------------------------------------------------------------------------
     # 8. Future AI & Cache Settings (Stage 11+)
     # --------------------------------------------------------------------------
-    REDIS_URL: Optional[str] = None
+    REDIS_URL: str | None = None
     LLM_PROVIDER: str = "openai"
-    LLM_API_KEY: Optional[str] = None
+    LLM_API_KEY: str | None = None
     LLM_MODEL: str = "gpt-4o-mini"
     LLM_TEMPERATURE: float = 0.0
     LLM_MAX_OUTPUT_TOKENS: int = 1000
@@ -248,7 +249,7 @@ class Settings(BaseSettings):
         return self
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> Settings:
     """Return cached singleton instance of application settings."""
     return Settings()

@@ -1,15 +1,17 @@
 """SQLAlchemy model for research reports and document generation."""
 
 import uuid
-from typing import Optional, Dict, Any, TYPE_CHECKING
-from sqlalchemy import String, ForeignKey, Integer, JSON
+from typing import TYPE_CHECKING, Any, Optional
+
+from sqlalchemy import JSON, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db.base import BaseModel
 
 if TYPE_CHECKING:
-    from app.db.models.project import Project
     from app.db.models.conversation import Conversation
+    from app.db.models.project import Project
 
 
 class Report(BaseModel):
@@ -23,7 +25,7 @@ class Report(BaseModel):
         nullable=False,
         index=True,
     )
-    conversation_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    conversation_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("conversations.id", ondelete="SET NULL"),
         nullable=True,
@@ -33,7 +35,7 @@ class Report(BaseModel):
     report_type: Mapped[str] = mapped_column(String(50), nullable=False, default="research_summary", index=True)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="generating", index=True) # draft, generating, completed, failed
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    content_json: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
+    content_json: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
 
     # Relationships
     project: Mapped["Project"] = relationship("Project", back_populates="reports", lazy="raise")

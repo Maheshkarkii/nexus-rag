@@ -1,6 +1,6 @@
 """Processor registry mapping document formats and extensions to dedicated extractors."""
 
-from typing import Dict
+
 from app.db.models.document import Document
 from app.services.document_processing.base import BaseDocumentProcessor
 from app.services.document_processing.csv_processor import CSVProcessor
@@ -19,7 +19,7 @@ _excel_processor = ExcelProcessor()
 _json_processor = JSONProcessor()
 
 # Extension to processor mapping (lower-case with dot)
-EXTENSION_PROCESSORS: Dict[str, BaseDocumentProcessor] = {
+EXTENSION_PROCESSORS: dict[str, BaseDocumentProcessor] = {
     ".pdf": _pdf_processor,
     ".docx": _docx_processor,
     ".txt": _text_processor,
@@ -30,7 +30,7 @@ EXTENSION_PROCESSORS: Dict[str, BaseDocumentProcessor] = {
 }
 
 # MIME type fallback mapping
-MIME_PROCESSORS: Dict[str, BaseDocumentProcessor] = {
+MIME_PROCESSORS: dict[str, BaseDocumentProcessor] = {
     "application/pdf": _pdf_processor,
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document": _docx_processor,
     "application/msword": _docx_processor,

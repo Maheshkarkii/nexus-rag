@@ -1,22 +1,23 @@
 import logging
-import uuid
 import re
-from typing import Any, Dict, List, Optional
+import uuid
+from typing import Any
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.db.models.document import Document
-from app.services.embedding import EmbeddingService, get_embedding_service
-from app.services.qdrant import QdrantService, get_qdrant_service
-from app.services.retrieval import RetrievalService, get_retrieval_service
-from app.services.reranking import RerankingService, get_reranking_service
+from app.services.embedding import EmbeddingService
 from app.services.hybrid_retrieval import (
-    LexicalSearchService,
     HybridFusionService,
+    LexicalSearchService,
     NearDuplicateDeduplicator,
     default_retrieval_cache,
 )
+from app.services.qdrant import QdrantService
+from app.services.reranking import RerankingService
+from app.services.retrieval import RetrievalService
 
 logger = logging.getLogger("ai_research_assistant.services.retrieval_pipeline")
 
@@ -33,10 +34,7 @@ class RetrievalPipeline:
             r"\bwhich (one|paper|document|dataset|approach|methodology|model)\b",
             r"\bbetween\b", r"\bcomparison\b", r"\bmethodologies\b"
         ]
-        for pat in patterns:
-            if re.search(pat, query_lc):
-                return True
-        return False
+        return any(re.search(pat, query_lc) for pat in patterns)
 
     async def retrieve_optimized(
         self,
@@ -48,9 +46,9 @@ class RetrievalPipeline:
         qdrant_service: QdrantService,
         embedding_service: EmbeddingService,
         top_k: int = 5,
-        document_ids: Optional[List[uuid.UUID]] = None,
-        file_types: Optional[List[str]] = None,
-    ) -> List[Dict[str, Any]]:
+        document_ids: list[uuid.UUID] | None = None,
+        file_types: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
         """Fetch candidates using hybrid semantic + lexical search, rerank using CrossEncoder, prune near-duplicates, and slice to budget."""
         settings = get_settings()
 
@@ -152,9 +150,9 @@ class RetrievalPipeline:
         reranking_service: RerankingService,
         qdrant_service: QdrantService,
         embedding_service: EmbeddingService,
-        document_ids: Optional[List[uuid.UUID]] = None,
-        file_types: Optional[List[str]] = None,
-    ) -> List[Dict[str, Any]]:
+        document_ids: list[uuid.UUID] | None = None,
+        file_types: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
         """Document-aware retrieval, grouping, reranking, and balancing for comparison queries."""
         settings = get_settings()
 
@@ -232,7 +230,7 @@ class RetrievalPipeline:
         lexical_scores = LexicalSearchService.score_chunks(query, candidates)
         fused_candidates = HybridFusionService.fuse_scores(candidates, semantic_scores, lexical_scores, query)
 
-        grouped: Dict[uuid.UUID, List[Dict[str, Any]]] = {}
+        grouped: dict[uuid.UUID, list[dict[str, Any]]] = {}
         for doc in docs:
             grouped[doc.id] = []
 
@@ -287,10 +285,10 @@ class RetrievalPipeline:
 
     def optimize_context(
         self,
-        candidates: List[Dict[str, Any]],
+        candidates: list[dict[str, Any]],
         max_tokens: int,
         final_k: int,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Remove duplicate and near-duplicate chunks, enforcing token and length boundaries."""
         deduped = NearDuplicateDeduplicator.deduplicate(candidates, similarity_threshold=0.75)
         final_list = deduped[:final_k]

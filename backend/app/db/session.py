@@ -2,7 +2,8 @@
 
 import asyncio
 import logging
-from typing import AsyncGenerator, Optional, Tuple
+from collections.abc import AsyncGenerator
+
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -10,6 +11,7 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+
 from app.core.config import get_settings
 
 logger = logging.getLogger("ai_research_assistant.db")
@@ -48,7 +50,7 @@ async_session_factory: async_sessionmaker[AsyncSession] = async_sessionmaker(
 
 
 def get_async_session_factory(
-    custom_engine: Optional[AsyncEngine] = None,
+    custom_engine: AsyncEngine | None = None,
 ) -> async_sessionmaker[AsyncSession]:
     """Return an async session factory bound to the provided or default engine."""
     target_engine = custom_engine or engine
@@ -80,9 +82,9 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 # Database Health & Connectivity Checker
 # ==============================================================================
 async def check_database_connection(
-    custom_engine: Optional[AsyncEngine] = None,
+    custom_engine: AsyncEngine | None = None,
     timeout_seconds: float = 3.0,
-) -> Tuple[bool, Optional[str]]:
+) -> tuple[bool, str | None]:
     """Safely execute a lightweight SELECT 1 query to verify database connectivity."""
     target_engine = custom_engine or engine
     try:
@@ -93,7 +95,7 @@ async def check_database_connection(
                 if row == 1:
                     return True, "PostgreSQL connected and responsive (SELECT 1 succeeded)"
                 return False, "Unexpected query response from database"
-    except asyncio.TimeoutError:
+    except TimeoutError:
         logger.warning("Database health check timed out.")
         return False, "Database connection timed out"
     except Exception as exc:

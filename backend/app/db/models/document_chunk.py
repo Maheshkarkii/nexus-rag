@@ -1,15 +1,15 @@
 """SQLAlchemy model for document chunks, token counts, and rich citation metadata."""
 
-from datetime import datetime
-from typing import Optional, TYPE_CHECKING
 import uuid
-from sqlalchemy import ForeignKey, Index, Integer, JSON, Text, UniqueConstraint
+from typing import TYPE_CHECKING, Optional
+
+from sqlalchemy import JSON, ForeignKey, Index, Integer, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db.base import BaseModel
 
 if TYPE_CHECKING:
     from app.db.models.document import Document
-    from app.db.models.project import Project
     from app.db.models.embedding import ChunkEmbedding
 
 
@@ -49,7 +49,7 @@ class DocumentChunk(BaseModel):
         nullable=False,
         doc="Character length of chunk text",
     )
-    metadata_: Mapped[Optional[dict]] = mapped_column(
+    metadata_: Mapped[dict | None] = mapped_column(
         "metadata",
         JSON,
         nullable=True,

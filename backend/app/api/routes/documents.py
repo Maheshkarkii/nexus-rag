@@ -1,17 +1,18 @@
 """REST API route handlers for research document upload, listing, processing, content, and deletion."""
 
-from typing import List
 import uuid
+
 from fastapi import APIRouter, Depends, File, Query, Response, UploadFile, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.exceptions import BadRequestException, NotFoundException
-from app.db.session import get_db
 from app.db.models.document_chunk import DocumentChunk
 from app.db.models.embedding import ChunkEmbedding
+from app.db.session import get_db
 from app.schemas.document import DocumentContentResponse, DocumentResponse
 from app.schemas.document_chunk import ChunkingSummaryResponse, DocumentChunkResponse
-from app.schemas.embedding import EmbeddingSummaryResponse, EmbeddingMetadataResponse
+from app.schemas.embedding import EmbeddingMetadataResponse, EmbeddingSummaryResponse
 from app.schemas.indexing import IndexingSummaryResponse
 from app.services.document import (
     create_document,
@@ -19,28 +20,27 @@ from app.services.document import (
     get_document_by_id,
     get_documents_by_project,
 )
-from app.services.document_processing.service import (
-    DocumentProcessingService,
-    get_processing_service,
-)
 from app.services.document_processing.chunking.service import (
     ChunkingService,
     get_chunking_service,
+)
+from app.services.document_processing.service import (
+    DocumentProcessingService,
+    get_processing_service,
 )
 from app.services.embedding import (
     EmbeddingService,
     get_embedding_service,
 )
-from app.services.qdrant import (
-    QdrantService,
-    get_qdrant_service,
-)
 from app.services.indexing import (
     VectorIndexingService,
     get_indexing_service,
 )
+from app.services.qdrant import (
+    QdrantService,
+    get_qdrant_service,
+)
 from app.services.storage import StorageService, get_storage_service
-
 
 router = APIRouter()
 
@@ -70,7 +70,7 @@ async def upload_document_to_project(
 
 @router.get(
     "/{project_id}/documents",
-    response_model=List[DocumentResponse],
+    response_model=list[DocumentResponse],
     status_code=status.HTTP_200_OK,
     summary="List Project Documents",
     description="Retrieve all document metadata records belonging to the research project, ordered newest first.",
@@ -78,7 +78,7 @@ async def upload_document_to_project(
 async def list_project_documents(
     project_id: uuid.UUID,
     session: AsyncSession = Depends(get_db),
-) -> List[DocumentResponse]:
+) -> list[DocumentResponse]:
     """List document metadata for a project workspace."""
     docs = await get_documents_by_project(session=session, project_id=project_id)
     return [DocumentResponse.model_validate(d) for d in docs]
@@ -216,7 +216,7 @@ async def chunk_project_document(
 
 @router.get(
     "/{project_id}/documents/{document_id}/chunks",
-    response_model=List[DocumentChunkResponse],
+    response_model=list[DocumentChunkResponse],
     status_code=status.HTTP_200_OK,
     summary="Get Document Chunks",
     description="Retrieve all sequential structured text chunks generated for this document.",
@@ -227,7 +227,7 @@ async def get_document_chunks(
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of chunks to return"),
     offset: int = Query(0, ge=0, description="Offset for pagination"),
     session: AsyncSession = Depends(get_db),
-) -> List[DocumentChunkResponse]:
+) -> list[DocumentChunkResponse]:
     """Fetch paginated sequential chunks of a document for verification and citation inspection."""
     # 1. Fetch document and verify existence
     doc = await get_document_by_id(
@@ -274,7 +274,7 @@ async def embed_project_document(
 
 @router.get(
     "/{project_id}/documents/{document_id}/embeddings",
-    response_model=List[EmbeddingMetadataResponse],
+    response_model=list[EmbeddingMetadataResponse],
     status_code=status.HTTP_200_OK,
     summary="Get Document Embeddings Metadata",
     description="Retrieve generation status and metadata for all chunks of this document.",
@@ -285,7 +285,7 @@ async def get_document_embeddings(
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of embedding metadata records to return"),
     offset: int = Query(0, ge=0, description="Offset for pagination"),
     session: AsyncSession = Depends(get_db),
-) -> List[EmbeddingMetadataResponse]:
+) -> list[EmbeddingMetadataResponse]:
     """Fetch paginated sequential chunk embedding metadata for debugging and RAG validation."""
     # 1. Fetch document and verify existence
     doc = await get_document_by_id(

@@ -1,21 +1,20 @@
-import logging
-import uuid
-import json
 import asyncio
+import json
+import logging
 import re
-from typing import Any, Dict, List, Optional, Set, Tuple
+import uuid
+from typing import Any
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
-from app.core.exceptions import BadRequestException
-from app.services.llm import LLMService
-from app.services.retrieval_pipeline import RetrievalPipeline
-from app.services.retrieval import RetrievalService
-from app.services.reranking import RerankingService
-from app.services.qdrant import QdrantService
 from app.services.embedding import EmbeddingService
+from app.services.llm import LLMService
 from app.services.prompt_builder import PromptBuilder
-from app.services.citation import SourceRegistry, CitationParser, CitationResolver
+from app.services.qdrant import QdrantService
+from app.services.reranking import RerankingService
+from app.services.retrieval import RetrievalService
+from app.services.retrieval_pipeline import RetrievalPipeline
 
 logger = logging.getLogger("ai_research_assistant.services.research")
 
@@ -39,7 +38,7 @@ class ControlledToolRegistry:
         return tool_name in cls.ALLOWED_TOOLS
 
     @classmethod
-    def get_tool_manifest(cls) -> Dict[str, str]:
+    def get_tool_manifest(cls) -> dict[str, str]:
         """Return allowed tool descriptions."""
         return cls.ALLOWED_TOOLS
 
@@ -50,7 +49,7 @@ class ResearchPlanner:
     def __init__(self, llm_service: LLMService) -> None:
         self.llm = llm_service
 
-    async def generate_plan(self, query: str, max_steps: int = 5) -> Dict[str, Any]:
+    async def generate_plan(self, query: str, max_steps: int = 5) -> dict[str, Any]:
         """Classify complexity and decompose the user query into research steps."""
         system_prompt = (
             "You are a structured research query planner.\n"
@@ -106,13 +105,13 @@ class ResearchPlanner:
                 ],
             }
 
-    def _validate_and_sanitize_dependencies(self, steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _validate_and_sanitize_dependencies(self, steps: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Validate dependencies to prevent cycles and clean up invalid references."""
         step_ids = {s["id"] for s in steps}
         sanitized = []
 
         # Build adjacency graph
-        adj: Dict[str, Set[str]] = {s["id"]: set() for s in steps}
+        adj: dict[str, set[str]] = {s["id"]: set() for s in steps}
         for s in steps:
             deps = s.get("depends_on", [])
             for d in deps:
@@ -120,25 +119,23 @@ class ResearchPlanner:
                     adj[s["id"]].add(d)
 
         # Detect cycles using DFS
-        visited: Dict[str, int] = {sid: 0 for sid in step_ids} # 0=unvisited, 1=visiting, 2=visited
+        visited: dict[str, int] = dict.fromkeys(step_ids, 0) # 0=unvisited, 1=visiting, 2=visited
 
         def has_cycle(u: str) -> bool:
             visited[u] = 1
             for v in adj[u]:
                 if visited[v] == 1:
                     return True
-                if visited[v] == 0:
-                    if has_cycle(v):
-                        return True
+                if visited[v] == 0 and has_cycle(v):
+                    return True
             visited[u] = 2
             return False
 
         has_any_cycle = False
         for sid in step_ids:
-            if visited[sid] == 0:
-                if has_cycle(sid):
-                    has_any_cycle = True
-                    break
+            if visited[sid] == 0 and has_cycle(sid):
+                has_any_cycle = True
+                break
 
         for s in steps:
             # If graph is cyclic, strip dependencies to execute safely
@@ -175,10 +172,10 @@ class ResearchOrchestrator:
         session: AsyncSession,
         project_id: uuid.UUID,
         query: str,
-        document_ids: Optional[List[uuid.UUID]] = None,
-        file_types: Optional[List[str]] = None,
+        document_ids: list[uuid.UUID] | None = None,
+        file_types: list[str] | None = None,
         is_streaming: bool = False,
-        event_queue: Optional[asyncio.Queue] = None,
+        event_queue: asyncio.Queue | None = None,
     ):
         """Execute the planning, step execution, and final synthesis phases of Stage 20."""
         settings = get_settings()
@@ -217,13 +214,13 @@ class ResearchOrchestrator:
             })
 
         # Evidence Registry mapping step_id to retrieved chunks list
-        evidence_registry: Dict[str, List[Dict[str, Any]]] = {}
-        step_results: Dict[str, str] = {} # Mapped summary results to resolve dependencies
-        completed_steps: Set[str] = set()
-        failed_steps: Set[str] = set()
+        evidence_registry: dict[str, list[dict[str, Any]]] = {}
+        step_results: dict[str, str] = {} # Mapped summary results to resolve dependencies
+        completed_steps: set[str] = set()
+        failed_steps: set[str] = set()
 
         # Define event emitter callback to pass to tasks
-        async def on_step_event(evt: Dict[str, Any]):
+        async def on_step_event(evt: dict[str, Any]):
             if is_streaming and event_queue:
                 await event_queue.put(evt)
 
@@ -259,7 +256,7 @@ class ResearchOrchestrator:
 
             res_list = await asyncio.gather(*tasks, return_exceptions=True)
 
-            for s, res in zip(ready_steps, res_list):
+            for s, res in zip(ready_steps, res_list, strict=False):
                 s_id = s["id"]
                 if isinstance(res, Exception):
                     logger.error(f"Research step {s_id} failed: {res}")
@@ -281,7 +278,7 @@ class ResearchOrchestrator:
         def est_tokens(text: str) -> int:
             return int(len(text.split()) * 1.3)
 
-        for s_id in step_results.keys():
+        for s_id in step_results:
             chunks = evidence_registry.get(s_id, [])
             for c in chunks:
                 uid = c.get("chunk_id") or c.get("id")
@@ -298,14 +295,14 @@ class ResearchOrchestrator:
         self,
         session: AsyncSession,
         project_id: uuid.UUID,
-        step: Dict[str, Any],
-        step_results: Dict[str, str],
-        document_ids: Optional[List[uuid.UUID]] = None,
-        file_types: Optional[List[str]] = None,
-        on_event: Optional[Any] = None,
+        step: dict[str, Any],
+        step_results: dict[str, str],
+        document_ids: list[uuid.UUID] | None = None,
+        file_types: list[str] | None = None,
+        on_event: Any | None = None,
         total_steps: int = 1,
         step_num: int = 1,
-    ) -> Tuple[List[Dict[str, Any]], str]:
+    ) -> tuple[list[dict[str, Any]], str]:
         """Execute a single step retrieval, resolving dependencies if present."""
         s_id = step["id"]
         question = step["question"]

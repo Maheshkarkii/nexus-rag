@@ -1,11 +1,12 @@
 import logging
 import uuid
-from typing import Any, Dict, List, Optional
+from typing import Any
+
+from qdrant_client.http import models as qmodels
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from qdrant_client.http import models as qmodels
 
-from app.core.exceptions import BadRequestException, NotFoundException
+from app.core.exceptions import BadRequestException
 from app.db.models.document import Document
 from app.services.embedding import EmbeddingService
 from app.services.qdrant import QdrantService
@@ -24,10 +25,10 @@ class RetrievalService:
         qdrant_service: QdrantService,
         embedding_service: EmbeddingService,
         top_k: int = 5,
-        score_threshold: Optional[float] = 0.0,
-        document_ids: Optional[List[uuid.UUID]] = None,
-        file_types: Optional[List[str]] = None,
-    ) -> List[Dict[str, Any]]:
+        score_threshold: float | None = 0.0,
+        document_ids: list[uuid.UUID] | None = None,
+        file_types: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
         """Run similarity queries against Qdrant, scoped strictly to project_id and document/file-type parameters."""
         # 1. Input query string verification
         if not query or not query.strip():

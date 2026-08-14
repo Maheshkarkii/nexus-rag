@@ -1,7 +1,8 @@
 """Common Pydantic data schemas and standardized response models."""
 
-from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from datetime import UTC, datetime
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -20,7 +21,7 @@ class DependencyCheck(BaseModel):
 
     name: str = Field(..., description="Name of the evaluated component or dependency")
     status: str = Field(..., description="Component state (e.g. ready, unconfigured, pending)")
-    details: Optional[str] = Field(
+    details: str | None = Field(
         default=None,
         description="Informational message regarding check status or stage limitation",
     )
@@ -45,10 +46,10 @@ class ReadinessResponse(BaseModel):
         examples=["0.1.0"],
     )
     timestamp: str = Field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat(),
+        default_factory=lambda: datetime.now(UTC).isoformat(),
         description="UTC timestamp of readiness evaluation",
     )
-    checks: Dict[str, DependencyCheck] = Field(
+    checks: dict[str, DependencyCheck] = Field(
         default_factory=dict,
         description="Subsystem check results",
     )
@@ -59,7 +60,7 @@ class ErrorDetail(BaseModel):
 
     code: str = Field(..., description="Machine-readable error classification code")
     message: str = Field(..., description="Human-readable explanation of the error")
-    details: Optional[Any] = Field(
+    details: Any | None = Field(
         default=None,
         description="Optional granular error metadata or validation field details",
     )

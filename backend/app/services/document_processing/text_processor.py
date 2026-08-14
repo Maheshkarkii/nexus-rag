@@ -2,6 +2,7 @@
 
 import logging
 from pathlib import Path
+
 from app.db.models.document import Document
 from app.services.document_processing.base import BaseDocumentProcessor, ExtractionResult
 

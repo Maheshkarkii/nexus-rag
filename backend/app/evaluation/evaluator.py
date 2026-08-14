@@ -1,8 +1,8 @@
-import logging
 import json
-import time
+import logging
 import os
-from typing import Any, Dict, List, Optional, Set
+import time
+from typing import Any
 
 from app.core.observability import BenchmarkEvaluator, GroundednessEvaluator
 
@@ -13,7 +13,7 @@ class RAGEvaluator:
     """Evaluates RAG pipeline quality across golden benchmark datasets, drift detection, and experiment tracking."""
 
     @staticmethod
-    def detect_quality_drift(baseline_results: Dict[str, Any], current_results: Dict[str, Any], threshold_percent: float = 5.0) -> Dict[str, Any]:
+    def detect_quality_drift(baseline_results: dict[str, Any], current_results: dict[str, Any], threshold_percent: float = 5.0) -> dict[str, Any]:
         """Compare current benchmark results against baseline metrics to detect quality drift."""
         base_pass = baseline_results.get("pass_rate_percent", 100.0)
         curr_pass = current_results.get("pass_rate_percent", 100.0)
@@ -34,29 +34,29 @@ class RAGEvaluator:
             "recommendation": "Review recent retrieval or prompt configuration changes." if has_drift else "Baseline stability maintained.",
         }
 
-    def __init__(self, dataset_path: Optional[str] = None) -> None:
+    def __init__(self, dataset_path: str | None = None) -> None:
         if not dataset_path:
             base_dir = os.path.dirname(__file__)
             dataset_path = os.path.join(base_dir, "golden_dataset.json")
         
         self.dataset_path = dataset_path
-        self.test_cases: List[Dict[str, Any]] = []
+        self.test_cases: list[dict[str, Any]] = []
         self._load_dataset()
 
     def _load_dataset(self) -> None:
         if os.path.exists(self.dataset_path):
-            with open(self.dataset_path, "r", encoding="utf-8") as f:
+            with open(self.dataset_path, encoding="utf-8") as f:
                 self.test_cases = json.load(f)
         else:
             logger.warning(f"Golden dataset not found at '{self.dataset_path}'.")
 
     def evaluate_test_case(
         self,
-        test_case: Dict[str, Any],
-        retrieved_chunks: List[Dict[str, Any]],
+        test_case: dict[str, Any],
+        retrieved_chunks: list[dict[str, Any]],
         generated_answer: str,
         latency_ms: float = 0.0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Evaluate a single test case against retrieval, generation, and citation quality standards."""
         expected_sources = test_case.get("expected_sources", [])
         is_answerable = test_case.get("is_answerable", True)
@@ -112,7 +112,7 @@ class RAGEvaluator:
             ),
         }
 
-    def evaluate_all(self, mock_runner: Optional[Any] = None) -> Dict[str, Any]:
+    def evaluate_all(self, mock_runner: Any | None = None) -> dict[str, Any]:
         """Run full evaluation suite across all golden dataset cases."""
         results = []
         start_time = time.time()

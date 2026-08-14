@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from app.services.llm import LLMService
 
@@ -11,7 +11,7 @@ class ConversationQueryRewriter:
 
     async def rewrite(
         self,
-        messages: List[Dict[str, Any]],
+        messages: list[dict[str, Any]],
         current_query: str,
         llm_service: LLMService,
     ) -> str:
@@ -64,7 +64,7 @@ class ConversationQueryRewriter:
             logger.error(f"Query rewriter LLM call failed: {exc}. Falling back to original query.")
             return current_query.strip()
 
-    def classify_intent(self, query: str, history: Optional[List[Dict[str, Any]]] = None) -> str:
+    def classify_intent(self, query: str, history: list[dict[str, Any]] | None = None) -> str:
         """Classify conversational query intent."""
         q_lower = query.strip().lower()
 
@@ -85,9 +85,7 @@ class ConversationQueryRewriter:
         if intent == "general_conversation":
             return False
         q_lower = query.strip().lower()
-        if len(q_lower.split()) <= 2 and any(w in q_lower for w in ["thanks", "ok", "okay", "got it", "cool"]):
-            return False
-        return True
+        return not (len(q_lower.split()) <= 2 and any(w in q_lower for w in ["thanks", "ok", "okay", "got it", "cool"]))
 
 
 # Singleton rewriter instance

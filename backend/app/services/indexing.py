@@ -1,19 +1,19 @@
 import logging
-from typing import Any, Dict
 import uuid
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Any
+
 from qdrant_client.http import models as qmodels
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
-from app.core.exceptions import NotFoundException, BadRequestException
+from app.core.exceptions import BadRequestException, NotFoundException
 from app.db.base import utc_now
 from app.db.models.document import Document
 from app.db.models.document_chunk import DocumentChunk
 from app.db.models.embedding import ChunkEmbedding
-from app.services.qdrant import QdrantService
 from app.services.embedding import EmbeddingService
+from app.services.qdrant import QdrantService
 
 logger = logging.getLogger("ai_research_assistant.services.indexing")
 
@@ -28,7 +28,7 @@ class VectorIndexingService:
         document_id: uuid.UUID,
         qdrant_service: QdrantService,
         embedding_service: EmbeddingService,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Verify embeddings exist, match vector dimensions, build payloads, and batch index to Qdrant."""
         # 1. Fetch document and verify existence
         doc_res = await session.execute(

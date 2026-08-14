@@ -1,6 +1,7 @@
 import uuid
-from typing import Any, Dict
-from fastapi import APIRouter, HTTPException, status, Depends
+from typing import Any
+
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.services.jobs import default_job_manager
@@ -19,7 +20,7 @@ class JobStatusResponse(BaseModel):
     updated_at: float
     error_message: str | None = None
     retries: int
-    result: Dict[str, Any] | None = None
+    result: dict[str, Any] | None = None
 
 
 @router.get(

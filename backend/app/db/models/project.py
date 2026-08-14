@@ -1,13 +1,16 @@
 """SQLAlchemy model for research projects and workspaces."""
 
-from typing import List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
+
 from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db.base import BaseModel
 
 if TYPE_CHECKING:
-    from app.db.models.document import Document
     from app.db.models.conversation import Conversation
+    from app.db.models.document import Document
+    from app.db.models.report import Report
 
 
 class Project(BaseModel):
@@ -21,14 +24,14 @@ class Project(BaseModel):
         index=True,
         doc="User-facing title or name of the research project workspace",
     )
-    description: Mapped[Optional[str]] = mapped_column(
+    description: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
         doc="Optional detailed description or objective of the research project",
     )
 
     # Relationships
-    documents: Mapped[List["Document"]] = relationship(
+    documents: Mapped[list["Document"]] = relationship(
         "Document",
         back_populates="project",
         cascade="all, delete-orphan",
@@ -36,7 +39,7 @@ class Project(BaseModel):
         doc="Collection of uploaded documents belonging to this research workspace",
     )
 
-    conversations: Mapped[List["Conversation"]] = relationship(
+    conversations: Mapped[list["Conversation"]] = relationship(
         "Conversation",
         back_populates="project",
         cascade="all, delete-orphan",
@@ -44,7 +47,7 @@ class Project(BaseModel):
         doc="Collection of active research sessions belonging to this project workspace",
     )
 
-    reports: Mapped[List["Report"]] = relationship(
+    reports: Mapped[list["Report"]] = relationship(
         "Report",
         back_populates="project",
         cascade="all, delete-orphan",

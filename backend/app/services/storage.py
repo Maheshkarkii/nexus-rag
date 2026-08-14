@@ -1,11 +1,12 @@
 """Local file storage service abstraction with streaming and path safety guarantees."""
 
 import logging
-from pathlib import Path
-from typing import Optional, Tuple
 import uuid
+from pathlib import Path
+
 import aiofiles
 from fastapi import UploadFile
+
 from app.core.config import get_settings
 from app.core.exceptions import BadRequestException
 
@@ -17,7 +18,7 @@ CHUNK_SIZE = 64 * 1024  # 64 KB streaming buffer
 class StorageService:
     """Manages file storage operations organized by project workspace with path security."""
 
-    def __init__(self, storage_root: Optional[Path] = None) -> None:
+    def __init__(self, storage_root: Path | None = None) -> None:
         settings = get_settings()
         self.storage_root = (storage_root or settings.storage_directory).resolve()
         self.storage_root.mkdir(parents=True, exist_ok=True)
@@ -43,8 +44,8 @@ class StorageService:
         project_id: uuid.UUID,
         upload_file: UploadFile,
         stored_filename: str,
-        max_size_bytes: Optional[int] = None,
-    ) -> Tuple[str, int]:
+        max_size_bytes: int | None = None,
+    ) -> tuple[str, int]:
         """Stream an uploaded file to disk in chunks, enforcing max file size limits."""
         settings = get_settings()
         limit_bytes = max_size_bytes or settings.max_upload_size_bytes

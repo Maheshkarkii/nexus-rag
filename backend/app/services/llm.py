@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+
 from openai import AsyncOpenAI
 
 from app.core.config import get_settings
@@ -12,12 +12,12 @@ class LLMService:
 
     def __init__(
         self,
-        provider: Optional[str] = None,
-        model_name: Optional[str] = None,
-        api_key: Optional[str] = None,
-        temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
-        timeout: Optional[int] = None,
+        provider: str | None = None,
+        model_name: str | None = None,
+        api_key: str | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        timeout: int | None = None,
     ) -> None:
         settings = get_settings()
         self.provider = provider or settings.LLM_PROVIDER
@@ -26,7 +26,7 @@ class LLMService:
         self.temperature = temperature if temperature is not None else settings.LLM_TEMPERATURE
         self.max_tokens = max_tokens or settings.LLM_MAX_OUTPUT_TOKENS
         self.timeout = timeout or settings.LLM_TIMEOUT
-        self._client: Optional[AsyncOpenAI] = None
+        self._client: AsyncOpenAI | None = None
 
     def _get_client(self) -> AsyncOpenAI:
         """Lazily initialize the AsyncOpenAI client when needed."""

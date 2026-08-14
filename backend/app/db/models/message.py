@@ -1,7 +1,9 @@
-from typing import Optional, TYPE_CHECKING
 import uuid
-from sqlalchemy import ForeignKey, String, Text, JSON
+from typing import TYPE_CHECKING
+
+from sqlalchemy import JSON, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db.base import BaseModel
 
 if TYPE_CHECKING:
@@ -26,7 +28,7 @@ class Message(BaseModel):
         Text,
         nullable=False,
     )
-    metadata_json: Mapped[Optional[dict]] = mapped_column(
+    metadata_json: Mapped[dict | None] = mapped_column(
         JSON,
         nullable=True,
         doc="Optional metadata containing sources, citations, model configurations, and latency metrics",

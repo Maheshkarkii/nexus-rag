@@ -3,17 +3,18 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any, List
+from typing import Any
+
 from app.db.models.document import Document
 from app.services.document_processing.base import BaseDocumentProcessor, ExtractionResult
 
 logger = logging.getLogger("ai_research_assistant.processors.json")
 
 
-def format_json_hierarchy(data: Any, indent_level: int = 0) -> List[str]:
+def format_json_hierarchy(data: Any, indent_level: int = 0) -> list[str]:
     """Recursively convert nested JSON structures into deterministic human-readable text."""
     prefix = "  " * indent_level
-    lines: List[str] = []
+    lines: list[str] = []
 
     if isinstance(data, dict):
         if not data:

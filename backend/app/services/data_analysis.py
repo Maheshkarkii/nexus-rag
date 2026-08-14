@@ -1,12 +1,13 @@
-import logging
 import json
-import re
+import logging
 import os
+import re
 import uuid
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
+
 import pandas as pd
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.db.models.document import Document
@@ -37,7 +38,7 @@ class DataAnalysisPlanner:
     def __init__(self, llm_service: LLMService) -> None:
         self.llm = llm_service
 
-    async def plan(self, query: str, dataset_schemas: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def plan(self, query: str, dataset_schemas: list[dict[str, Any]]) -> dict[str, Any]:
         """Analyze user query against available dataset schemas and generate structured AnalysisPlan."""
         if not dataset_schemas:
             return {"requires_analysis": False}
@@ -101,9 +102,8 @@ class DataAnalysisPlanner:
             # Validate filters
             valid_filters = []
             for f in plan.get("filters", []):
-                if isinstance(f, dict) and "column" in f and "operator" in f and "value" in f:
-                    if f["operator"] in self.ALLOWED_OPERATORS:
-                        valid_filters.append(f)
+                if isinstance(f, dict) and "column" in f and "operator" in f and "value" in f and f["operator"] in self.ALLOWED_OPERATORS:
+                    valid_filters.append(f)
             plan["filters"] = valid_filters
 
             return plan
@@ -117,7 +117,7 @@ class DataAnalysisEngine:
     """Executes deterministic pandas computations based strictly on validated AnalysisPlan objects."""
 
     @staticmethod
-    def load_dataframe(storage_path: str, file_ext: str, sheet_name: Optional[str] = None) -> pd.DataFrame:
+    def load_dataframe(storage_path: str, file_ext: str, sheet_name: str | None = None) -> pd.DataFrame:
         """Safely load structured file into pandas DataFrame."""
         if not os.path.exists(storage_path):
             raise FileNotFoundError(f"File at '{storage_path}' does not exist.")
@@ -135,7 +135,7 @@ class DataAnalysisEngine:
             raise ValueError(f"Unsupported file format '{ext}' for deterministic analysis.")
 
     @classmethod
-    def execute_plan(cls, df: pd.DataFrame, plan: Dict[str, Any], filename: str) -> Dict[str, Any]:
+    def execute_plan(cls, df: pd.DataFrame, plan: dict[str, Any], filename: str) -> dict[str, Any]:
         """Execute validated AnalysisPlan deterministically on DataFrame."""
         settings = get_settings()
         
@@ -146,7 +146,7 @@ class DataAnalysisEngine:
         # Case-insensitive column resolution
         col_map = {str(c).lower().strip(): str(c) for c in df.columns}
 
-        def resolve_col(target: Optional[str]) -> Optional[str]:
+        def resolve_col(target: str | None) -> str | None:
             if not target:
                 return None
             target_clean = str(target).lower().strip()
@@ -219,10 +219,7 @@ class DataAnalysisEngine:
             if not target_col or target_col not in filtered_df.columns:
                 # Fallback to first numeric column
                 num_cols = filtered_df.select_dtypes(include=["number"]).columns
-                if len(num_cols) > 0:
-                    target_col = num_cols[0]
-                else:
-                    target_col = filtered_df.columns[0]
+                target_col = num_cols[0] if len(num_cols) > 0 else filtered_df.columns[0]
 
             series = filtered_df[target_col].dropna()
             if op == "mean":
@@ -293,8 +290,8 @@ class DataAnalysisService:
         session: AsyncSession,
         project_id: uuid.UUID,
         query: str,
-        document_ids: Optional[List[uuid.UUID]] = None,
-    ) -> Optional[Dict[str, Any]]:
+        document_ids: list[uuid.UUID] | None = None,
+    ) -> dict[str, Any] | None:
         """Attempt to perform deterministic data analysis for the user query."""
         
         # 1. Discover structured dataset documents in project
@@ -313,7 +310,7 @@ class DataAnalysisService:
 
         # Build schema summary list
         dataset_schemas = []
-        doc_map: Dict[str, Document] = {}
+        doc_map: dict[str, Document] = {}
 
         for d in structured_docs:
             meta = d.extracted_metadata or {}

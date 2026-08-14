@@ -1,13 +1,14 @@
 import logging
-from typing import List, Optional, Dict, Any
 import uuid
+from typing import Any
+
 import torch
 from sentence_transformers import SentenceTransformer
-from sqlalchemy import select, delete
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
-from app.core.exceptions import NotFoundException, BadRequestException
+from app.core.exceptions import BadRequestException, NotFoundException
 from app.db.models.document import Document
 from app.db.models.document_chunk import DocumentChunk
 from app.db.models.embedding import ChunkEmbedding
@@ -20,19 +21,19 @@ class EmbeddingService:
 
     def __init__(
         self,
-        model_name: Optional[str] = None,
-        device: Optional[str] = None,
-        batch_size: Optional[int] = None,
-        normalize: Optional[bool] = None,
+        model_name: str | None = None,
+        device: str | None = None,
+        batch_size: int | None = None,
+        normalize: bool | None = None,
     ) -> None:
         settings = get_settings()
         self.model_name = model_name or settings.EMBEDDING_MODEL_NAME
         self.config_device = device or settings.EMBEDDING_DEVICE
         self.batch_size = batch_size or settings.EMBEDDING_BATCH_SIZE
         self.normalize = normalize if normalize is not None else settings.EMBEDDING_NORMALIZE
-        self._model: Optional[SentenceTransformer] = None
-        self._dimension: Optional[int] = None
-        self._resolved_device: Optional[str] = None
+        self._model: SentenceTransformer | None = None
+        self._dimension: int | None = None
+        self._resolved_device: str | None = None
 
     def _resolve_device(self) -> str:
         """Determine and validate execution hardware target (CPU / CUDA / Auto)."""
@@ -75,7 +76,7 @@ class EmbeddingService:
         self.load_model()
         return self._dimension
 
-    def embed_text(self, text: str) -> List[float]:
+    def embed_text(self, text: str) -> list[float]:
         """Convert a single string into a semantic vector representation."""
         if not text or not text.strip():
             logger.warning("Empty or whitespace-only text passed to embed_text; returning empty vector.")
@@ -90,7 +91,7 @@ class EmbeddingService:
         )
         return vector.tolist()
 
-    def embed_batch(self, texts: List[str]) -> List[List[float]]:
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
         """Convert a batch of strings into semantic vector representations in parallel."""
         # Defense validation
         valid_texts = []
@@ -117,7 +118,7 @@ class EmbeddingService:
         session: AsyncSession,
         project_id: uuid.UUID,
         document_id: uuid.UUID,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Orchestrate chunk retrieval, model execution, vector dimension validation, and persistence."""
         # 1. Fetch document and verify existence
         doc_res = await session.execute(
@@ -172,7 +173,7 @@ class EmbeddingService:
 
         # 7. Persist embeddings in completed state
         embeddings_to_save = []
-        for chunk, vector in zip(chunks, vectors):
+        for chunk, vector in zip(chunks, vectors, strict=False):
             emb = ChunkEmbedding(
                 id=uuid.uuid4(),
                 chunk_id=chunk.id,

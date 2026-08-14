@@ -1,8 +1,9 @@
 import logging
-import time
 import os
 import shutil
-from typing import Any, Dict, List, Optional
+import time
+from typing import Any
+
 from app.core.config import get_settings
 from app.core.observability import default_metrics_collector
 
@@ -13,7 +14,7 @@ class AlertManager:
     """Evaluates system telemetry and triggers operational alerts based on configurable thresholds."""
 
     @staticmethod
-    def evaluate_alerts(metrics_summary: Dict[str, Any], queue_depth: int = 0) -> List[Dict[str, Any]]:
+    def evaluate_alerts(metrics_summary: dict[str, Any], queue_depth: int = 0) -> list[dict[str, Any]]:
         """Evaluate operational health metrics and return active alert items."""
         alerts = []
         req_count = metrics_summary.get("request_count", 0)
@@ -78,7 +79,7 @@ class SLICalculator:
     """Calculates Service Level Indicators (SLIs) and Service Level Objectives (SLOs)."""
 
     @staticmethod
-    def calculate_slos(metrics_summary: Dict[str, Any]) -> Dict[str, Any]:
+    def calculate_slos(metrics_summary: dict[str, Any]) -> dict[str, Any]:
         """Compute system availability SLO, latency compliance, and remaining error budget."""
         req_count = metrics_summary.get("request_count", 0)
         errors = metrics_summary.get("error_counts", {})
@@ -123,7 +124,7 @@ class ReliabilityDashboardService:
     """Assembles live operational telemetry into executive reliability dashboard data."""
 
     @classmethod
-    def get_dashboard_payload(cls) -> Dict[str, Any]:
+    def get_dashboard_payload(cls) -> dict[str, Any]:
         """Assemble metrics, alerts, SLIs/SLOs, and component health for dashboard display."""
         metrics_summary = default_metrics_collector.get_summary()
         alerts = AlertManager.evaluate_alerts(metrics_summary)
