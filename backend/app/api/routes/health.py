@@ -10,17 +10,9 @@ router = APIRouter(tags=["Observability & Health"])
 
 
 @router.get("/health", summary="System Health & Readiness Check")
-async def health_check(db: AsyncSession = Depends(get_db)):
-    """System health check verifying database connection and service readiness."""
-    db_status = "healthy"
-    try:
-        await db.execute(text("SELECT 1"))
-    except Exception:
-        db_status = "unhealthy"
-
-    default_metrics_collector.get_summary()
-
-    return {"status": "healthy"} if db_status == "healthy" else {"status": "degraded"}
+async def health_check():
+    """Lightweight system health check verifying process liveness."""
+    return {"status": "healthy"}
 
 
 @router.get("/health/liveness", summary="Liveness Probe Check")

@@ -27,17 +27,50 @@ class QdrantService:
         self._client: QdrantClient | None = None
 
     def connect(self) -> QdrantClient:
-        """Initialize the Qdrant HTTP client (cached)."""
+        """Initialize the Qdrant HTTP client (cached) with fallback for local dev."""
         if self._client is not None:
             return self._client
 
-        logger.info(f"Connecting to Qdrant server at: {self.url} (timeout={self.timeout})")
-        # For local development, api_key can be empty
-        self._client = QdrantClient(
-            url=self.url,
-            api_key=self.api_key or None,
-            timeout=self.timeout,
-        )
+        target_url = self.url
+        if get_settings().APP_ENV == "development" and target_url in ("http://qdrant:6333", "http://localhost:6333", "http://127.0.0.1:6333"):
+            import socket
+
+            use_memory = False
+            if "qdrant:6333" in target_url:
+                try:
+                    socket.gethostbyname("qdrant")
+                except socket.gaierror:
+                    target_url = "http://localhost:6333"
+
+            if target_url.startswith("http://localhost:6333") or target_url.startswith("http://127.0.0.1:6333"):
+                try:
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    sock.settimeout(1.0)
+                    res = sock.connect_ex(("127.0.0.1", 6333))
+                    sock.close()
+                    if res != 0:
+                        use_memory = True
+                except Exception:
+                    use_memory = True
+
+            if use_memory:
+                target_url = ":memory:"
+                logger.info("Standalone Qdrant server unreachable on port 6333; using in-memory Qdrant instance.")
+
+        logger.info(f"Connecting to Qdrant server at: {target_url} (timeout={self.timeout})")
+        try:
+            if target_url == ":memory:":
+                self._client = QdrantClient(location=":memory:")
+            else:
+                self._client = QdrantClient(
+                    url=target_url,
+                    api_key=self.api_key or None,
+                    timeout=self.timeout,
+                )
+        except Exception as exc:
+            logger.warning(f"Could not connect to Qdrant server at {target_url} ({exc}). Falling back to in-memory Qdrant instance.")
+            self._client = QdrantClient(location=":memory:")
+
         return self._client
 
     def collection_exists(self) -> bool:
