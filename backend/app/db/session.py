@@ -17,15 +17,25 @@ from app.core.config import get_settings
 logger = logging.getLogger("ai_research_assistant.db")
 settings = get_settings()
 
-# ==============================================================================
-# Database Engine Initialization
-# ==============================================================================
+database_url = settings.async_database_url
+
+# Handle local standalone development where postgres hostname isn't in local DNS/hosts
+if "postgres:5432" in database_url and settings.APP_ENV == "development":
+    import socket
+
+    try:
+        socket.gethostbyname("postgres")
+    except socket.gaierror:
+        # Fallback to local SQLite async database when running python app.main without Docker
+        database_url = "sqlite+aiosqlite:///./local_dev.db"
+        logger.info("Local Postgres host 'postgres' unresolvable; defaulting to local SQLite database.")
+
 engine_kwargs = {
     "echo": settings.DEBUG and settings.APP_ENV == "development",
     "future": True,
 }
 
-if "sqlite" not in settings.async_database_url:
+if "sqlite" not in database_url:
     engine_kwargs.update(
         {
             "pool_pre_ping": True,
@@ -36,7 +46,7 @@ if "sqlite" not in settings.async_database_url:
     )
 
 engine: AsyncEngine = create_async_engine(
-    settings.async_database_url,
+    database_url,
     **engine_kwargs,
 )
 

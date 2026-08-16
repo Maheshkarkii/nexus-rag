@@ -24,6 +24,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     )
     logger.info(f"API v1 routes mounted at prefix: {settings.API_V1_STR}")
     logger.info(f"Allowed CORS origins: {settings.BACKEND_CORS_ORIGINS}")
+
+    # Initialize tables for local sqlite dev mode
+    from app.db.base import Base
+    from app.db.session import engine
+
+    if "sqlite" in str(engine.url):
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("Initialized local SQLite database schema tables.")
+
     yield
     logger.info(f"Shutting down {settings.APP_NAME} gracefully...")
 

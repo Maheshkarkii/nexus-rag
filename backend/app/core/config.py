@@ -79,12 +79,18 @@ class Settings(BaseSettings):
 
     @property
     def async_database_url(self) -> str:
-        """Construct the async database URL for AsyncPG / SQLAlchemy."""
+        """Construct the async database URL for AsyncPG / SQLAlchemy with fallback for local dev."""
         if self.DATABASE_URL and self.DATABASE_URL.strip():
             url = self.DATABASE_URL.strip()
             if url.startswith("postgresql://"):
                 return url.replace("postgresql://", "postgresql+asyncpg://", 1)
             return url
+        # In non-Docker local dev without a postgres container running, fallback to SQLite
+        if self.POSTGRES_SERVER == "localhost" or self.POSTGRES_SERVER == "127.0.0.1":
+            return (
+                f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
+                f"@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+            )
         return (
             f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
             f"@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
