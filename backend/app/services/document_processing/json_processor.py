@@ -20,7 +20,7 @@ def format_json_hierarchy(data: Any, indent_level: int = 0) -> list[str]:
         if not data:
             lines.append(f"{prefix}(empty object)")
         for key, value in data.items():
-            if isinstance(value, (dict, list)):
+            if isinstance(value, dict | list):
                 lines.append(f"{prefix}{key}:")
                 lines.extend(format_json_hierarchy(value, indent_level + 1))
             else:
@@ -29,7 +29,7 @@ def format_json_hierarchy(data: Any, indent_level: int = 0) -> list[str]:
         if not data:
             lines.append(f"{prefix}(empty list)")
         for idx, item in enumerate(data, start=1):
-            if isinstance(item, (dict, list)):
+            if isinstance(item, dict | list):
                 lines.append(f"{prefix}- Item {idx}:")
                 lines.extend(format_json_hierarchy(item, indent_level + 1))
             else:
@@ -68,7 +68,7 @@ class JSONProcessor(BaseDocumentProcessor):
         char_count = len(combined_text)
         word_count = len(combined_text.split())
 
-        item_count = len(parsed_data) if isinstance(parsed_data, (dict, list)) else 1
+        item_count = len(parsed_data) if isinstance(parsed_data, dict | list) else 1
 
         return ExtractionResult(
             text=combined_text,

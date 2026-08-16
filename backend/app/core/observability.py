@@ -60,7 +60,7 @@ class RAGMetricsCollector:
         """Safely record a request event without throwing exceptions."""
         try:
             self.request_count += 1
-            if isinstance(latency_ms, (int, float)):
+            if isinstance(latency_ms, int | float):
                 self.latencies_ms.append(float(latency_ms))
             if isinstance(tokens, int) and tokens > 0:
                 self.token_counts.append(tokens)
@@ -71,7 +71,7 @@ class RAGMetricsCollector:
 
     def get_summary(self) -> dict[str, Any]:
         """Compute latency percentiles (P50, P95) and aggregated counts."""
-        valid_lat = [float(x) for x in self.latencies_ms if isinstance(x, (int, float))]
+        valid_lat = [float(x) for x in self.latencies_ms if isinstance(x, int | float)]
         if not valid_lat:
             return {
                 "request_count": self.request_count,
