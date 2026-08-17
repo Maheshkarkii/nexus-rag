@@ -355,7 +355,16 @@ export default function ProjectWorkspacePage() {
         }),
       });
 
-      if (!response.ok) throw new Error("Ask query stream request failed.");
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Ask query stream HTTP error:", {
+          status: response.status,
+          statusText: response.statusText,
+          url: response.url,
+          body: errorText,
+        });
+        throw new Error(`Ask query stream request failed (${response.status}: ${response.statusText}). Body: ${errorText}`);
+      }
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();

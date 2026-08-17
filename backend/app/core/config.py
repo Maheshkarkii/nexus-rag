@@ -196,7 +196,7 @@ class Settings(BaseSettings):
     LEXICAL_WEIGHT: float = 0.3
     INITIAL_RETRIEVAL_K: int = 50
     RERANK_K: int = 20
-    MIN_RELEVANCE_THRESHOLD: float = 0.25
+    MIN_RELEVANCE_THRESHOLD: float = -10.0
     ENABLE_RETRIEVAL_CACHE: bool = True
 
     # Stage 26 Production Scalability & Background Jobs settings
