@@ -1,4 +1,5 @@
 import logging
+import time
 import uuid
 from typing import Any
 
@@ -95,6 +96,7 @@ class ChunkingService:
             }
 
         # 3. Select strategy and chunk text
+        chunk_start = time.perf_counter()
         strategy = self.select_strategy(document.file_extension)
         raw_chunks = strategy.chunk(document.extracted_text, document, c_size, c_overlap)
 
@@ -135,6 +137,9 @@ class ChunkingService:
                 metadata_=chunk_metadata,
             )
             chunks_to_save.append(db_chunk)
+
+        chunk_ms = round((time.perf_counter() - chunk_start) * 1000, 2)
+        logger.info(f"[CHUNKING] Chunked doc {document_id} into {len(chunks_to_save)} chunks in {chunk_ms}ms ({total_chars} chars, {total_tokens} tokens)")
 
         # 5. Clear old chunks (supports reprocessing/re-chunking idempotency)
         # Using execute delete to be fast and safe

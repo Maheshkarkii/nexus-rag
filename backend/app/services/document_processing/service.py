@@ -71,7 +71,10 @@ class DocumentProcessingService:
             logger.info(f"Selected processor {processor.__class__.__name__} for doc {document_id}")
 
             # 6. Extract content
+            extract_start = time.perf_counter()
             extraction = await processor.extract(abs_file_path, document)
+            extract_ms = round((time.perf_counter() - extract_start) * 1000, 2)
+            logger.info(f"[PDF EXTRACTION] Extracted doc {document_id} in {extract_ms}ms ({len(extraction.text)} chars)")
 
             # 7. Normalize text
             normalized_text = normalize_extracted_text(extraction.text)
@@ -89,7 +92,7 @@ class DocumentProcessingService:
 
             duration_ms = round((time.perf_counter() - start_time) * 1000, 2)
             logger.info(
-                f"Successfully processed doc {document_id} in {duration_ms}ms "
+                f"[PDF EXTRACTION TOTAL] Successfully processed doc {document_id} in {duration_ms}ms "
                 f"({document.extracted_character_count} chars, {document.extracted_word_count} words)"
             )
 

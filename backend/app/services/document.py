@@ -1,6 +1,7 @@
 """Service and repository operations for research document ingestion and metadata lifecycle."""
 
 import logging
+import time
 import uuid
 from collections.abc import Sequence
 from pathlib import Path
@@ -59,13 +60,17 @@ async def create_document(
     stored_filename = f"{uuid.uuid4().hex}{ext}"
 
     # 4. Stream file to project storage directory
+    save_start = time.perf_counter()
     storage_path, file_size = await storage_service.save_file(
         project_id=project_id,
         upload_file=upload_file,
         stored_filename=stored_filename,
     )
+    save_ms = round((time.perf_counter() - save_start) * 1000, 2)
+    logger.info(f"[SAVE] Saved file '{original_filename}' ({file_size} bytes) to {storage_path} in {save_ms}ms")
 
     # 5. Persist document metadata in PostgreSQL with transactional compensation
+    db_start = time.perf_counter()
     doc = Document(
         project_id=project_id,
         original_filename=original_filename,
@@ -81,8 +86,9 @@ async def create_document(
     try:
         await session.commit()
         await session.refresh(doc)
+        db_ms = round((time.perf_counter() - db_start) * 1000, 2)
         logger.info(
-            f"Successfully ingested document '{original_filename}' (ID: {doc.id}) in project '{project_id}'"
+            f"[UPLOAD] Persisted document metadata '{original_filename}' (ID: {doc.id}) in DB in {db_ms}ms"
         )
         return doc
     except Exception as exc:

@@ -1,4 +1,5 @@
 import logging
+import time
 import uuid
 from typing import Any
 
@@ -132,21 +133,27 @@ class VectorIndexingService:
             # 6. Batch upsert to Qdrant
             settings = get_settings()
             batch_size = settings.QDRANT_UPSERT_BATCH_SIZE
-            logger.info(f"Upserting {len(points)} vector points in batches of {batch_size}...")
+            logger.info(f"[VECTOR STORE] Collection: '{qdrant_service.collection_name}'. Upserting {len(points)} vector points in batches of {batch_size}...")
 
+            insert_start = time.perf_counter()
             for i in range(0, len(points), batch_size):
                 batch = points[i : i + batch_size]
                 qdrant_service.upsert_points(batch)
+            insert_ms = round((time.perf_counter() - insert_start) * 1000, 2)
+            logger.info(f"[INSERT] Upserted {len(points)} vectors to Qdrant collection '{qdrant_service.collection_name}' in {insert_ms}ms")
 
             # 7. Update status to 'ready' and indexing_status to 'indexed'
+            status_start = time.perf_counter()
             document.status = "ready"
             document.indexing_status = "indexed"
             document.indexed_at = utc_now()
             document.indexing_error = None
             await session.commit()
+            status_ms = round((time.perf_counter() - status_start) * 1000, 2)
+            logger.info(f"[STATUS UPDATE] Document {document_id} status updated to READY in {status_ms}ms")
             
             duration = (utc_now() - start_time).total_seconds()
-            logger.info(f"Successfully indexed document {document_id} in {duration:.2f}s.")
+            logger.info(f"[INDEXING TOTAL] Successfully indexed document {document_id} in {duration:.2f}s.")
 
             return {
                 "document_id": document.id,
@@ -159,6 +166,7 @@ class VectorIndexingService:
         except Exception as exc:
             # 8. Compensate database status to 'failed'
             logger.error(f"Vector indexing failed for document {document_id}: {exc}")
+            document.status = "failed"
             document.indexing_status = "failed"
             document.indexing_error = str(exc)
             await session.commit()

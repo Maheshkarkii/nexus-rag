@@ -23,7 +23,7 @@ logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(levelname)s] - 
 async def test_in_memory_rag():
     async with async_session_factory() as session:
         # Get target document
-        stmt = select(Document).where(Document.status == "ready")
+        stmt = select(Document)
         res = await session.execute(stmt)
         docs = res.scalars().all()
         target_doc = docs[0]

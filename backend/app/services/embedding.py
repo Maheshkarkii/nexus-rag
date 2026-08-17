@@ -1,4 +1,5 @@
 import logging
+import time
 import uuid
 from typing import Any
 
@@ -159,6 +160,7 @@ class EmbeddingService:
         
         # 6. Generate embeddings and handle failures cleanly
         try:
+            embed_start = time.perf_counter()
             logger.info(f"Generating embeddings for {len(texts)} chunks of doc {document_id} using {self.model_name}")
             vectors = self.embed_batch(texts)
             
@@ -166,6 +168,9 @@ class EmbeddingService:
             for vec in vectors:
                 if len(vec) != dimension:
                     raise ValueError(f"Inference returned vector dimension {len(vec)}, expected {dimension}")
+
+            embed_ms = round((time.perf_counter() - embed_start) * 1000, 2)
+            logger.info(f"[EMBEDDING] Generated {len(vectors)} vectors (dim: {dimension}) for doc {document_id} in {embed_ms}ms")
                     
         except Exception as exc:
             logger.error(f"Embedding inference failed for document {document_id}: {exc}")
