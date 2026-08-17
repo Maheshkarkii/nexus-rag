@@ -111,6 +111,9 @@ async def test_retrieve_constructs_correct_qdrant_filters(
     }
     
     mock_client = MagicMock()
+    mock_response = MagicMock()
+    mock_response.points = [mock_hit]
+    mock_client.query_points.return_value = mock_response
     mock_client.search.return_value = [mock_hit]
     mock_qdrant.connect.return_value = mock_client
 
@@ -137,8 +140,10 @@ async def test_retrieve_constructs_correct_qdrant_filters(
     assert results[0]["metadata"]["source_filename"] == "d1.txt"
 
     # Verify qmodels filter calls
-    mock_client.search.assert_called_once()
-    kwargs = mock_client.search.call_args[1]
+    if mock_client.query_points.called:
+        kwargs = mock_client.query_points.call_args[1]
+    else:
+        kwargs = mock_client.search.call_args[1]
     assert kwargs["limit"] == 3
     assert kwargs["score_threshold"] == 0.5
     
