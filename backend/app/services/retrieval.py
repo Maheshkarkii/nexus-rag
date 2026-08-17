@@ -124,13 +124,23 @@ class RetrievalService:
                     logger.warning("Qdrant collection or connection unavailable for search.")
                     return []
             client = qdrant_service.connect()
-            search_results = client.search(
-                collection_name=qdrant_service.collection_name,
-                query_vector=query_vector,
-                query_filter=qfilter,
-                limit=top_k,
-                score_threshold=score_threshold if score_threshold and score_threshold > 0.0 else None,
-            )
+            if hasattr(client, "query_points"):
+                response = client.query_points(
+                    collection_name=qdrant_service.collection_name,
+                    query=query_vector,
+                    query_filter=qfilter,
+                    limit=top_k,
+                    score_threshold=score_threshold if score_threshold and score_threshold > 0.0 else None,
+                )
+                search_results = response.points
+            else:
+                search_results = client.search(
+                    collection_name=qdrant_service.collection_name,
+                    query_vector=query_vector,
+                    query_filter=qfilter,
+                    limit=top_k,
+                    score_threshold=score_threshold if score_threshold and score_threshold > 0.0 else None,
+                )
 
             # 6. Map results
             mapped_results = []
