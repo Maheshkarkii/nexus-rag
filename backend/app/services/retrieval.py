@@ -107,8 +107,8 @@ class RetrievalService:
             if not qdrant_service.health_check() or not qdrant_service.collection_exists():
                 if get_settings().APP_ENV == "development":
                     logger.info("Qdrant collection missing during local dev search. Attempting on-demand indexing...")
-                    from app.services.indexing import get_indexing_service
                     from app.services.embedding import get_embedding_service
+                    from app.services.indexing import get_indexing_service
                     idx_svc = get_indexing_service()
                     emb_svc = get_embedding_service()
                     if document_ids:
@@ -123,16 +123,14 @@ class RetrievalService:
                 if not qdrant_service.collection_exists():
                     logger.warning("Qdrant collection or connection unavailable for search.")
                     return []
-
             client = qdrant_service.connect()
-            response = client.query_points(
+            search_results = client.search(
                 collection_name=qdrant_service.collection_name,
-                query=query_vector,
+                query_vector=query_vector,
                 query_filter=qfilter,
                 limit=top_k,
                 score_threshold=score_threshold if score_threshold and score_threshold > 0.0 else None,
             )
-            search_results = response.points
 
             # 6. Map results
             mapped_results = []
