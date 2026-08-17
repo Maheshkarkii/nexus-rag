@@ -36,7 +36,7 @@ def test_process_txt_document(client: TestClient) -> None:
     proc_res = client.post(f"/api/v1/projects/{project_id}/documents/{doc_id}/process")
     assert proc_res.status_code == 200
     data = proc_res.json()
-    assert data["status"] == "ready"
+    assert data["status"] == "extracted"
     assert data["extracted_character_count"] > 0
     assert data["extracted_word_count"] > 0
     assert data["processed_at"] is not None
@@ -46,7 +46,7 @@ def test_process_txt_document(client: TestClient) -> None:
     assert content_res.status_code == 200
     c_data = content_res.json()
     assert "Self-attention allows the model" in c_data["extracted_text"]
-    assert c_data["status"] == "ready"
+    assert c_data["status"] == "extracted"
 
 
 # ------------------------------------------------------------------------------
@@ -65,7 +65,7 @@ def test_process_csv_document(client: TestClient) -> None:
 
     proc_res = client.post(f"/api/v1/projects/{project_id}/documents/{doc_id}/process")
     assert proc_res.status_code == 200
-    assert proc_res.json()["status"] == "ready"
+    assert proc_res.json()["status"] == "extracted"
 
     content_res = client.get(f"/api/v1/projects/{project_id}/documents/{doc_id}/content")
     assert content_res.status_code == 200
@@ -89,7 +89,7 @@ def test_process_json_document(client: TestClient) -> None:
 
     proc_res = client.post(f"/api/v1/projects/{project_id}/documents/{doc_id}/process")
     assert proc_res.status_code == 200
-    assert proc_res.json()["status"] == "ready"
+    assert proc_res.json()["status"] == "extracted"
 
     content_res = client.get(f"/api/v1/projects/{project_id}/documents/{doc_id}/content")
     assert "experiment: Transformer_v1" in content_res.json()["extracted_text"]
@@ -118,7 +118,7 @@ def test_process_docx_document(client: TestClient) -> None:
 
     proc_res = client.post(f"/api/v1/projects/{project_id}/documents/{doc_id}/process")
     assert proc_res.status_code == 200
-    assert proc_res.json()["status"] == "ready"
+    assert proc_res.json()["status"] == "extracted"
 
     content_res = client.get(f"/api/v1/projects/{project_id}/documents/{doc_id}/content")
     assert "## Methodology" in content_res.json()["extracted_text"]
@@ -149,7 +149,7 @@ def test_process_excel_document(client: TestClient) -> None:
 
     proc_res = client.post(f"/api/v1/projects/{project_id}/documents/{doc_id}/process")
     assert proc_res.status_code == 200
-    assert proc_res.json()["status"] == "ready"
+    assert proc_res.json()["status"] == "extracted"
 
     content_res = client.get(f"/api/v1/projects/{project_id}/documents/{doc_id}/content")
     assert "Sheet: Results" in content_res.json()["extracted_text"]
@@ -184,7 +184,7 @@ def test_process_pdf_document(client: TestClient) -> None:
 
     proc_res = client.post(f"/api/v1/projects/{project_id}/documents/{doc_id}/process")
     assert proc_res.status_code == 200
-    assert proc_res.json()["status"] == "ready"
+    assert proc_res.json()["status"] == "extracted"
 
     content_res = client.get(f"/api/v1/projects/{project_id}/documents/{doc_id}/content")
     assert "--- Page 1 ---" in content_res.json()["extracted_text"]
