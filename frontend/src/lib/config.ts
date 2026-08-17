@@ -12,7 +12,7 @@ export interface AppConfig {
 
 export const config: AppConfig = {
   appName: process.env.NEXT_PUBLIC_APP_NAME || "AI Research Assistant",
-  apiUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
+  apiUrl: process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000",
   isProduction: process.env.NODE_ENV === "production",
   version: "0.1.0",
 };
