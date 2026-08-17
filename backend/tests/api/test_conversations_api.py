@@ -1,13 +1,14 @@
 import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
+
 import httpx
 import pytest
 from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models.project import Project
 from app.db.models.conversation import Conversation
 from app.db.models.message import Message
+from app.db.models.project import Project
 
 
 @pytest.mark.asyncio
@@ -151,8 +152,8 @@ async def test_ask_endpoint_with_conversation(
     
     mock_openai.chat.completions.create = AsyncMock(return_value=mock_completion)
 
-    from app.services.qdrant import get_qdrant_service
     from app.main import app
+    from app.services.qdrant import get_qdrant_service
     app.dependency_overrides[get_qdrant_service] = lambda: mock_qdrant
 
     try:

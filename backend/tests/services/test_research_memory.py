@@ -1,11 +1,10 @@
 import uuid
-import pytest
 
 from app.services.research_memory import (
     ResearchFinding,
+    ResearchMemoryService,
     ResearchNote,
     SavedSource,
-    ResearchMemoryService,
 )
 
 

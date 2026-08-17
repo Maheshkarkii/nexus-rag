@@ -8,13 +8,12 @@ if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))
 
 from sqlalchemy import select
-from app.db.session import async_session_factory
+
 from app.db.models.document import Document
-from app.db.models.document_chunk import DocumentChunk
-from app.db.models.embedding import ChunkEmbedding
+from app.db.session import async_session_factory
 from app.services.embedding import get_embedding_service
-from app.services.qdrant import get_qdrant_service
 from app.services.indexing import get_indexing_service
+from app.services.qdrant import get_qdrant_service
 from app.services.retrieval import RetrievalService
 from app.services.retrieval_pipeline import get_retrieval_pipeline
 
@@ -56,9 +55,9 @@ async def test_in_memory_rag():
         ]
 
         for q in queries:
-            print(f"\n==================================================")
+            print("\n==================================================")
             print(f"QUERY: '{q}'")
-            print(f"==================================================")
+            print("==================================================")
             
             # Raw search
             raw_results = await retrieval_svc.retrieve(
@@ -73,7 +72,8 @@ async def test_in_memory_rag():
             print(f"A. Raw Vector Search (Scoped to Project): {len(raw_results)} chunks returned")
             for i, r in enumerate(raw_results[:3], 1):
                 print(f"   [{i}] Score: {r['score']:.4f} | Chunk ID: {r['chunk_id']}")
-                print(f"       Text snippet: {r['text'][:150]}...")
+                snippet = r['text'][:150].encode('ascii', 'ignore').decode('ascii')
+                print(f"       Text snippet: {snippet}...")
 
             # Filtered search
             filtered_results = await retrieval_svc.retrieve(
@@ -109,10 +109,10 @@ async def test_in_memory_rag():
                 b_score = r.get("bm25_score", 0.0)
                 rr_score = r.get("rerank_score", 0.0)
                 meta = r.get("metadata", {})
-                txt = r.get("text", "")
+                snippet = r.get("text", "")[:300].encode('ascii', 'ignore').decode('ascii')
                 print(f"   [{i}] Score: {score:.4f} (vector: {v_score:.4f}, bm25: {b_score:.4f}, rerank: {rr_score:.4f})")
                 print(f"       Chunk Index: {chunk_idx} | Page/Metadata: {meta}")
-                print(f"       Content Snippet: {txt[:300]}\n")
+                print(f"       Content Snippet: {snippet}\n")
 
 if __name__ == "__main__":
     asyncio.run(test_in_memory_rag())

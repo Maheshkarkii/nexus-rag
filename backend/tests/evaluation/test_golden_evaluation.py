@@ -1,4 +1,3 @@
-import pytest
 
 from app.evaluation.evaluator import RAGEvaluator
 

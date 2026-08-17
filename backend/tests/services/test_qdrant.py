@@ -1,9 +1,17 @@
-import uuid
 from unittest.mock import MagicMock, patch
+
 import pytest
 from qdrant_client.http import models as qmodels
 
 from app.services.qdrant import QdrantService
+
+
+@pytest.fixture(autouse=True)
+def reset_qdrant_service_state():
+    """Reset shared clients dict before each test."""
+    QdrantService._shared_clients.clear()
+    yield
+    QdrantService._shared_clients.clear()
 
 
 @patch("app.services.qdrant.QdrantClient")
@@ -25,7 +33,7 @@ def test_ensure_collection_creates_when_missing(mock_client_class: MagicMock) ->
     mock_client_class.return_value = mock_client
     mock_client.collection_exists.return_value = False
 
-    service = QdrantService(collection_name="test_collection")
+    service = QdrantService(url="http://mock-qdrant:6333", collection_name="test_collection")
     service.ensure_collection(dimension=384, distance_metric="Cosine")
 
     mock_client.collection_exists.assert_called_once_with("test_collection")
@@ -44,7 +52,7 @@ def test_ensure_collection_checks_compatibility(mock_client_class: MagicMock) ->
     mock_info.config.params.vectors.distance = qmodels.Distance.COSINE
     mock_client.get_collection.return_value = mock_info
 
-    service = QdrantService(collection_name="test_collection")
+    service = QdrantService(url="http://mock-qdrant:6333", collection_name="test_collection")
     service.ensure_collection(dimension=384, distance_metric="Cosine")
 
     # Incompatible dimension should raise ValueError

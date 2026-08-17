@@ -1,19 +1,19 @@
 import uuid
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import MagicMock, AsyncMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models.project import Project
 from app.db.models.document import Document
+from app.db.models.project import Project
+from app.services.embedding import EmbeddingService
 from app.services.hybrid_retrieval import (
-    LexicalSearchService,
     HybridFusionService,
+    LexicalSearchService,
     NearDuplicateDeduplicator,
     RetrievalCache,
 )
 from app.services.retrieval_pipeline import RetrievalPipeline
-from app.services.embedding import EmbeddingService
-from app.services.prompt_builder import PromptBuilder
 
 
 def test_lexical_bm25_search() -> None:

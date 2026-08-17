@@ -1,5 +1,6 @@
 import uuid
 from unittest.mock import MagicMock, patch
+
 import httpx
 import pytest
 from fastapi import status
@@ -51,8 +52,8 @@ async def test_retrieve_endpoint_with_reranking(
     mock_rerank_instance.predict.return_value = [4.2]
 
     # Override the fastapi dependency for QdrantService
-    from app.services.qdrant import get_qdrant_service
     from app.main import app
+    from app.services.qdrant import get_qdrant_service
     app.dependency_overrides[get_qdrant_service] = lambda: mock_qdrant
 
     try:

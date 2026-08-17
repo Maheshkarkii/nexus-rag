@@ -1,4 +1,5 @@
 import uuid
+
 import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,9 +8,8 @@ from app.db.models.document import Document
 from app.db.models.document_chunk import DocumentChunk
 from app.db.models.embedding import ChunkEmbedding
 from app.db.models.project import Project
-from app.services.embedding import EmbeddingService
-from app.services.document_processing.chunking.recursive import count_tokens
 from app.services.document_processing.chunking.service import ChunkingService
+from app.services.embedding import EmbeddingService
 
 
 # ------------------------------------------------------------------------------

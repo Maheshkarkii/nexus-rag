@@ -1,5 +1,6 @@
 import uuid
 from unittest.mock import MagicMock, patch
+
 import httpx
 import pytest
 from fastapi import status
@@ -84,8 +85,8 @@ async def test_ask_stream_endpoint_success(
         ])
     )
 
-    from app.services.qdrant import get_qdrant_service
     from app.main import app
+    from app.services.qdrant import get_qdrant_service
     
     default_llm_service.api_key = "test-mock-key"
     app.dependency_overrides[get_qdrant_service] = lambda: mock_qdrant
@@ -116,11 +117,11 @@ async def test_ask_stream_endpoint_success(
             print("STREAM LINES:", lines)
             assert len(lines) > 0
             # Matches event lines: "event: token" followed by "data: {"content": "..."}"
-            assert any("event: initializing" in l or "event: status" in l for l in lines)
-            assert any("event: sources" in l for l in lines)
-            assert any("event: token" in l for l in lines)
-            assert any("event: citations" in l for l in lines)
-            assert any("event: complete" in l for l in lines)
+            assert any("event: initializing" in line or "event: status" in line for line in lines)
+            assert any("event: sources" in line for line in lines)
+            assert any("event: token" in line for line in lines)
+            assert any("event: citations" in line for line in lines)
+            assert any("event: complete" in line for line in lines)
 
     finally:
         app.dependency_overrides.clear()

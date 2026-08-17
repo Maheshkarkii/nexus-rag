@@ -1,14 +1,14 @@
 """Unit tests for format-specific document processors (PDF, DOCX, TXT, CSV, Excel, JSON)."""
 
-import io
 import json
-from pathlib import Path
-import tempfile
 import uuid
+from pathlib import Path
+
 import docx
 import openpyxl
-from pypdf import PdfWriter
 import pytest
+from pypdf import PdfWriter
+
 from app.db.models.document import Document
 from app.services.document_processing.csv_processor import CSVProcessor
 from app.services.document_processing.docx_processor import DocxProcessor

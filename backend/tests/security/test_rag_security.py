@@ -1,11 +1,9 @@
 import uuid
-import pytest
 
 from app.core.security import (
-    PromptInjectionDetector,
     FileSecurityValidator,
     LogSanitizer,
-    SecurityAuditLogger,
+    PromptInjectionDetector,
 )
 from app.services.hybrid_retrieval import RetrievalCache
 from app.services.prompt_builder import PromptBuilder

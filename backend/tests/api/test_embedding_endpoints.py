@@ -1,13 +1,13 @@
 import uuid
-import pytest
+
 import httpx
+import pytest
 from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.document import Document
 from app.db.models.document_chunk import DocumentChunk
 from app.db.models.project import Project
-from app.db.models.embedding import ChunkEmbedding
 
 
 @pytest.mark.asyncio

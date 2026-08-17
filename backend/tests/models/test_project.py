@@ -1,10 +1,12 @@
 """Unit tests for Project model CRUD, UUID primary key, and timezone-aware timestamps."""
 
-from datetime import datetime
 import uuid
+from datetime import datetime
+
+import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-import pytest
+
 from app.db.models.project import Project
 
 

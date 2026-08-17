@@ -8,13 +8,12 @@ if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))
 
 from sqlalchemy import select
-from app.db.session import async_session_factory
+
 from app.db.models.document import Document
-from app.db.models.document_chunk import DocumentChunk
-from app.db.models.embedding import ChunkEmbedding
+from app.db.session import async_session_factory
 from app.services.embedding import get_embedding_service
-from app.services.qdrant import get_qdrant_service
 from app.services.indexing import get_indexing_service
+from app.services.qdrant import get_qdrant_service
 
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(levelname)s] - %(message)s")
 

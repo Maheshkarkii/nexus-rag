@@ -1,16 +1,13 @@
 import uuid
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import MagicMock, AsyncMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import get_settings
-from app.db.models.project import Project
 from app.db.models.document import Document
-from app.services.retrieval_pipeline import RetrievalPipeline
-from app.services.retrieval import RetrievalService
-from app.services.reranking import RerankingService
-from app.services.qdrant import QdrantService
+from app.db.models.project import Project
 from app.services.embedding import EmbeddingService
+from app.services.retrieval_pipeline import RetrievalPipeline
 
 
 def test_comparison_intent_detection() -> None:

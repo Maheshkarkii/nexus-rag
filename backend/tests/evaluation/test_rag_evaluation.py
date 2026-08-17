@@ -1,11 +1,8 @@
-import uuid
-import pytest
 
 from app.core.observability import (
-    TraceSpan,
-    RAGMetricsCollector,
-    GroundednessEvaluator,
     BenchmarkEvaluator,
+    GroundednessEvaluator,
+    RAGMetricsCollector,
 )
 
 

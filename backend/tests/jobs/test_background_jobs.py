@@ -1,5 +1,6 @@
-import uuid
 import asyncio
+import uuid
+
 import pytest
 
 from app.services.jobs import BackgroundJobManager, Job

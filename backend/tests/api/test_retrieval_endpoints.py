@@ -1,11 +1,11 @@
 import uuid
 from unittest.mock import MagicMock, patch
+
 import httpx
 import pytest
 from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models.document import Document
 from app.db.models.project import Project
 
 
@@ -54,8 +54,8 @@ async def test_retrieve_endpoint_success(
     mock_rerank_instance.predict.return_value = [2.5]
 
     # Override the fastapi dependency for QdrantService
-    from app.services.qdrant import get_qdrant_service
     from app.main import app
+    from app.services.qdrant import get_qdrant_service
     app.dependency_overrides[get_qdrant_service] = lambda: mock_qdrant
 
     try:

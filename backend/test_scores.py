@@ -1,11 +1,13 @@
 import asyncio
 import uuid
+
 from app.db.session import async_session_factory
-from app.services.retrieval_pipeline import get_retrieval_pipeline
-from app.services.retrieval import get_retrieval_service
-from app.services.reranking import get_reranking_service
-from app.services.qdrant import get_qdrant_service
 from app.services.embedding import get_embedding_service
+from app.services.qdrant import get_qdrant_service
+from app.services.reranking import get_reranking_service
+from app.services.retrieval import get_retrieval_service
+from app.services.retrieval_pipeline import get_retrieval_pipeline
+
 
 async def test():
     async with async_session_factory() as session:

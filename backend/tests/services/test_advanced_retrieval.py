@@ -1,13 +1,11 @@
 import uuid
-import pytest
 
 from app.services.hybrid_retrieval import (
-    LexicalSearchService,
-    MultiQueryExpander,
-    SourceDiversifier,
     HybridFusionService,
+    MultiQueryExpander,
     NearDuplicateDeduplicator,
     RetrievalCache,
+    SourceDiversifier,
 )
 
 

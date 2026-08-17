@@ -1,13 +1,13 @@
 import uuid
-import pytest
 from unittest.mock import AsyncMock, patch
+
+import pytest
 
 from app.services.agentic_research import (
     AgenticResearchEngine,
+    GapDetector,
     ResearchPlanner,
     ToolRegistry,
-    GapDetector,
-    ResearchState,
 )
 
 

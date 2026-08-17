@@ -1,16 +1,17 @@
 import uuid
 from unittest.mock import AsyncMock, MagicMock
+
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.project import Project
 from app.services.conversation import (
     create_conversation,
-    get_conversations,
-    get_conversation_by_id,
-    delete_conversation,
     create_message,
+    delete_conversation,
+    get_conversation_by_id,
     get_conversation_messages,
+    get_conversations,
 )
 from app.services.query_rewriter import ConversationQueryRewriter
 

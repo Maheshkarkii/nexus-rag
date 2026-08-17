@@ -1,4 +1,5 @@
 import uuid
+
 import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,15 +7,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models.document import Document
 from app.db.models.document_chunk import DocumentChunk
 from app.db.models.project import Project
-from app.services.document_processing.chunking.recursive import RecursiveChunkingStrategy, count_tokens
-from app.services.document_processing.chunking.structural import (
-    PDFChunkingStrategy,
-    DocxChunkingStrategy,
-    CSVChunkingStrategy,
-    ExcelChunkingStrategy,
-    JSONChunkingStrategy,
+from app.services.document_processing.chunking.recursive import (
+    RecursiveChunkingStrategy,
+    count_tokens,
 )
 from app.services.document_processing.chunking.service import ChunkingService
+from app.services.document_processing.chunking.structural import (
+    CSVChunkingStrategy,
+    DocxChunkingStrategy,
+    ExcelChunkingStrategy,
+    JSONChunkingStrategy,
+    PDFChunkingStrategy,
+)
 
 
 def create_mock_doc(ext: str, text: str = "") -> Document:

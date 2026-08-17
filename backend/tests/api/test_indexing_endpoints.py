@@ -1,5 +1,6 @@
 import uuid
 from unittest.mock import MagicMock, patch
+
 import httpx
 import pytest
 from fastapi import status
@@ -27,8 +28,8 @@ async def test_index_document_endpoint_success(
     mock_qdrant_class.return_value = mock_qdrant
 
     # Override the fastapi dependency for QdrantService
-    from app.services.qdrant import get_qdrant_service
     from app.main import app
+    from app.services.qdrant import get_qdrant_service
     app.dependency_overrides[get_qdrant_service] = lambda: mock_qdrant
 
     try:

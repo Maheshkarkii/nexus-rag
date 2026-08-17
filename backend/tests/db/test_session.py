@@ -1,8 +1,9 @@
 """Tests for database session management, dependency lifecycle, and connection probing."""
 
+import pytest
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
-import pytest
+
 from app.db.session import check_database_connection
 from tests.conftest import test_engine
 

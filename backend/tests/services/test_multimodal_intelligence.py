@@ -1,11 +1,10 @@
 import uuid
-import pytest
 
 from app.services.document_processing.multimodal_intelligence import (
     DocumentIntelligenceEngine,
-    TableExtractor,
     FigureExtractor,
     SpreadsheetExtractor,
+    TableExtractor,
 )
 
 

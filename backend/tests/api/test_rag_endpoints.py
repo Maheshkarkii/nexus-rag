@@ -1,5 +1,6 @@
 import uuid
 from unittest.mock import MagicMock, patch
+
 import httpx
 import pytest
 from fastapi import status
@@ -66,9 +67,9 @@ async def test_ask_endpoint_success(
     mock_openai.chat.completions.create = AsyncMock(return_value=mock_completion)
 
     # Override the fastapi dependencies
-    from app.services.qdrant import get_qdrant_service
-    from app.services.llm import get_llm_service, default_llm_service
     from app.main import app
+    from app.services.llm import default_llm_service
+    from app.services.qdrant import get_qdrant_service
     
     default_llm_service._client = None
     default_llm_service.api_key = "test-mock-key"
@@ -178,9 +179,9 @@ async def test_ask_endpoint_handles_hallucinated_citation_safely(
     from unittest.mock import AsyncMock
     mock_openai.chat.completions.create = AsyncMock(return_value=mock_completion)
 
-    from app.services.qdrant import get_qdrant_service
-    from app.services.llm import default_llm_service
     from app.main import app
+    from app.services.llm import default_llm_service
+    from app.services.qdrant import get_qdrant_service
     
     default_llm_service._client = None
     default_llm_service.api_key = "test-mock-key"

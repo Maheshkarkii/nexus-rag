@@ -1,5 +1,6 @@
 import uuid
 from unittest.mock import MagicMock, patch
+
 import pytest
 from qdrant_client.http import models as qmodels
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,9 +8,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.exceptions import BadRequestException
 from app.db.models.document import Document
 from app.db.models.project import Project
-from app.services.retrieval import RetrievalService
 from app.services.embedding import EmbeddingService
 from app.services.qdrant import QdrantService
+from app.services.retrieval import RetrievalService
 
 
 @pytest.mark.asyncio

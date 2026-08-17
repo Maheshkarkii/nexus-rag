@@ -1,21 +1,23 @@
 """Pytest test fixtures and database isolation for FastAPI backend tests."""
 
-from pathlib import Path
 import shutil
 import tempfile
-from typing import AsyncGenerator, Generator
-from fastapi.testclient import TestClient
+from collections.abc import AsyncGenerator, Generator
+from pathlib import Path
+
 import httpx
 import pytest
 import pytest_asyncio
+from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
+
+import app.db.models  # noqa: F401 Register models for table creation
 from app.core.config import Settings, get_settings
 from app.db.base import Base
-import app.db.models  # noqa: F401 Register models for table creation
 from app.db.session import get_db
 from app.main import app
 from app.services.storage import StorageService, get_storage_service

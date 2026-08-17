@@ -1,11 +1,12 @@
 import uuid
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.services.citation import CitationParser, CitationResolver, SourceRegistry
 from app.services.prompt_builder import PromptBuilder
 from app.services.rag import RAGService
-from app.services.citation import SourceRegistry, CitationParser, CitationResolver
 
 
 def test_prompt_builder_grounding_and_injection_defense() -> None:

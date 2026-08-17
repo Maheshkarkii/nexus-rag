@@ -1,8 +1,8 @@
 """Unit and integration tests for backend health, readiness, and CORS headers."""
 
-from fastapi.testclient import TestClient
 import httpx
 import pytest
+from fastapi.testclient import TestClient
 
 
 def test_health_check_sync(client: TestClient) -> None:

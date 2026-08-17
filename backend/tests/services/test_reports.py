@@ -1,14 +1,14 @@
 import uuid
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
-from unittest.mock import MagicMock, AsyncMock
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.project import Project
-from app.db.models.report import Report
-from app.services.export_adapters import MarkdownExporter, PDFExporter, DOCXExporter
+from app.services.export_adapters import DOCXExporter, MarkdownExporter, PDFExporter
+from app.services.prompt_builder import PromptBuilder
 from app.services.report_generator import ReportGeneratorService
 from app.services.retrieval_pipeline import RetrievalPipeline
-from app.services.prompt_builder import PromptBuilder
 
 
 def test_markdown_exporter() -> None:

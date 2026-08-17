@@ -2,9 +2,10 @@
 
 import io
 import uuid
-from fastapi.testclient import TestClient
+
 import httpx
 import pytest
+from fastapi.testclient import TestClient
 
 
 def create_sample_project(client: TestClient) -> str:

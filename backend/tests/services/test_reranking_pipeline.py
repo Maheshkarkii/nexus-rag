@@ -1,6 +1,5 @@
-import uuid
 from unittest.mock import MagicMock, patch
-import pytest
+
 from app.services.reranking import RerankingService
 from app.services.retrieval_pipeline import RetrievalPipeline
 

@@ -25,9 +25,10 @@ class QdrantService:
         self.collection_name = collection_name or settings.QDRANT_COLLECTION_NAME
         self.timeout = timeout or settings.QDRANT_TIMEOUT
         self._client: QdrantClient | None = None
+    _shared_clients: dict[str, QdrantClient] = {}
 
     def connect(self) -> QdrantClient:
-        """Initialize the Qdrant HTTP client (cached) with fallback for local dev."""
+        """Initialize the Qdrant HTTP client (cached globally) with fallback for local dev."""
         if self._client is not None:
             return self._client
 
@@ -60,6 +61,10 @@ class QdrantService:
                 target_url = storage_path
                 logger.info(f"Standalone Qdrant server unreachable on port 6333; using local persistent Qdrant at '{storage_path}'.")
 
+        if target_url in QdrantService._shared_clients and QdrantService._shared_clients[target_url] is not None:
+            self._client = QdrantService._shared_clients[target_url]
+            return self._client
+
         logger.info(f"Connecting to Qdrant server at: {target_url} (timeout={self.timeout})")
         try:
             if target_url == ":memory:":
@@ -77,8 +82,13 @@ class QdrantService:
             import os
             storage_path = os.path.join(os.getcwd(), "storage", "qdrant_db")
             os.makedirs(storage_path, exist_ok=True)
+            if storage_path in QdrantService._shared_clients:
+                self._client = QdrantService._shared_clients[storage_path]
+                return self._client
             self._client = QdrantClient(path=storage_path)
+            target_url = storage_path
 
+        QdrantService._shared_clients[target_url] = self._client
         return self._client
 
     def collection_exists(self) -> bool:

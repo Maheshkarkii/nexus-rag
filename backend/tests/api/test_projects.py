@@ -1,9 +1,10 @@
 """Unit and integration tests for Research Project CRUD endpoints."""
 
 import uuid
-from fastapi.testclient import TestClient
+
 import httpx
 import pytest
+from fastapi.testclient import TestClient
 
 
 def test_create_project_success(client: TestClient) -> None:

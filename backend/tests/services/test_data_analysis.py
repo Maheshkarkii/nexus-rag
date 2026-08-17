@@ -1,14 +1,11 @@
-import os
-import uuid
-import tempfile
-import pytest
-import pandas as pd
 from unittest.mock import AsyncMock
 
+import pandas as pd
+import pytest
+
 from app.services.data_analysis import (
-    DataAnalysisPlanner,
     DataAnalysisEngine,
-    DataAnalysisService,
+    DataAnalysisPlanner,
 )
 
 
