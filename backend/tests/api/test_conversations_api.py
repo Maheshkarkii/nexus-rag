@@ -123,6 +123,9 @@ async def test_ask_endpoint_with_conversation(
         "source_filename": "info.pdf",
     }
     mock_qclient = MagicMock()
+    mock_qresponse = MagicMock()
+    mock_qresponse.points = [mock_hit]
+    mock_qclient.query_points.return_value = mock_qresponse
     mock_qclient.search.return_value = [mock_hit]
     mock_qdrant.connect.return_value = mock_qclient
 

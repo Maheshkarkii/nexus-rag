@@ -37,6 +37,9 @@ async def test_retrieve_endpoint_with_reranking(
         "file_type": ".pdf",
     }
     mock_client = MagicMock()
+    mock_response = MagicMock()
+    mock_response.points = [mock_hit]
+    mock_client.query_points.return_value = mock_response
     mock_client.search.return_value = [mock_hit]
     mock_qdrant.connect.return_value = mock_client
 
