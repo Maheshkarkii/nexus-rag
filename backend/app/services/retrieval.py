@@ -6,7 +6,6 @@ from qdrant_client.http import models as qmodels
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import get_settings
 from app.core.exceptions import BadRequestException
 from app.db.models.document import Document
 from app.services.embedding import EmbeddingService
@@ -105,24 +104,8 @@ class RetrievalService:
         
         try:
             if not qdrant_service.health_check() or not qdrant_service.collection_exists():
-                if get_settings().APP_ENV == "development":
-                    logger.info("Qdrant collection missing during local dev search. Attempting on-demand indexing...")
-                    from app.services.embedding import get_embedding_service
-                    from app.services.indexing import get_indexing_service
-                    idx_svc = get_indexing_service()
-                    emb_svc = get_embedding_service()
-                    if document_ids:
-                        for d_id in document_ids:
-                            await idx_svc.index_document(session, project_id, d_id, qdrant_service, emb_svc)
-                    else:
-                        # Index all documents for project
-                        p_docs = await session.execute(select(Document.id).where(Document.project_id == project_id))
-                        for d_id in p_docs.scalars().all():
-                            await idx_svc.index_document(session, project_id, d_id, qdrant_service, emb_svc)
-                
-                if not qdrant_service.collection_exists():
-                    logger.warning("Qdrant collection or connection unavailable for search.")
-                    return []
+                logger.warning("Qdrant collection or connection unavailable for search.")
+                return []
             client = qdrant_service.connect()
             if hasattr(client, "query_points"):
                 response = client.query_points(

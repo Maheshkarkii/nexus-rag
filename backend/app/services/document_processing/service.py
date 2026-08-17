@@ -78,8 +78,8 @@ class DocumentProcessingService:
             if not normalized_text:
                 raise ValueError("Document yielded 0 characters of readable extracted text.")
 
-            # 8. Update document to 'ready'
-            document.status = "ready"
+            # 8. Update document status to 'extracted' (indexing required for 'ready')
+            document.status = "extracted"
             document.extracted_text = normalized_text
             document.extracted_character_count = len(normalized_text)
             document.extracted_word_count = len(normalized_text.split())

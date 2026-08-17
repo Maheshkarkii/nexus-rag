@@ -138,7 +138,8 @@ class VectorIndexingService:
                 batch = points[i : i + batch_size]
                 qdrant_service.upsert_points(batch)
 
-            # 7. Update status to 'indexed'
+            # 7. Update status to 'ready' and indexing_status to 'indexed'
+            document.status = "ready"
             document.indexing_status = "indexed"
             document.indexed_at = utc_now()
             document.indexing_error = None

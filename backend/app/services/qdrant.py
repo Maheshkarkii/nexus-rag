@@ -54,22 +54,30 @@ class QdrantService:
                     use_memory = True
 
             if use_memory:
-                target_url = ":memory:"
-                logger.info("Standalone Qdrant server unreachable on port 6333; using in-memory Qdrant instance.")
+                import os
+                storage_path = os.path.join(os.getcwd(), "storage", "qdrant_db")
+                os.makedirs(storage_path, exist_ok=True)
+                target_url = storage_path
+                logger.info(f"Standalone Qdrant server unreachable on port 6333; using local persistent Qdrant at '{storage_path}'.")
 
         logger.info(f"Connecting to Qdrant server at: {target_url} (timeout={self.timeout})")
         try:
             if target_url == ":memory:":
                 self._client = QdrantClient(location=":memory:")
-            else:
+            elif target_url.startswith("http://") or target_url.startswith("https://"):
                 self._client = QdrantClient(
                     url=target_url,
                     api_key=self.api_key or None,
                     timeout=self.timeout,
                 )
+            else:
+                self._client = QdrantClient(path=target_url)
         except Exception as exc:
-            logger.warning(f"Could not connect to Qdrant server at {target_url} ({exc}). Falling back to in-memory Qdrant instance.")
-            self._client = QdrantClient(location=":memory:")
+            logger.warning(f"Could not connect to Qdrant server at {target_url} ({exc}). Falling back to local persistent Qdrant instance.")
+            import os
+            storage_path = os.path.join(os.getcwd(), "storage", "qdrant_db")
+            os.makedirs(storage_path, exist_ok=True)
+            self._client = QdrantClient(path=storage_path)
 
         return self._client
 
