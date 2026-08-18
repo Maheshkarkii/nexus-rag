@@ -11,7 +11,7 @@ from app.db.models.project import Project
 
 @pytest.mark.asyncio
 @patch("app.services.retrieval.QdrantService")
-@patch("app.services.reranking.CrossEncoder")
+@patch("sentence_transformers.CrossEncoder")
 @patch("app.services.llm.AsyncOpenAI")
 async def test_ask_endpoint_success(
     mock_openai_class: MagicMock,
@@ -129,7 +129,7 @@ async def test_ask_endpoint_empty_query_fails(async_client: httpx.AsyncClient, d
 
 @pytest.mark.asyncio
 @patch("app.services.retrieval.QdrantService")
-@patch("app.services.reranking.CrossEncoder")
+@patch("sentence_transformers.CrossEncoder")
 @patch("app.services.llm.AsyncOpenAI")
 async def test_ask_endpoint_handles_hallucinated_citation_safely(
     mock_openai_class: MagicMock,

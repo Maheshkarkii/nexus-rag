@@ -8,24 +8,23 @@ backend_dir = Path(__file__).parent
 if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))
 
+from fastapi import UploadFile
 from sqlalchemy import select
+
 from app.db.models.project import Project
-from app.db.models.document import Document
-from app.db.models.document_chunk import DocumentChunk
 from app.db.session import async_session_factory
 from app.services.document import create_document
-from app.services.document_processing.service import get_processing_service
 from app.services.document_processing.chunking.service import get_chunking_service
+from app.services.document_processing.service import get_processing_service
 from app.services.embedding import get_embedding_service
 from app.services.indexing import get_indexing_service
-from app.services.qdrant import get_qdrant_service
-from app.services.retrieval import RetrievalService
-from app.services.retrieval_pipeline import get_retrieval_pipeline
-from app.services.reranking import get_reranking_service
 from app.services.llm import get_llm_service
 from app.services.prompt_builder import get_prompt_builder
+from app.services.qdrant import get_qdrant_service
 from app.services.rag import get_rag_service
-from fastapi import UploadFile
+from app.services.reranking import get_reranking_service
+from app.services.retrieval import RetrievalService
+from app.services.retrieval_pipeline import get_retrieval_pipeline
 
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(levelname)s] - %(message)s")
 

@@ -11,7 +11,7 @@ from app.db.models.project import Project
 
 @pytest.mark.asyncio
 @patch("app.services.retrieval.QdrantService")
-@patch("app.services.reranking.CrossEncoder")
+@patch("sentence_transformers.CrossEncoder")
 async def test_retrieve_endpoint_with_reranking(
     mock_cross_encoder_class: MagicMock,
     mock_qdrant_class: MagicMock,

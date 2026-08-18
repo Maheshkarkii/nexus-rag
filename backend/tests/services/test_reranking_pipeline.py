@@ -4,7 +4,7 @@ from app.services.reranking import RerankingService
 from app.services.retrieval_pipeline import RetrievalPipeline
 
 
-@patch("app.services.reranking.CrossEncoder")
+@patch("sentence_transformers.CrossEncoder")
 def test_reranker_model_loading_and_prediction(mock_cross_encoder_class: MagicMock) -> None:
     mock_instance = MagicMock()
     mock_cross_encoder_class.return_value = mock_instance

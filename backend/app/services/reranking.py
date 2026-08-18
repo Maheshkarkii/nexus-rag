@@ -1,6 +1,8 @@
 import logging
 from typing import Any
 
+from sentence_transformers import CrossEncoder
+
 from app.core.config import get_settings
 
 logger = logging.getLogger("ai_research_assistant.services.reranking")

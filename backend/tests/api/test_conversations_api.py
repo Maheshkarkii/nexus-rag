@@ -91,7 +91,7 @@ async def test_conversations_project_isolation_violations(
 
 @pytest.mark.asyncio
 @patch("app.services.retrieval.QdrantService")
-@patch("app.services.reranking.CrossEncoder")
+@patch("sentence_transformers.CrossEncoder")
 @patch("app.services.llm.AsyncOpenAI")
 async def test_ask_endpoint_with_conversation(
     mock_openai_class: MagicMock,

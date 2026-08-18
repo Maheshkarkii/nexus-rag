@@ -6,23 +6,23 @@ from fastapi.testclient import TestClient
 
 
 def test_health_check_sync(client: TestClient) -> None:
-    """Verify that GET /api/v1/health returns HTTP 200 and expected status 'healthy'."""
+    """Verify that GET /api/v1/health returns HTTP 200 and expected status 'ok'."""
     response = client.get("/api/v1/health")
     assert response.status_code == 200
     data = response.json()
     assert "status" in data
-    assert data["status"] == "healthy"
-    assert data == {"status": "healthy"}
+    assert data["status"] == "ok"
+    assert data == {"status": "ok"}
 
 
 @pytest.mark.asyncio
 async def test_health_check_async(async_client: httpx.AsyncClient) -> None:
-    """Verify that asynchronous GET /api/v1/health returns HTTP 200 and status 'healthy'."""
+    """Verify that asynchronous GET /api/v1/health returns HTTP 200 and status 'ok'."""
     response = await async_client.get("/api/v1/health")
     assert response.status_code == 200
     data = response.json()
-    assert data["status"] == "healthy"
-    assert data == {"status": "healthy"}
+    assert data["status"] == "ok"
+    assert data == {"status": "ok"}
 
 
 def test_readiness_check_sync(client: TestClient) -> None:
