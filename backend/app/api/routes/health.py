@@ -12,7 +12,7 @@ router = APIRouter(tags=["Observability & Health"])
 @router.get("/health", summary="System Health & Readiness Check")
 async def health_check():
     """Lightweight system health check verifying process liveness."""
-    return {"status": "healthy"}
+    return {"status": "ok"}
 
 
 @router.get("/health/liveness", summary="Liveness Probe Check")

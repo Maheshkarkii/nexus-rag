@@ -1,9 +1,6 @@
 import logging
 from typing import Any
 
-import torch
-from sentence_transformers import CrossEncoder
-
 from app.core.config import get_settings
 
 logger = logging.getLogger("ai_research_assistant.services.reranking")
@@ -30,6 +27,8 @@ class RerankingService:
         if self._resolved_device is not None:
             return self._resolved_device
 
+        import torch
+
         device = self.config_device.lower()
         if device == "cuda":
             if not torch.cuda.is_available():
@@ -43,10 +42,12 @@ class RerankingService:
         self._resolved_device = resolved
         return resolved
 
-    def load_model(self) -> CrossEncoder:
+    def load_model(self):
         """Load and cache the CrossEncoder model weights."""
         if self._model is not None:
             return self._model
+
+        from sentence_transformers import CrossEncoder
 
         device = self._resolve_device()
         logger.info(f"Loading reranker model '{self.model_name}' on device '{device}'...")

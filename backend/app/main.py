@@ -19,12 +19,16 @@ logger = setup_logging()
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifecycle manager for startup initialization and graceful shutdown."""
+    import time
+    t0 = time.perf_counter()
+    logger.info("[STARTUP] APP_IMPORT and APP_CREATION completed.")
     logger.info(
-        f"Starting {settings.APP_NAME} in [{settings.APP_ENV}] mode (debug={settings.DEBUG})"
+        f"[STARTUP] Starting {settings.APP_NAME} in [{settings.APP_ENV}] mode (debug={settings.DEBUG})"
     )
-    logger.info(f"API v1 routes mounted at prefix: {settings.API_V1_STR}")
-    logger.info(f"Allowed CORS origins: {settings.BACKEND_CORS_ORIGINS}")
+    logger.info(f"[STARTUP] API v1 routes mounted at prefix: {settings.API_V1_STR}")
+    logger.info(f"[STARTUP] Allowed CORS origins: {settings.BACKEND_CORS_ORIGINS}")
 
+    t_db = time.perf_counter()
     # Initialize tables for local sqlite dev mode
     from app.db.base import Base
     from app.db.session import engine
@@ -32,7 +36,11 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     if "sqlite" in str(engine.url):
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-        logger.info("Initialized local SQLite database schema tables.")
+        db_ms = round((time.perf_counter() - t_db) * 1000, 2)
+        logger.info(f"[STARTUP] DATABASE_INITIALIZATION: Initialized local SQLite schema in {db_ms}ms.")
+
+    total_ms = round((time.perf_counter() - t0) * 1000, 2)
+    logger.info(f"[STARTUP] STARTUP_COMPLETE in {total_ms}ms")
 
     yield
     logger.info(f"Shutting down {settings.APP_NAME} gracefully...")

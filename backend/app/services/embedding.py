@@ -2,9 +2,6 @@ import logging
 import time
 import uuid
 from typing import Any
-
-import torch
-from sentence_transformers import SentenceTransformer
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -38,6 +35,8 @@ class EmbeddingService:
 
     def _resolve_device(self) -> str:
         """Determine and validate execution hardware target (CPU / CUDA / Auto)."""
+        import torch
+
         target = self.config_device.lower().strip()
         if target == "auto":
             resolved = "cuda" if torch.cuda.is_available() else "cpu"
@@ -53,10 +52,12 @@ class EmbeddingService:
         self._resolved_device = resolved
         return resolved
 
-    def load_model(self) -> SentenceTransformer:
+    def load_model(self):
         """Load and cache the SentenceTransformer model weights once."""
         if self._model is not None:
             return self._model
+
+        from sentence_transformers import SentenceTransformer
 
         device = self._resolve_device()
         logger.info(f"Loading embedding model '{self.model_name}' on device '{device}'...")
