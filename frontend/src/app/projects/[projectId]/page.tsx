@@ -304,8 +304,10 @@ export default function ProjectWorkspacePage() {
       const newSession: ConversationItem = { id: String(newSessionObj.id), title: String(newSessionObj.title) };
       setConversations((prev) => [newSession, ...prev]);
       setActiveConvId(newSession.id);
-    } catch {
-      alert("Failed to create session.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to create session.";
+      console.error("Manual session creation error:", err);
+      alert(`Failed to create session: ${msg}`);
     }
   };
 
@@ -323,8 +325,10 @@ export default function ProjectWorkspacePage() {
         setConversations([newSession]);
         setActiveConvId(newSession.id);
         convId = newSession.id;
-      } catch {
-        alert("Failed to initialize conversation session.");
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Failed to initialize conversation session.";
+        console.error("Session creation error:", err);
+        alert(`Failed to initialize conversation session: ${msg}`);
         return;
       }
     }
