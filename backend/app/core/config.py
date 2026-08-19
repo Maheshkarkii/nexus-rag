@@ -211,7 +211,7 @@ class Settings(BaseSettings):
     REDIS_URL: str | None = None
     LLM_PROVIDER: str = "openai"
     LLM_API_KEY: str | None = None
-    LLM_MODEL: str = "gpt-4o-mini"
+    LLM_MODEL: str = "groq/compound-mini"
     LLM_TEMPERATURE: float = 0.0
     LLM_MAX_OUTPUT_TOKENS: int = 1000
     LLM_TIMEOUT: int = 30
