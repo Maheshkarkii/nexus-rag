@@ -1,8 +1,6 @@
 import logging
 from typing import Any
 
-from sentence_transformers import CrossEncoder
-
 from app.core.config import get_settings
 
 logger = logging.getLogger("ai_research_assistant.services.reranking")
@@ -21,7 +19,7 @@ class RerankingService:
         self.model_name = model_name or settings.RERANKER_MODEL_NAME
         self.config_device = device or settings.EMBEDDING_DEVICE  # Reuse embedding device setting
         self.batch_size = batch_size or settings.RERANKER_BATCH_SIZE
-        self._model: CrossEncoder | None = None
+        self._model: Any = None
         self._resolved_device: str | None = None
 
     def _resolve_device(self) -> str:
