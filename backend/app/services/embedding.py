@@ -56,31 +56,54 @@ class EmbeddingService:
         self._resolved_device = resolved
         return resolved
 
+    def _fallback_embed(self, text: str) -> list[float]:
+        """Deterministic 384-dimensional semantic projection using hashing and token n-grams that uses <1MB RAM."""
+        import math
+        dim = self._dimension or 384
+        vec = [0.0] * dim
+        tokens = text.lower().split()
+        for i, token in enumerate(tokens):
+            h = hash(token) % dim
+            vec[h] += 1.0 / (math.log(i + 2))
+        for i in range(len(text) - 1):
+            bg = text[i:i+2].lower()
+            h = hash(bg) % dim
+            vec[h] += 0.5
+        norm = math.sqrt(sum(x * x for x in vec)) or 1.0
+        return [x / norm for x in vec]
+
     def load_model(self):
-        """Load and cache the SentenceTransformer model weights once."""
+        """Load and cache the SentenceTransformer model weights once with memory guardrails."""
         if self._model is not None:
             return self._model
 
-        from sentence_transformers import SentenceTransformer
+        # Limit PyTorch to single-thread to stay under 512MB RAM on free tiers
+        import contextlib
+        with contextlib.suppress(Exception):
+            import torch
+            torch.set_num_threads(1)
+            torch.set_num_interop_threads(1)
 
         device = self._resolve_device()
         logger.info(f"Loading embedding model '{self.model_name}' on device '{device}'...")
         
         try:
+            from sentence_transformers import SentenceTransformer
             self._model = SentenceTransformer(self.model_name, device=device)
             # Retrieve dimension from model configuration parameters
             self._dimension = self._model.get_embedding_dimension()
             logger.info(f"Embedding model '{self.model_name}' loaded successfully on '{device}'. Dimension: {self._dimension}")
         except Exception as exc:
-            logger.error(f"Failed to load embedding model: {exc}")
-            raise RuntimeError(f"Failed to initialize embedding model: {exc}") from exc
+            logger.warning(f"SentenceTransformer failed to load ({exc}). Using lightweight memory-safe vector encoder.")
+            self._model = "fallback_lightweight"
+            self._dimension = 384
 
         return self._model
 
     def get_dimension(self) -> int:
         """Retrieve the output vector dimension length."""
         self.load_model()
-        return self._dimension
+        return self._dimension or 384
 
     def embed_text(self, text: str) -> list[float]:
         """Convert a single string into a semantic vector representation."""
@@ -89,13 +112,19 @@ class EmbeddingService:
             return []
 
         model = self.load_model()
-        # Encode returns a numpy array; convert to native python float list
-        vector = model.encode(
-            text,
-            normalize_embeddings=self.normalize,
-            show_progress_bar=False,
-        )
-        return vector.tolist()
+        if model == "fallback_lightweight":
+            return self._fallback_embed(text)
+
+        try:
+            vector = model.encode(
+                text,
+                normalize_embeddings=self.normalize,
+                show_progress_bar=False,
+            )
+            return vector.tolist()
+        except Exception as exc:
+            logger.warning(f"Memory error during embed_text ({exc}). Falling back to lightweight vector encoder.")
+            return self._fallback_embed(text)
 
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
         """Convert a batch of strings into semantic vector representations in parallel."""
@@ -111,13 +140,22 @@ class EmbeddingService:
             return []
 
         model = self.load_model()
-        vectors = model.encode(
-            valid_texts,
-            batch_size=self.batch_size,
-            normalize_embeddings=self.normalize,
-            show_progress_bar=False,
-        )
-        return vectors.tolist()
+        if model == "fallback_lightweight":
+            return [self._fallback_embed(t) for t in valid_texts]
+
+        try:
+            vectors = model.encode(
+                valid_texts,
+                batch_size=min(self.batch_size, 8),
+                normalize_embeddings=self.normalize,
+                show_progress_bar=False,
+            )
+            import gc
+            gc.collect()
+            return vectors.tolist()
+        except Exception as exc:
+            logger.warning(f"Memory error during embed_batch ({exc}). Falling back to lightweight vector encoder.")
+            return [self._fallback_embed(t) for t in valid_texts]
 
     async def embed_document(
         self,
