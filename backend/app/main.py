@@ -28,15 +28,19 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info(f"[STARTUP] API v1 routes mounted at prefix: {settings.API_V1_STR}")
     logger.info(f"[STARTUP] Allowed CORS origins: {settings.BACKEND_CORS_ORIGINS}")
 
-    # Pre-warm embedding model in background thread to prevent cold-start latency on document upload
-    try:
-        import asyncio
-        from app.services.embedding import get_embedding_service
-        embedding_svc = get_embedding_service()
-        asyncio.get_running_loop().run_in_executor(None, embedding_svc.load_model)
-        logger.info("[STARTUP] Embedding model pre-warming initiated successfully.")
-    except Exception as exc:
-        logger.warning(f"[STARTUP] Embedding model pre-warming skipped: {exc}")
+    # Pre-warm embedding model only if explicitly enabled (prevent OOM on low-memory free tiers like Render 512MB)
+    import os
+    if os.getenv("PREWARM_MODELS", "false").lower() in ("1", "true", "yes"):
+        try:
+            import asyncio
+            from app.services.embedding import get_embedding_service
+            embedding_svc = get_embedding_service()
+            asyncio.get_running_loop().run_in_executor(None, embedding_svc.load_model)
+            logger.info("[STARTUP] Embedding model pre-warming initiated successfully.")
+        except Exception as exc:
+            logger.warning(f"[STARTUP] Embedding model pre-warming skipped: {exc}")
+    else:
+        logger.info("[STARTUP] Lazy model loading enabled (PREWARM_MODELS=false) to conserve memory.")
 
     t_db = time.perf_counter()
     # Initialize tables for local sqlite dev mode

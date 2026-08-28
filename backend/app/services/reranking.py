@@ -67,8 +67,12 @@ class RerankingService:
         if not candidates:
             return []
 
-        # Load model once
-        model = self.load_model()
+        # Attempt to load model with graceful fallback on memory-constrained servers
+        try:
+            model = self.load_model()
+        except Exception as exc:
+            logger.warning(f"Reranking model failed to load ({exc}). Falling back to vector similarity scores.")
+            return sorted(candidates, key=lambda x: float(x.get("score", 0.0)), reverse=True)[:top_k]
 
         # Build pairs
         pairs = [(query, c["text"]) for c in candidates]
