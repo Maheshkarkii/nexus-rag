@@ -30,10 +30,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Pre-warm embedding model only if explicitly enabled (prevent OOM on low-memory free tiers like Render 512MB)
     import os
+
     if os.getenv("PREWARM_MODELS", "false").lower() in ("1", "true", "yes"):
         try:
             import asyncio
+
             from app.services.embedding import get_embedding_service
+
             embedding_svc = get_embedding_service()
             asyncio.get_running_loop().run_in_executor(None, embedding_svc.load_model)
             logger.info("[STARTUP] Embedding model pre-warming initiated successfully.")
