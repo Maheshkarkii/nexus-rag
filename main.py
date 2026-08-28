@@ -12,5 +12,6 @@ from app.main import app, create_application  # noqa: F401
 if __name__ == "__main__":
     import uvicorn
 
-    port = int(os.getenv("PORT", 8000))
+    port = int(os.getenv("PORT", 10000))
+    print(f"[RENDER] Starting Uvicorn on 0.0.0.0:{port}...")
     uvicorn.run("app.main:app", host="0.0.0.0", port=port)
