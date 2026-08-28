@@ -1,0 +1,14 @@
+﻿# Exclude Python backend and local databases from Vercel deployment
+backend/
+.venv/
+venv/
+*.db
+*.sqlite3
+local_dev.db
+data/
+storage/
+scripts/
+docs/
+docker-compose.yml
+Dockerfile
+*.log
