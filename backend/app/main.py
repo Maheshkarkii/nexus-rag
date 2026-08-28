@@ -18,7 +18,7 @@ logger = setup_logging()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    """Application lifecycle manager for startup initialization and graceful shutdown."""
+    """Execute startup and shutdown tasks for database engines and vector connections."""
     import time
     t0 = time.perf_counter()
     logger.info("[STARTUP] APP_IMPORT and APP_CREATION completed.")
@@ -27,6 +27,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     )
     logger.info(f"[STARTUP] API v1 routes mounted at prefix: {settings.API_V1_STR}")
     logger.info(f"[STARTUP] Allowed CORS origins: {settings.BACKEND_CORS_ORIGINS}")
+
+    # Pre-warm embedding model in background thread to prevent cold-start latency on document upload
+    try:
+        import asyncio
+        from app.services.embedding import get_embedding_service
+        embedding_svc = get_embedding_service()
+        asyncio.get_running_loop().run_in_executor(None, embedding_svc.load_model)
+        logger.info("[STARTUP] Embedding model pre-warming initiated successfully.")
+    except Exception as exc:
+        logger.warning(f"[STARTUP] Embedding model pre-warming skipped: {exc}")
 
     t_db = time.perf_counter()
     # Initialize tables for local sqlite dev mode

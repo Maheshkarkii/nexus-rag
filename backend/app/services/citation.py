@@ -40,20 +40,23 @@ class CitationParser:
     """Parser to extract structured source identifiers from LLM generated text."""
 
     def parse(self, text: str) -> list[str]:
-        """Extract citations (e.g. [S1], [S2]) from text, returning unique IDs in first-appearance order."""
+        """Extract citations (e.g. [S1], [Source S1], [Source: S2]) from text, returning unique IDs in first-appearance order."""
         if not text:
             return []
 
-        # Find all occurrences of [S1], [S2], etc.
-        matches = re.findall(r"\[S(\d+)\]", text)
+        # Find all bracketed blocks, e.g. [S1], [Source S1], [Source: S2], [Source 1], [S1, S2], etc.
+        bracket_blocks = re.findall(r"\[([^\]]+)\]", text)
         
         seen = set()
         ordered_sources = []
-        for match in matches:
-            source_id = f"S{match}"
-            if source_id not in seen:
-                seen.add(source_id)
-                ordered_sources.append(source_id)
+        for block in bracket_blocks:
+            # Match S1, S2, Source 1, Source S1, etc.
+            found_ids = re.findall(r"(?:Source[\s:\u00a0\u202f]*)?(?:S)?(\d+)", block, flags=re.IGNORECASE)
+            for s_num in found_ids:
+                source_id = f"S{s_num}"
+                if source_id not in seen:
+                    seen.add(source_id)
+                    ordered_sources.append(source_id)
         
         return ordered_sources
 
@@ -67,8 +70,12 @@ class CitationResolver:
         for sid in source_ids:
             chunk = registry.resolve(sid)
             if not chunk:
-                logger.warning(f"LLM hallucinated citation '{sid}' which does not exist in registry. Skipping.")
-                continue
+                # Also try normalized lookup
+                sid_norm = sid.upper()
+                chunk = registry.resolve(sid_norm)
+                if not chunk:
+                    logger.warning(f"LLM hallucinated citation '{sid}' which does not exist in registry. Skipping.")
+                    continue
 
             metadata = chunk.get("metadata", {})
             
@@ -86,11 +93,10 @@ class CitationResolver:
                 "line_end": metadata.get("line_end"),
             }
 
-            # Map the response reference structure
-            text_preview = chunk.get("text", "")
-            preview = text_preview[:200]
-            if len(text_preview) > 200:
-                preview += "..."
+            # Map the response reference structure - provide complete text context
+            text_preview = (chunk.get("text") or "").strip()
+            # Keep full passage (up to 3000 chars) for complete, useful context inspection
+            preview = text_preview if len(text_preview) <= 3000 else text_preview[:3000] + "..."
 
             ref = {
                 "source_id": sid,

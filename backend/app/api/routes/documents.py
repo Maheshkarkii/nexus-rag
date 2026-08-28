@@ -131,6 +131,40 @@ async def process_project_document(
     return DocumentResponse.model_validate(doc)
 
 
+@router.post(
+    "/{project_id}/documents/{document_id}/pipeline",
+    response_model=DocumentResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Full Ingestion Pipeline (Extract, Chunk, Embed, Index)",
+    description="Execute all processing stages sequentially in a single server-side call for optimal performance.",
+)
+async def run_full_ingestion_pipeline(
+    project_id: uuid.UUID,
+    document_id: uuid.UUID,
+    session: AsyncSession = Depends(get_db),
+    storage_service: StorageService = Depends(get_storage_service),
+    processing_service: DocumentProcessingService = Depends(get_processing_service),
+    chunking_service: ChunkingService = Depends(get_chunking_service),
+    embedding_service: EmbeddingService = Depends(get_embedding_service),
+    indexing_service: VectorIndexingService = Depends(get_indexing_service),
+    qdrant_service: QdrantService = Depends(get_qdrant_service),
+) -> DocumentResponse:
+    """Run extract -> chunk -> embed -> index in a single fast server-side transaction."""
+    # 1. Process / Extract text
+    doc = await processing_service.process_document(
+        session=session, project_id=project_id, document_id=document_id, storage_service=storage_service
+    )
+    # 2. Chunk
+    await chunking_service.chunk_document(session=session, project_id=project_id, document_id=document_id)
+    # 3. Embed
+    await embedding_service.embed_document(session=session, project_id=project_id, document_id=document_id)
+    # 4. Index
+    await indexing_service.index_document(
+        session=session, project_id=project_id, document_id=document_id, qdrant_service=qdrant_service, embedding_service=embedding_service
+    )
+    return DocumentResponse.model_validate(doc)
+
+
 @router.get(
     "/{project_id}/documents/{document_id}/content",
     response_model=DocumentContentResponse,

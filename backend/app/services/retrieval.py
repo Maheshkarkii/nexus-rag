@@ -44,14 +44,11 @@ class RetrievalService:
             res = await session.execute(stmt)
             valid_doc_ids = set(res.scalars().all())
 
-            invalid_ids = [d_id for d_id in document_ids if d_id not in valid_doc_ids]
-            if invalid_ids:
-                invalid_str = ", ".join(str(i_id) for i_id in invalid_ids[:5])
-                if len(invalid_ids) > 5:
-                    invalid_str += "..."
-                raise BadRequestException(
-                    message=f"Validation failed: The following document IDs do not exist or belong to another project: [{invalid_str}]."
-                )
+            # Gracefully scope to valid IDs belonging to project
+            document_ids = [d_id for d_id in document_ids if d_id in valid_doc_ids]
+            if not document_ids:
+                logger.warning("None of the specified document IDs belong to the current project or they were deleted.")
+                return []
 
         # 3. Generate query vector embedding using the configured model
         query_vector = embedding_service.embed_text(query)

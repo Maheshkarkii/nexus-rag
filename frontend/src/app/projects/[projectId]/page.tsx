@@ -40,7 +40,22 @@ import remarkGfm from "remark-gfm";
 
 interface CitationSource {
   source_id: string;
+  document_id?: string;
+  chunk_id?: string;
   filename: string;
+  location?: {
+    page_number?: number | null;
+    section_title?: string | null;
+    paragraph_index?: number | null;
+    sheet_name?: string | null;
+    row_start?: number | null;
+    row_end?: number | null;
+    column_range?: string | null;
+    json_path?: string | null;
+    line_start?: number | null;
+    line_end?: number | null;
+  };
+  relevance_score?: number;
   preview: string;
 }
 
@@ -97,6 +112,14 @@ export default function ProjectWorkspacePage() {
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [queryInput, setQueryInput] = React.useState("");
   const [isGenerating, setIsGenerating] = React.useState(false);
+  const [selectedCitation, setSelectedCitation] = React.useState<CitationSource | null>(null);
+  const [isCopied, setIsCopied] = React.useState(false);
+  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+
+  // Auto-scroll chat to latest message smoothly
+  React.useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isGenerating]);
 
   // Stage 21 Reports states
   const [reports, setReports] = React.useState<ReportItem[]>([]);
@@ -217,30 +240,29 @@ export default function ProjectWorkspacePage() {
     setUploadStatus("Uploading file...");
     try {
       const uploadedDoc = await apiClient.uploadDocument(projectId, file);
-      setUploadStatus("File uploaded. Starting processing...");
+      setUploadStatus("File uploaded. Ingesting content...");
       await handleProcessDoc(uploadedDoc.id);
       await fetchDocuments();
+      setUploadStatus(null);
     } catch (err: unknown) {
       setUploadStatus(null);
       const msg = err instanceof Error ? err.message : "Failed to upload file.";
       alert(msg);
     } finally {
       setIsUploading(false);
+      setUploadStatus(null);
+      if (event.target) {
+        event.target.value = "";
+      }
     }
   };
 
-  // Process, chunk, embed, index sequential execution pipeline
+  // Unified fast ingestion pipeline execution (Extract -> Chunk -> Embed -> Index in one server call)
   const handleProcessDoc = async (docId: string) => {
     if (!projectId) return;
-    setProcessingDocs((prev) => ({ ...prev, [docId]: "Extracting text..." }));
+    setProcessingDocs((prev) => ({ ...prev, [docId]: "Processing pipeline..." }));
     try {
-      await apiClient.processDocument(projectId, docId);
-      setProcessingDocs((prev) => ({ ...prev, [docId]: "Partitioning chunks..." }));
-      await apiClient.chunkDocument(projectId, docId);
-      setProcessingDocs((prev) => ({ ...prev, [docId]: "Generating vectors..." }));
-      await apiClient.embedDocument(projectId, docId);
-      setProcessingDocs((prev) => ({ ...prev, [docId]: "Indexing to Qdrant..." }));
-      await apiClient.indexDocument(projectId, docId);
+      await apiClient.post(`/api/v1/projects/${projectId}/documents/${docId}/pipeline`);
       setProcessingDocs((prev) => {
         const copy = { ...prev };
         delete copy[docId];
@@ -854,27 +876,89 @@ export default function ProjectWorkspacePage() {
                         )}
                         
                         <div className="prose prose-sm dark:prose-invert max-w-none break-words">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {msg.content}
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              a: ({ href, children, ...props }) => {
+                                if (href && href.startsWith("#citation-")) {
+                                  const sourceId = href.replace("#citation-", "").toUpperCase();
+                                  const found = msg.citations?.find(
+                                    (c) =>
+                                      c.source_id.toUpperCase() === sourceId ||
+                                      c.source_id.toUpperCase() === `SOURCE ${sourceId}` ||
+                                      c.source_id.toUpperCase().includes(sourceId)
+                                  );
+                                  return (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        if (found) {
+                                          setSelectedCitation(found);
+                                        } else {
+                                          setSelectedCitation({
+                                            source_id: sourceId,
+                                            filename: "Referenced Source",
+                                            preview: `Passage excerpt for reference ${sourceId} from the retrieved context.`,
+                                          });
+                                        }
+                                      }}
+                                      className="inline-flex items-center gap-0.5 mx-0.5 px-1.5 py-0.2 rounded-md bg-primary/15 hover:bg-primary/25 border border-primary/30 text-primary font-mono text-[10px] font-bold transition-all cursor-pointer not-prose align-baseline shadow-2xs"
+                                      title={`Click to view source evidence for ${sourceId}`}
+                                    >
+                                      <FileText className="h-2.5 w-2.5 inline-block shrink-0" />
+                                      <span>{children}</span>
+                                    </button>
+                                  );
+                                }
+                                return (
+                                  <a href={href} target="_blank" rel="noreferrer" {...props}>
+                                    {children}
+                                  </a>
+                                );
+                              },
+                            }}
+                          >
+                            {msg.content
+                              ? msg.content.replace(
+                                  /\[(?:Source[\s:\u00A0\u202F]*)?\s*(S\d+)(?:\s*,\s*(?:Source[\s:\u00A0\u202F]*)?\s*(S\d+))*\]/gi,
+                                  (fullMatch) => {
+                                    const sMatches = fullMatch.match(/S\d+/gi);
+                                    if (!sMatches) return fullMatch;
+                                    return sMatches
+                                      .map((s) => `[${s.toUpperCase()}](#citation-${s.toUpperCase()})`)
+                                      .join(" ");
+                                  }
+                                )
+                              : ""}
                           </ReactMarkdown>
                         </div>
                       </div>
 
-                      {/* Display Citations tags and Latency */}
+                      {/* Display Interactive Citations tags and Latency */}
                       {msg.role === "assistant" && (
                         <div className="flex flex-wrap items-center gap-2 px-1 text-[10px] text-muted-foreground font-mono">
                           {msg.latencyMs && <span>Latency: {msg.latencyMs}ms</span>}
                           {msg.citations && msg.citations.length > 0 && (
                             <div className="flex flex-wrap gap-1.5 items-center">
-                              <span>• Sources:</span>
+                              <span className="text-[10px] text-muted-foreground font-sans font-medium">Sources:</span>
                               {msg.citations.map((c) => (
-                                <span
+                                <button
                                   key={c.source_id}
-                                  className="px-1.5 py-0.5 rounded bg-muted border border-border text-[9px] font-bold text-foreground cursor-help"
-                                  title={`${c.filename} - ${c.preview}`}
+                                  type="button"
+                                  onClick={() => setSelectedCitation(c)}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 border border-primary/20 hover:bg-primary/20 text-[10px] font-semibold text-primary transition-all cursor-pointer shadow-xs"
+                                  title={`Click to view passage excerpt from ${c.filename}`}
                                 >
-                                  {c.source_id}
-                                </span>
+                                  <FileText className="h-3 w-3 shrink-0" />
+                                  <span>{c.source_id}</span>
+                                  <span className="text-muted-foreground font-normal truncate max-w-[140px]">
+                                    {c.filename}
+                                  </span>
+                                  {c.location?.page_number && (
+                                    <span className="text-primary/70 text-[9px]">(p. {c.location.page_number})</span>
+                                  )}
+                                </button>
                               ))}
                             </div>
                           )}
@@ -884,6 +968,7 @@ export default function ProjectWorkspacePage() {
                   </div>
                 ))
               )}
+              <div ref={messagesEndRef} className="h-2 shrink-0" />
             </div>
 
             {/* Input Form area */}
@@ -1128,6 +1213,152 @@ export default function ProjectWorkspacePage() {
         onClose={() => setIsDeleteOpen(false)}
         onSuccess={handleDeleted}
       />
+
+      {/* Citation Source Evidence Modal */}
+      {selectedCitation && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-150">
+          <div className="bg-card border border-border/80 rounded-2xl shadow-2xl max-w-2xl w-full flex flex-col max-h-[85vh] overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="p-4 px-5 border-b border-border flex items-center justify-between bg-muted/40 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 border border-primary/30 text-primary font-bold text-sm shadow-xs">
+                  {selectedCitation.source_id}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-foreground">
+                      Source Evidence Passage
+                    </h3>
+                    <Badge variant="outline" className="text-[10px] bg-primary/10 border-primary/20 text-primary font-mono py-0 px-2 font-bold">
+                      {selectedCitation.source_id}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground font-mono truncate max-w-md">
+                    {selectedCitation.filename}
+                    {selectedCitation.location?.page_number ? ` • Page ${selectedCitation.location.page_number}` : ""}
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
+                onClick={() => {
+                  setSelectedCitation(null);
+                  setIsCopied(false);
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Scrollable Content Body */}
+            <div className="p-5 space-y-4 overflow-y-auto flex-1">
+              {/* 4-Item Precision Metadata Cards Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {/* 1. Source */}
+                <div className="p-3 rounded-xl bg-background border border-border flex flex-col justify-between space-y-1 shadow-xs">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Source</span>
+                  <div className="flex items-center gap-1.5 font-semibold text-xs text-foreground truncate">
+                    <Badge variant="outline" className="text-[10px] bg-primary/10 border-primary/25 text-primary font-bold px-1.5 py-0 shrink-0">
+                      {selectedCitation.source_id}
+                    </Badge>
+                    <span className="truncate" title={selectedCitation.filename}>
+                      {selectedCitation.filename}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 2. Page */}
+                <div className="p-3 rounded-xl bg-background border border-border flex flex-col justify-between space-y-1 shadow-xs">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Page Number</span>
+                  <div className="font-mono font-bold text-xs text-foreground">
+                    {selectedCitation.location?.page_number ? `Page ${selectedCitation.location.page_number}` : "Not Specified"}
+                  </div>
+                </div>
+
+                {/* 3. Section */}
+                <div className="p-3 rounded-xl bg-background border border-border flex flex-col justify-between space-y-1 shadow-xs">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Section</span>
+                  <div className="font-semibold text-xs text-foreground truncate" title={selectedCitation.location?.section_title || "Document Body"}>
+                    {selectedCitation.location?.section_title || (selectedCitation.location?.page_number ? `Page ${selectedCitation.location.page_number} Body` : "Document Body")}
+                  </div>
+                </div>
+
+                {/* 4. Chunk ID */}
+                <div className="p-3 rounded-xl bg-background border border-border flex flex-col justify-between space-y-1 shadow-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Chunk ID</span>
+                    {selectedCitation.chunk_id && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (selectedCitation.chunk_id) {
+                            navigator.clipboard.writeText(selectedCitation.chunk_id);
+                          }
+                        }}
+                        className="text-[9px] text-primary hover:underline cursor-pointer"
+                        title="Copy full Chunk UUID"
+                      >
+                        copy
+                      </button>
+                    )}
+                  </div>
+                  <div className="font-mono text-[11px] text-muted-foreground truncate" title={selectedCitation.chunk_id || "N/A"}>
+                    {selectedCitation.chunk_id ? selectedCitation.chunk_id : "N/A"}
+                  </div>
+                </div>
+              </div>
+
+              {/* Text Snippet / Evidence */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                    <span>Retrieved Passage Excerpt</span>
+                    <span className="text-[10px] font-normal text-muted-foreground">
+                      ({selectedCitation.preview ? selectedCitation.preview.length : 0} characters • {selectedCitation.preview ? selectedCitation.preview.split(/\s+/).length : 0} words)
+                    </span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (selectedCitation.preview) {
+                        navigator.clipboard.writeText(selectedCitation.preview);
+                        setIsCopied(true);
+                        setTimeout(() => setIsCopied(false), 2000);
+                      }
+                    }}
+                    className="inline-flex items-center gap-1 text-primary hover:underline text-xs font-semibold cursor-pointer px-2 py-0.5 rounded bg-primary/10 border border-primary/20"
+                  >
+                    <FileCheck className="h-3 w-3" />
+                    <span>{isCopied ? "Copied!" : "Copy Excerpt"}</span>
+                  </button>
+                </div>
+                <div className="p-4 rounded-xl border border-border/80 bg-muted/30 text-xs sm:text-sm text-foreground leading-relaxed whitespace-pre-wrap font-serif select-text border-l-4 border-l-primary shadow-inner max-h-[45vh] overflow-y-auto">
+                  {selectedCitation.preview}
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-3 px-5 border-t border-border/60 bg-muted/20 flex items-center justify-between shrink-0">
+              <span className="text-[11px] text-muted-foreground">
+                Grounded source verification
+              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setSelectedCitation(null);
+                  setIsCopied(false);
+                }}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </Container>
   );
 }

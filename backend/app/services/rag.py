@@ -4,10 +4,12 @@ import time
 import uuid
 from typing import Any
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.exceptions import BadRequestException, NotFoundException
+from app.db.models.document import Document
 from app.services.answer_generation import (
     GroundedAnswerGenerator,
 )
@@ -32,14 +34,25 @@ logger = logging.getLogger("ai_research_assistant.services.rag")
 settings = get_settings()
 
 
-async def get_conversation_document_scope(session: AsyncSession, conversation_id: uuid.UUID) -> list[uuid.UUID] | None:
+async def get_conversation_document_scope(
+    session: AsyncSession, conversation_id: uuid.UUID, project_id: uuid.UUID | None = None
+) -> list[uuid.UUID] | None:
     """Scan conversation messages chronologically to find the most recent user-selected document scope."""
     db_messages = await get_conversation_messages(session, conversation_id, limit=100)
     for msg in reversed(db_messages):
         if msg.role == "user" and msg.metadata_json and "selected_document_ids" in msg.metadata_json:
             doc_ids_str = msg.metadata_json["selected_document_ids"]
             if doc_ids_str is not None:
-                return [uuid.UUID(d) for d in doc_ids_str]
+                parsed_ids = [uuid.UUID(d) for d in doc_ids_str]
+                if project_id and parsed_ids:
+                    stmt = select(Document.id).where(
+                        Document.id.in_(parsed_ids),
+                        Document.project_id == project_id,
+                    )
+                    res = await session.execute(stmt)
+                    valid_ids = list(res.scalars().all())
+                    return valid_ids if valid_ids else None
+                return parsed_ids
     return None
 
 
@@ -82,7 +95,7 @@ class RAGService:
                 raise BadRequestException("Conversation does not belong to this project.")
             
             if document_ids is None:
-                inherited = await get_conversation_document_scope(session, conversation_id)
+                inherited = await get_conversation_document_scope(session, conversation_id, project_id=project_id)
                 if inherited is not None:
                     effective_doc_ids = inherited
                     logger.info(f"Inherited document scope from conversation: {effective_doc_ids}")
@@ -281,7 +294,7 @@ class RAGService:
                 return
             
             if document_ids is None:
-                inherited = await get_conversation_document_scope(session, conversation_id)
+                inherited = await get_conversation_document_scope(session, conversation_id, project_id=project_id)
                 if inherited is not None:
                     effective_doc_ids = inherited
                     logger.info(f"Inherited document scope from conversation: {effective_doc_ids}")

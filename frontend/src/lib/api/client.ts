@@ -31,7 +31,7 @@ export class ApiClient {
 
   constructor(clientConfig: ApiClientConfig = {}) {
     this.baseUrl = (clientConfig.baseUrl || config.apiUrl).replace(/\/+$/, "");
-    this.defaultTimeoutMs = clientConfig.defaultTimeoutMs || 10000;
+    this.defaultTimeoutMs = clientConfig.defaultTimeoutMs || 120000;
     this.defaultHeaders = {
       Accept: "application/json",
       ...(clientConfig.defaultHeaders || {}),
@@ -366,7 +366,10 @@ export class ApiClient {
     },
     options: RequestOptions = {}
   ): Promise<unknown> {
-    return this.post<unknown>(`/api/v1/projects/${projectId}/ask`, payload, options);
+    return this.post<unknown>(`/api/v1/projects/${projectId}/ask`, payload, {
+      timeoutMs: 120000,
+      ...options,
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -382,7 +385,10 @@ export class ApiClient {
     },
     options: RequestOptions = {}
   ): Promise<unknown> {
-    return this.post<unknown>(`/api/v1/projects/${projectId}/reports`, payload, options);
+    return this.post<unknown>(`/api/v1/projects/${projectId}/reports`, payload, {
+      timeoutMs: 180000,
+      ...options,
+    });
   }
 
   public async listReports(
