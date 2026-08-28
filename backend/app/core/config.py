@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     BACKEND_HOST: str = "0.0.0.0"
     BACKEND_PORT: int = 8000
+    PORT: int | None = None
 
     # --------------------------------------------------------------------------
     # 3. CORS Settings

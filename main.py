@@ -1,6 +1,16 @@
-def main():
-    print("Hello from ai-research-assistant!")
+import os
+import sys
+from pathlib import Path
 
+# Ensure backend directory is in python search path
+backend_dir = Path(__file__).resolve().parent / "backend"
+if str(backend_dir) not in sys.path:
+    sys.path.insert(0, str(backend_dir))
+
+from app.main import app, create_application  # noqa: F401
 
 if __name__ == "__main__":
-    main()
+    import uvicorn
+
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port)
