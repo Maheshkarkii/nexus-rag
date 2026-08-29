@@ -572,22 +572,34 @@ export default function ProjectWorkspacePage() {
 
   if (error || !project) {
     return (
-      <Container className="py-12 max-w-lg mx-auto text-center space-y-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-destructive/10 text-destructive mx-auto border border-destructive/20">
-          <AlertCircle className="h-6 w-6" />
+      <Container className="py-16 max-w-lg mx-auto text-center space-y-4">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500 mx-auto border border-amber-500/20">
+          <FolderKanban className="h-7 w-7" />
         </div>
-        <h2 className="text-lg font-bold text-foreground">Project Not Found</h2>
-        <div className="flex items-center justify-center gap-3 pt-2">
+        <div className="space-y-1.5">
+          <h2 className="text-xl font-bold text-foreground">Workspace Not Found</h2>
+          <p className="text-xs text-muted-foreground leading-relaxed max-w-sm mx-auto">
+            This research project was not found in the current backend database. It may have been deleted or the server recently restarted.
+          </p>
+        </div>
+        <div className="flex items-center justify-center gap-3 pt-3">
           <Link href="/projects">
+            <Button variant="default" size="sm" className="gap-1.5 shadow-sm shadow-primary/20">
+              <FolderKanban className="h-3.5 w-3.5" />
+              <span>Browse All Projects</span>
+            </Button>
+          </Link>
+          <Link href="/">
             <Button variant="outline" size="sm" className="gap-1.5">
               <ArrowLeft className="h-3.5 w-3.5" />
-              <span>Back to Projects</span>
+              <span>Home</span>
             </Button>
           </Link>
         </div>
       </Container>
     );
   }
+
 
   return (
     <Container size="xl" className="py-4 space-y-4 max-w-[1600px] h-[calc(100vh-2rem)] flex flex-col">
