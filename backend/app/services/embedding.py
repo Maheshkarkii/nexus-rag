@@ -201,11 +201,14 @@ class EmbeddingService:
         # 5. Load model and get dimensions
         dimension = self.get_dimension()
         
-        # 6. Generate embeddings and handle failures cleanly
+        # 6. Generate embeddings non-blocking in worker thread
         try:
+            import asyncio
+
             embed_start = time.perf_counter()
             logger.info(f"Generating embeddings for {len(texts)} chunks of doc {document_id} using {self.model_name}")
-            vectors = self.embed_batch(texts)
+            vectors = await asyncio.to_thread(self.embed_batch, texts)
+
             
             # Dimension validation
             for vec in vectors:
