@@ -48,6 +48,8 @@ class Settings(BaseSettings):
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:8000",
+        "https://nexus-rag-mu.vercel.app",
+        "*",
     ]
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
@@ -66,7 +68,8 @@ class Settings(BaseSettings):
             return [origin.strip() for origin in v_trimmed.split(",") if origin.strip()]
         elif isinstance(v, list):
             return [str(item).strip() for item in v if item]
-        return ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8000"]
+        return ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8000", "https://nexus-rag-mu.vercel.app", "*"]
+
 
     # --------------------------------------------------------------------------
     # 4. PostgreSQL Relational Database Settings

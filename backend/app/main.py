@@ -86,10 +86,12 @@ def create_application() -> FastAPI:
         application.add_middleware(
             CORSMiddleware,
             allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+            allow_origin_regex=r"https://.*\.vercel\.app",
             allow_credentials=False,
             allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"],
             allow_headers=["*"],
         )
+
 
     # 3. Mount API v1 router under configured prefix
     application.include_router(api_router, prefix=settings.API_V1_STR)

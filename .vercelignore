@@ -1,5 +1,6 @@
-﻿# Exclude Python backend and local databases from Vercel deployment
+# Exclude Python backend, requirements, ML models, and databases from Vercel deployment
 backend/
+src/
 .venv/
 venv/
 *.db
@@ -12,3 +13,9 @@ docs/
 docker-compose.yml
 Dockerfile
 *.log
+*.py
+requirements.txt
+requirement.txt
+pyproject.toml
+uv.lock
+
