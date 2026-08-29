@@ -56,8 +56,29 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         db_ms = round((time.perf_counter() - t_db) * 1000, 2)
         logger.info(f"[STARTUP] DATABASE_INITIALIZATION: Initialized local SQLite schema in {db_ms}ms.")
 
+    # Seed default workspace if none exists
+    try:
+        from sqlalchemy import select
+        from app.db.models.project import Project
+        from app.db.session import async_session_factory
+
+        async with async_session_factory() as db_session:
+            result = await db_session.execute(select(Project).limit(1))
+            existing_project = result.scalar_one_or_none()
+            if not existing_project:
+                default_proj = Project(
+                    name="Default Research Workspace",
+                    description="Primary workspace for multi-document deep research, semantic retrieval, and synthesis.",
+                )
+                db_session.add(default_proj)
+                await db_session.commit()
+                logger.info(f"[STARTUP] SEED_DATA: Created default workspace with ID '{default_proj.id}'.")
+    except Exception as exc:
+        logger.warning(f"[STARTUP] Default project seeding skipped: {exc}")
+
     total_ms = round((time.perf_counter() - t0) * 1000, 2)
     logger.info(f"[STARTUP] STARTUP_COMPLETE in {total_ms}ms")
+
 
     yield
     logger.info(f"Shutting down {settings.APP_NAME} gracefully...")
