@@ -141,6 +141,8 @@ async def process_project_document(
 async def run_full_ingestion_pipeline(
     project_id: uuid.UUID,
     document_id: uuid.UUID,
+    chunk_size: int | None = Query(None, ge=50, le=4000, description="Optional custom chunk size in characters"),
+    chunk_overlap: int | None = Query(None, ge=0, le=1000, description="Optional custom chunk overlap in characters"),
     session: AsyncSession = Depends(get_db),
     storage_service: StorageService = Depends(get_storage_service),
     processing_service: DocumentProcessingService = Depends(get_processing_service),
@@ -154,8 +156,14 @@ async def run_full_ingestion_pipeline(
     doc = await processing_service.process_document(
         session=session, project_id=project_id, document_id=document_id, storage_service=storage_service
     )
-    # 2. Chunk
-    await chunking_service.chunk_document(session=session, project_id=project_id, document_id=document_id)
+    # 2. Chunk with user-configured chunk_size & chunk_overlap
+    await chunking_service.chunk_document(
+        session=session,
+        project_id=project_id,
+        document_id=document_id,
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+    )
     # 3. Embed
     await embedding_service.embed_document(session=session, project_id=project_id, document_id=document_id)
     # 4. Index
@@ -220,6 +228,8 @@ async def delete_project_document(
 async def chunk_project_document(
     project_id: uuid.UUID,
     document_id: uuid.UUID,
+    chunk_size: int | None = Query(None, ge=50, le=4000, description="Optional custom chunk size in characters"),
+    chunk_overlap: int | None = Query(None, ge=0, le=1000, description="Optional custom chunk overlap in characters"),
     session: AsyncSession = Depends(get_db),
     chunking_service: ChunkingService = Depends(get_chunking_service),
 ) -> ChunkingSummaryResponse:
@@ -239,13 +249,16 @@ async def chunk_project_document(
             message="Document text has not been extracted yet. Please process the document first."
         )
 
-    # 3. Perform chunking
+    # 3. Perform chunking with user-configured chunk_size & chunk_overlap
     summary = await chunking_service.chunk_document(
         session=session,
         project_id=project_id,
         document_id=document_id,
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
     )
     return ChunkingSummaryResponse.model_validate(summary)
+
 
 
 @router.get(

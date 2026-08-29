@@ -25,6 +25,7 @@ import {
   FileCode,
   FileCheck,
   Sparkles,
+  SlidersHorizontal,
   X
 } from "lucide-react";
 import { apiClient } from "@/lib/api";
@@ -35,8 +36,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { EditProjectModal } from "@/components/projects/edit-project-modal";
 import { DeleteProjectModal } from "@/components/projects/delete-project-modal";
+import { RagConfigModal, RagConfig, DEFAULT_RAG_CONFIG } from "@/components/projects/rag-config-modal";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+
 
 interface CitationSource {
   source_id: string;
@@ -132,6 +135,42 @@ export default function ProjectWorkspacePage() {
   // Modals
   const [isEditOpen, setIsEditOpen] = React.useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = React.useState(false);
+  const [isConfigModalOpen, setIsConfigModalOpen] = React.useState(false);
+
+  // RAG & Ingestion Hyperparameters State
+  const [ragConfig, setRagConfig] = React.useState<RagConfig>(DEFAULT_RAG_CONFIG);
+
+  // Load saved config from localStorage
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved =
+          localStorage.getItem(`nexus_rag_config_${projectId}`) ||
+          localStorage.getItem("nexus_rag_config_default");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && typeof parsed.topK === "number") {
+            setRagConfig(parsed);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load saved RAG config", e);
+      }
+    }
+  }, [projectId]);
+
+  const handleSaveConfig = (newConfig: RagConfig) => {
+    setRagConfig(newConfig);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(`nexus_rag_config_${projectId}`, JSON.stringify(newConfig));
+        localStorage.setItem("nexus_rag_config_default", JSON.stringify(newConfig));
+      } catch (e) {
+        console.error("Failed to save RAG config", e);
+      }
+    }
+  };
+
 
   // Load project details
   const fetchProject = React.useCallback(async () => {
@@ -258,11 +297,15 @@ export default function ProjectWorkspacePage() {
   };
 
   // Unified fast ingestion pipeline execution (Extract -> Chunk -> Embed -> Index in one server call)
-  const handleProcessDoc = async (docId: string) => {
+  const handleProcessDoc = async (docId: string, customConfig?: RagConfig) => {
     if (!projectId) return;
     setProcessingDocs((prev) => ({ ...prev, [docId]: "Processing pipeline..." }));
+    const cfg = customConfig || ragConfig;
     try {
-      await apiClient.post(`/api/v1/projects/${projectId}/documents/${docId}/pipeline`);
+      await apiClient.runDocumentPipeline(projectId, docId, {
+        chunkSize: cfg.chunkSize,
+        chunkOverlap: cfg.chunkOverlap,
+      });
       setProcessingDocs((prev) => {
         const copy = { ...prev };
         delete copy[docId];
@@ -375,10 +418,11 @@ export default function ProjectWorkspacePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           query: userMsg.content,
-          top_k: 8,
+          top_k: ragConfig.topK,
           document_ids: searchEntireProject ? null : selectedDocIds,
           conversation_id: convId,
         }),
+
       });
 
       if (!response.ok) {
@@ -570,6 +614,19 @@ export default function ProjectWorkspacePage() {
           <Button
             variant="outline"
             size="sm"
+            onClick={() => setIsConfigModalOpen(true)}
+            className="gap-1.5 h-8 text-xs bg-secondary/80 border-border text-foreground hover:bg-accent"
+            title="Configure Top Results (top_k), Chunk Size, and Chunk Overlap"
+          >
+            <SlidersHorizontal className="h-3.5 w-3.5 text-primary" />
+            <span>Hyperparameters</span>
+            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 font-mono text-primary bg-primary/10 border border-primary/20">
+              k={ragConfig.topK} | {ragConfig.chunkSize}c
+            </Badge>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setIsReportModalOpen(true)}
             className="gap-1.5 h-8 text-xs bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"
           >
@@ -595,6 +652,7 @@ export default function ProjectWorkspacePage() {
             <span>Delete</span>
           </Button>
         </div>
+
       </div>
 
       {/* Main Split Layout */}
@@ -644,6 +702,23 @@ export default function ProjectWorkspacePage() {
             </CardHeader>
 
             <CardContent className="p-3 overflow-y-auto flex-1 space-y-2">
+              {/* Active Chunking Hyperparameters Banner */}
+              <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-muted/40 border border-border/50 text-[10px] text-muted-foreground">
+                <div className="flex items-center gap-1.5">
+                  <SlidersHorizontal className="h-3 w-3 text-primary" />
+                  <span>
+                    Chunking: <strong className="text-foreground font-mono">{ragConfig.chunkSize}</strong> chars (overlap <strong className="text-foreground font-mono">{ragConfig.chunkOverlap}</strong>)
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsConfigModalOpen(true)}
+                  className="text-primary hover:underline font-semibold cursor-pointer"
+                >
+                  Tune
+                </button>
+              </div>
+
               {documents.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground space-y-2">
                   <Upload className="h-8 w-8 mx-auto text-muted-foreground/45" />
@@ -704,6 +779,17 @@ export default function ProjectWorkspacePage() {
                       </div>
 
                       <div className="flex items-center gap-1 shrink-0 ml-2">
+                        {doc.status === "ready" && !isProcessing && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-primary/10"
+                            onClick={() => handleProcessDoc(doc.id)}
+                            title="Re-chunk & re-index document with active hyperparameters"
+                          >
+                            <RefreshCw className="h-3 w-3" />
+                          </Button>
+                        )}
                         {doc.status !== "ready" && !isProcessing && (
                           <Button
                             size="icon"
@@ -730,6 +816,7 @@ export default function ProjectWorkspacePage() {
                 })
               )}
             </CardContent>
+
           </Card>
 
           {/* Research Scope & Sessions Card */}
@@ -796,22 +883,35 @@ export default function ProjectWorkspacePage() {
         {/* Right Side: Chat & Comparison Board (8 columns) */}
         <div className="lg:col-span-8 flex flex-col min-h-0">
           <Card className="flex-1 flex flex-col min-h-0 border-border/80 bg-card/60 backdrop-blur-sm shadow-sm relative">
-            {/* Header displaying targeted scope */}
-            <div className="p-4 border-b border-border/60 shrink-0 bg-background/40 flex items-center justify-between">
+            {/* Header displaying targeted scope & RAG hyperparams */}
+            <div className="p-3 px-4 border-b border-border/60 shrink-0 bg-background/40 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Bot className="h-5 w-5 text-primary" />
                 <div>
                   <h2 className="text-xs font-bold text-foreground">Grounded Research Assistant</h2>
                   <p className="text-[10px] text-muted-foreground">
-                    Ask questions, decompose complex tasks, and generate grounded research reports.
+                    Grounded multi-document synthesis and citation verification.
                   </p>
                 </div>
               </div>
-              <Badge variant="outline" className="text-[10px] font-mono gap-1">
-                <GitCompare className="h-3 w-3" />
-                <span>Stage 20 Planning & Stage 21 Reports</span>
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsConfigModalOpen(true)}
+                  className="h-7 px-2.5 text-[10px] gap-1.5 bg-background/60 hover:bg-accent cursor-pointer"
+                  title="Change Top K Results or Chunking Parameters"
+                >
+                  <SlidersHorizontal className="h-3 w-3 text-primary" />
+                  <span>Top K: <strong className="font-mono text-foreground">{ragConfig.topK}</strong></span>
+                </Button>
+                <Badge variant="outline" className="text-[10px] font-mono gap-1 hidden sm:inline-flex">
+                  <GitCompare className="h-3 w-3" />
+                  <span>Stage 20 RAG</span>
+                </Badge>
+              </div>
             </div>
+
 
             {/* Chat Messages Log */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -1359,6 +1459,14 @@ export default function ProjectWorkspacePage() {
           </div>
         </div>
       )}
+      {/* RAG & Ingestion Hyperparameters Modal */}
+      <RagConfigModal
+        isOpen={isConfigModalOpen}
+        onClose={() => setIsConfigModalOpen(false)}
+        config={ragConfig}
+        onSave={handleSaveConfig}
+      />
     </Container>
   );
 }
+

@@ -253,17 +253,40 @@ export class ApiClient {
     );
   }
 
-  public async chunkDocument(
+  public async runDocumentPipeline(
     projectId: string,
     documentId: string,
+    params?: { chunkSize?: number; chunkOverlap?: number },
     options: RequestOptions = {}
-  ): Promise<unknown> {
-    return this.post<unknown>(
-      `/api/v1/projects/${projectId}/documents/${documentId}/chunk`,
+  ): Promise<DocumentResponse> {
+    const searchParams = new URLSearchParams();
+    if (params?.chunkSize) searchParams.set("chunk_size", String(params.chunkSize));
+    if (params?.chunkOverlap) searchParams.set("chunk_overlap", String(params.chunkOverlap));
+    const qs = searchParams.toString() ? `?${searchParams.toString()}` : "";
+    return this.post<DocumentResponse>(
+      `/api/v1/projects/${projectId}/documents/${documentId}/pipeline${qs}`,
       undefined,
       options
     );
   }
+
+  public async chunkDocument(
+    projectId: string,
+    documentId: string,
+    params?: { chunkSize?: number; chunkOverlap?: number },
+    options: RequestOptions = {}
+  ): Promise<unknown> {
+    const searchParams = new URLSearchParams();
+    if (params?.chunkSize) searchParams.set("chunk_size", String(params.chunkSize));
+    if (params?.chunkOverlap) searchParams.set("chunk_overlap", String(params.chunkOverlap));
+    const qs = searchParams.toString() ? `?${searchParams.toString()}` : "";
+    return this.post<unknown>(
+      `/api/v1/projects/${projectId}/documents/${documentId}/chunk${qs}`,
+      undefined,
+      options
+    );
+  }
+
 
   public async embedDocument(
     projectId: string,
