@@ -25,37 +25,51 @@ export function ApiStatusCard() {
     setErrorMessage(null);
 
     const start = performance.now();
-    try {
-      // 1. Check process liveness
-      const health = await apiClient.checkHealth();
-      setHealthData(health);
+    let attempts = 0;
+    const maxAttempts = 3;
 
-      // 2. Check live PostgreSQL database readiness
+    while (attempts < maxAttempts) {
+      attempts++;
       try {
-        const ready = await apiClient.checkReadiness();
-        setReadinessData(ready);
-      } catch {
-        // Readiness can be degraded without failing process liveness
+        // 1. Check process liveness
+        const health = await apiClient.checkHealth({ timeoutMs: 15000 });
+        setHealthData(health);
+
+        // 2. Check live PostgreSQL database readiness
+        try {
+          const ready = await apiClient.checkReadiness({ timeoutMs: 10000 });
+          setReadinessData(ready);
+        } catch {
+          // Readiness can be degraded without failing process liveness
+          setReadinessData(null);
+        }
+
+        setLatencyMs(Math.round(performance.now() - start));
+        setStatus("connected");
+        setErrorMessage(null);
+        break;
+      } catch (err: unknown) {
+        if (attempts < maxAttempts) {
+          // Wait 2 seconds before retrying (gives Render cold start time to finish booting)
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          continue;
+        }
+
+        setLatencyMs(Math.round(performance.now() - start));
+        setHealthData(null);
         setReadinessData(null);
+        setStatus("unavailable");
+
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Unable to connect to the research assistant backend. The server may still be spinning up from cold sleep.";
+        setErrorMessage(message);
       }
-
-      setLatencyMs(Math.round(performance.now() - start));
-      setStatus("connected");
-    } catch (err: unknown) {
-      setLatencyMs(Math.round(performance.now() - start));
-      setHealthData(null);
-      setReadinessData(null);
-      setStatus("unavailable");
-
-      const message =
-        err instanceof Error
-          ? err.message
-          : "Unable to connect to the research assistant backend. Please verify that the API server is running.";
-      setErrorMessage(message);
-    } finally {
-      setIsRefreshing(false);
     }
+    setIsRefreshing(false);
   }, []);
+
 
   React.useEffect(() => {
     probeBackend();

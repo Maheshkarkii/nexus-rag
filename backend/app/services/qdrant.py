@@ -33,20 +33,20 @@ class QdrantService:
             return self._client
 
         target_url = self.url
-        if get_settings().APP_ENV == "development" and target_url in ("http://qdrant:6333", "http://localhost:6333", "http://127.0.0.1:6333"):
+        if target_url in ("http://qdrant:6333", "http://localhost:6333", "http://127.0.0.1:6333"):
             import socket
 
             use_memory = False
             if "qdrant:6333" in target_url:
                 try:
                     socket.gethostbyname("qdrant")
-                except socket.gaierror:
+                except Exception:
                     target_url = "http://localhost:6333"
 
             if target_url.startswith("http://localhost:6333") or target_url.startswith("http://127.0.0.1:6333"):
                 try:
                     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    sock.settimeout(1.0)
+                    sock.settimeout(0.5)
                     res = sock.connect_ex(("127.0.0.1", 6333))
                     sock.close()
                     if res != 0:
@@ -59,7 +59,8 @@ class QdrantService:
                 storage_path = os.path.join(os.getcwd(), "storage", "qdrant_db")
                 os.makedirs(storage_path, exist_ok=True)
                 target_url = storage_path
-                logger.info(f"Standalone Qdrant server unreachable on port 6333; using local persistent Qdrant at '{storage_path}'.")
+                logger.info(f"Remote Qdrant unreachable; using local embedded persistent Qdrant at '{storage_path}'.")
+
 
         if target_url in QdrantService._shared_clients and QdrantService._shared_clients[target_url] is not None:
             self._client = QdrantService._shared_clients[target_url]

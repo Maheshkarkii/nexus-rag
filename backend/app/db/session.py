@@ -19,16 +19,17 @@ settings = get_settings()
 
 database_url = settings.async_database_url
 
-# Handle local standalone development where postgres hostname isn't in local DNS/hosts
-if "postgres:5432" in database_url and settings.APP_ENV == "development":
+# Handle standalone environments where postgres hostname isn't in local DNS/hosts
+if "postgres:5432" in database_url:
     import socket
 
     try:
         socket.gethostbyname("postgres")
-    except socket.gaierror:
-        # Fallback to local SQLite async database when running python app.main without Docker
+    except Exception:
+        # Fallback to local SQLite async database
         database_url = "sqlite+aiosqlite:///./local_dev.db"
-        logger.info("Local Postgres host 'postgres' unresolvable; defaulting to local SQLite database.")
+        logger.info("Postgres host 'postgres' unresolvable; defaulting to local SQLite database.")
+
 
 engine_kwargs = {
     "echo": settings.DEBUG and settings.APP_ENV == "development",

@@ -117,7 +117,7 @@ export class ApiClient {
 
       // Handle fetch network failures and timeout aborts
       if (err instanceof DOMException && err.name === "AbortError") {
-        throw new NetworkError("Request timed out. The backend server took too long to respond.");
+        throw new NetworkError("Request timed out. The backend server may be waking up from cold sleep (Render free tier). Please retry in a few seconds.");
       }
 
       const rawMessage = err instanceof Error ? err.message : String(err);
@@ -126,11 +126,12 @@ export class ApiClient {
         rawMessage.toLowerCase().includes("networkerror")
       ) {
         throw new NetworkError(
-          "Unable to connect to the research assistant backend. Please verify that the API server is running."
+          "Unable to connect to the research assistant backend. The server may still be spinning up from cold sleep."
         );
       }
 
       throw new NetworkError(`Network communication error: ${rawMessage}`);
+
     }
   }
 
