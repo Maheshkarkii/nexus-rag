@@ -31,7 +31,7 @@ export class ApiClient {
 
   constructor(clientConfig: ApiClientConfig = {}) {
     this.baseUrl = (clientConfig.baseUrl || config.apiUrl).replace(/\/+$/, "");
-    this.defaultTimeoutMs = clientConfig.defaultTimeoutMs || 120000;
+    this.defaultTimeoutMs = clientConfig.defaultTimeoutMs || 180000; // 3 minutes to accommodate Render cold starts
     this.defaultHeaders = {
       Accept: "application/json",
       ...(clientConfig.defaultHeaders || {}),

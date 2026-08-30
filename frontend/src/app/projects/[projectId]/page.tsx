@@ -276,10 +276,10 @@ export default function ProjectWorkspacePage() {
     if (!file || !projectId) return;
 
     setIsUploading(true);
-    setUploadStatus("Uploading file...");
+    setUploadStatus("Uploading file (waking up server if idle)...");
     try {
-      const uploadedDoc = await apiClient.uploadDocument(projectId, file);
-      setUploadStatus("File uploaded. Ingesting content...");
+      const uploadedDoc = await apiClient.uploadDocument(projectId, file, { timeoutMs: 120000 });
+      setUploadStatus("Ingesting content (extracting, embedding, indexing)...");
       await handleProcessDoc(uploadedDoc.id);
       await fetchDocuments();
       setUploadStatus(null);
@@ -305,7 +305,7 @@ export default function ProjectWorkspacePage() {
       await apiClient.runDocumentPipeline(projectId, docId, {
         chunkSize: cfg.chunkSize,
         chunkOverlap: cfg.chunkOverlap,
-      });
+      }, { timeoutMs: 180000 });
       setProcessingDocs((prev) => {
         const copy = { ...prev };
         delete copy[docId];

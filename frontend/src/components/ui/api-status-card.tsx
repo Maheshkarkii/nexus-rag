@@ -31,13 +31,13 @@ export function ApiStatusCard() {
     while (attempts < maxAttempts) {
       attempts++;
       try {
-        // 1. Check process liveness
-        const health = await apiClient.checkHealth({ timeoutMs: 15000 });
+        // 1. Check process liveness with 90s tolerance for cold starts
+        const health = await apiClient.checkHealth({ timeoutMs: 90000 });
         setHealthData(health);
 
         // 2. Check live PostgreSQL database readiness
         try {
-          const ready = await apiClient.checkReadiness({ timeoutMs: 10000 });
+          const ready = await apiClient.checkReadiness({ timeoutMs: 60000 });
           setReadinessData(ready);
         } catch {
           // Readiness can be degraded without failing process liveness
@@ -50,8 +50,8 @@ export function ApiStatusCard() {
         break;
       } catch (err: unknown) {
         if (attempts < maxAttempts) {
-          // Wait 2 seconds before retrying (gives Render cold start time to finish booting)
-          await new Promise((resolve) => setTimeout(resolve, 2000));
+          // Wait 3 seconds before retrying (gives Render cold start time to finish booting)
+          await new Promise((resolve) => setTimeout(resolve, 3000));
           continue;
         }
 
