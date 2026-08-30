@@ -46,15 +46,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         logger.info("[STARTUP] Lazy model loading enabled (PREWARM_MODELS=false) to conserve memory.")
 
     t_db = time.perf_counter()
-    # Initialize tables for local sqlite dev mode
+    # Auto-initialize tables if they do not exist
+    import app.db.models  # noqa: F401
     from app.db.base import Base
     from app.db.session import engine
 
-    if "sqlite" in str(engine.url):
+    try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         db_ms = round((time.perf_counter() - t_db) * 1000, 2)
-        logger.info(f"[STARTUP] DATABASE_INITIALIZATION: Initialized local SQLite schema in {db_ms}ms.")
+        logger.info(f"[STARTUP] DATABASE_INITIALIZATION: Initialized database schema in {db_ms}ms.")
+    except Exception as exc:
+        logger.warning(f"[STARTUP] Database schema auto-creation skipped: {exc}")
 
     # Seed default workspace if none exists
     try:
