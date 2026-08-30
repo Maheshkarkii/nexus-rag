@@ -10,9 +10,32 @@ export interface AppConfig {
   version: string;
 }
 
+const getBaseApiUrl = (): string => {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+  
+  // 1. If explicit valid environment variable provided and not default localhost in browser production
+  if (typeof window !== "undefined") {
+    // Check for user-configured custom backend URL override in localStorage
+    const stored = localStorage.getItem("nexus_custom_api_url")?.trim();
+    if (stored) return stored;
+
+    const hostname = window.location.hostname;
+    const isVercel = hostname.includes("vercel.app") || hostname.includes("nexus-rag");
+
+    // If running on Vercel and env is empty or accidentally points to localhost, route to Render
+    if (isVercel && (!envUrl || envUrl.includes("localhost") || envUrl.includes("127.0.0.1"))) {
+      return "https://nexus-rag-backend.onrender.com";
+    }
+  }
+
+  return envUrl || "http://127.0.0.1:8000";
+};
+
 export const config: AppConfig = {
   appName: process.env.NEXT_PUBLIC_APP_NAME || "AI Research Assistant",
-  apiUrl: process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000",
+  get apiUrl(): string {
+    return getBaseApiUrl();
+  },
   isProduction: process.env.NODE_ENV === "production",
   version: "0.1.0",
 };

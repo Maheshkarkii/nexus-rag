@@ -25,17 +25,21 @@ export interface ApiClientConfig {
 }
 
 export class ApiClient {
-  private readonly baseUrl: string;
+  private readonly clientConfig: ApiClientConfig;
   private readonly defaultTimeoutMs: number;
   private readonly defaultHeaders: Record<string, string>;
 
   constructor(clientConfig: ApiClientConfig = {}) {
-    this.baseUrl = (clientConfig.baseUrl || config.apiUrl).replace(/\/+$/, "");
+    this.clientConfig = clientConfig;
     this.defaultTimeoutMs = clientConfig.defaultTimeoutMs || 180000; // 3 minutes to accommodate Render cold starts
     this.defaultHeaders = {
       Accept: "application/json",
       ...(clientConfig.defaultHeaders || {}),
     };
+  }
+
+  public get baseUrl(): string {
+    return (this.clientConfig.baseUrl || config.apiUrl).replace(/\/+$/, "");
   }
 
   /**
