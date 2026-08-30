@@ -1,16 +1,25 @@
 """FastAPI application entrypoint for AI Research Assistant."""
 
+import asyncio
+import os
+import time
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import select
 
+import app.db.models  # noqa: F401
 from app.api.router import api_router
 from app.core.config import get_settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logging import setup_logging
+from app.db.base import Base
+from app.db.models.project import Project
+from app.db.session import async_session_factory, engine
 from app.schemas.common import ServiceInfoResponse
+from app.services.embedding import get_embedding_service
 
 settings = get_settings()
 logger = setup_logging()
@@ -19,7 +28,6 @@ logger = setup_logging()
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Execute startup and shutdown tasks for database engines and vector connections."""
-    import time
     t0 = time.perf_counter()
     logger.info("[STARTUP] APP_IMPORT and APP_CREATION completed.")
     logger.info(
@@ -29,14 +37,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info(f"[STARTUP] Allowed CORS origins: {settings.BACKEND_CORS_ORIGINS}")
 
     # Pre-warm embedding model only if explicitly enabled (prevent OOM on low-memory free tiers like Render 512MB)
-    import os
-
     if os.getenv("PREWARM_MODELS", "false").lower() in ("1", "true", "yes"):
         try:
-            import asyncio
-
-            from app.services.embedding import get_embedding_service
-
             embedding_svc = get_embedding_service()
             asyncio.get_running_loop().run_in_executor(None, embedding_svc.load_model)
             logger.info("[STARTUP] Embedding model pre-warming initiated successfully.")
@@ -47,10 +49,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     t_db = time.perf_counter()
     # Auto-initialize tables if they do not exist
-    import app.db.models  # noqa: F401
-    from app.db.base import Base
-    from app.db.session import engine
-
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
@@ -61,10 +59,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Seed default workspace if none exists
     try:
-        from sqlalchemy import select
-        from app.db.models.project import Project
-        from app.db.session import async_session_factory
-
         async with async_session_factory() as db_session:
             result = await db_session.execute(select(Project).limit(1))
             existing_project = result.scalar_one_or_none()
