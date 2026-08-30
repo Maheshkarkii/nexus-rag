@@ -71,6 +71,28 @@ export function ApiStatusCard() {
   }, []);
 
 
+  const [isEditingUrl, setIsEditingUrl] = React.useState<boolean>(false);
+  const [customUrlInput, setCustomUrlInput] = React.useState<string>("");
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      setCustomUrlInput(config.apiUrl);
+    }
+  }, []);
+
+  const handleSaveCustomUrl = (newUrl: string) => {
+    const cleanUrl = newUrl.trim().replace(/\/+$/, "");
+    if (typeof window !== "undefined") {
+      if (cleanUrl) {
+        localStorage.setItem("nexus_custom_api_url", cleanUrl);
+      } else {
+        localStorage.removeItem("nexus_custom_api_url");
+      }
+    }
+    setIsEditingUrl(false);
+    probeBackend();
+  };
+
   React.useEffect(() => {
     probeBackend();
   }, [probeBackend]);
@@ -85,8 +107,15 @@ export function ApiStatusCard() {
             </div>
             <div>
               <CardTitle className="text-sm font-semibold">FastAPI Backend Communication</CardTitle>
-              <CardDescription className="text-xs">
-                Centralized HTTP API client integration ({config.apiUrl})
+              <CardDescription className="text-xs flex items-center gap-2">
+                <span>Centralized API: <code className="font-mono text-foreground font-semibold">{config.apiUrl}</code></span>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingUrl((prev) => !prev)}
+                  className="text-primary hover:underline text-[11px] font-medium"
+                >
+                  {isEditingUrl ? "Cancel" : "Change URL"}
+                </button>
               </CardDescription>
             </div>
           </div>
@@ -115,10 +144,55 @@ export function ApiStatusCard() {
       </CardHeader>
 
       <CardContent className="p-5 pt-2 space-y-4">
+        {isEditingUrl && (
+          <div className="p-3.5 rounded-lg border border-primary/30 bg-primary/5 space-y-2.5 text-xs">
+            <p className="font-semibold text-foreground">Configure Backend API URL:</p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={customUrlInput}
+                onChange={(e) => setCustomUrlInput(e.target.value)}
+                placeholder="https://your-backend-name.onrender.com or http://localhost:8000"
+                className="flex-1 px-3 py-1.5 rounded-md border border-border bg-background text-xs font-mono"
+              />
+              <Button
+                size="sm"
+                onClick={() => handleSaveCustomUrl(customUrlInput)}
+                className="h-8 px-3 text-xs"
+              >
+                Save & Connect
+              </Button>
+            </div>
+            <div className="flex items-center gap-2 pt-1">
+              <span className="text-muted-foreground text-[11px]">Quick Presets:</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setCustomUrlInput("http://localhost:8000");
+                  handleSaveCustomUrl("http://localhost:8000");
+                }}
+                className="px-2 py-0.5 rounded border border-border bg-muted text-[10px] font-mono hover:bg-muted/80"
+              >
+                Localhost:8000
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setCustomUrlInput("http://127.0.0.1:8000");
+                  handleSaveCustomUrl("http://127.0.0.1:8000");
+                }}
+                className="px-2 py-0.5 rounded border border-border bg-muted text-[10px] font-mono hover:bg-muted/80"
+              >
+                127.0.0.1:8000
+              </button>
+            </div>
+          </div>
+        )}
+
         {status === "loading" && (
           <div className="py-4 flex items-center justify-center gap-2 text-xs text-muted-foreground">
             <RefreshCw className="h-4 w-4 animate-spin text-primary" />
-            <span>Probing FastAPI health endpoints...</span>
+            <span>Probing FastAPI health endpoints ({config.apiUrl})...</span>
           </div>
         )}
 
@@ -175,6 +249,18 @@ export function ApiStatusCard() {
                 <p className="text-[11px] text-muted-foreground/80 font-mono pt-1">
                   Target: {config.apiUrl}/api/v1/health
                 </p>
+                {!isEditingUrl && (
+                  <div className="pt-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setIsEditingUrl(true)}
+                      className="h-7 text-xs bg-background"
+                    >
+                      Enter Render Backend URL
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -182,7 +268,7 @@ export function ApiStatusCard() {
 
         <div className="flex items-center justify-between pt-1 border-t border-border/40 text-xs">
           <span className="text-[11px] text-muted-foreground">
-            FastAPI CORS configured for: <code className="text-foreground font-mono">http://localhost:3000</code>
+            Target Host: <code className="text-foreground font-mono">{config.apiUrl}</code>
           </span>
           <Button
             size="sm"
