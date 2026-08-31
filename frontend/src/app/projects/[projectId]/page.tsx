@@ -628,12 +628,12 @@ export default function ProjectWorkspacePage() {
             size="sm"
             onClick={() => setIsConfigModalOpen(true)}
             className="gap-1.5 h-8 text-xs bg-secondary/80 border-border text-foreground hover:bg-accent"
-            title="Configure Top Results (top_k), Chunk Size, and Chunk Overlap"
+            title="Adjust Search Settings (number of sources and chunk size)"
           >
             <SlidersHorizontal className="h-3.5 w-3.5 text-primary" />
-            <span>Hyperparameters</span>
+            <span>Search Settings</span>
             <Badge variant="secondary" className="text-[9px] px-1.5 py-0 font-mono text-primary bg-primary/10 border border-primary/20">
-              k={ragConfig.topK} | {ragConfig.chunkSize}c
+              {ragConfig.topK} sources
             </Badge>
           </Button>
           <Button

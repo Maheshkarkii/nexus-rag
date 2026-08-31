@@ -67,29 +67,59 @@ export default function HomePage() {
   return (
     <AppShell onOpenCreateProject={() => setIsCreateModalOpen(true)}>
       <Container size="lg" className="space-y-8 py-2">
-        {/* Page Hero Section */}
-        <section className="space-y-4">
+        {/* Hero Section */}
+        <section className="space-y-4 pt-2">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="default" className="gap-1.5 px-3 py-1 text-xs">
-              <Sparkles className="h-3 w-3" />
-              <span>Stage 7 Research Project Frontend</span>
-            </Badge>
-            <Badge variant="outline" className="text-xs text-muted-foreground">
-              Production Research UI Shell
+            <Badge variant="default" className="gap-1.5 px-3 py-1 text-xs bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>AI Research & Document Intelligence</span>
             </Badge>
           </div>
 
           <div className="space-y-2 max-w-3xl">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-foreground">
-              AI Research Assistant
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">
+              Instant Answers from Your Research Documents
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-              Research, analyze, compare, and discover insights from your knowledge base with grounded citations and multi-step synthesis.
+              Upload research papers, PDFs, notes, or spreadsheets. Ask questions in natural language and receive grounded answers with exact source citations.
             </p>
+          </div>
+
+          {/* Easy 3-Step Guide for Basic Users */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+            <div className="flex items-start gap-3 p-3.5 rounded-xl border border-border/70 bg-card/40 backdrop-blur-sm">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-xs">
+                1
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-xs font-semibold text-foreground">Create Workspace</p>
+                <p className="text-[11px] text-muted-foreground leading-tight">Create a project workspace for your topic or assignment.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3.5 rounded-xl border border-border/70 bg-card/40 backdrop-blur-sm">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold text-xs border border-primary/20">
+                2
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-xs font-semibold text-foreground">Upload Documents</p>
+                <p className="text-[11px] text-muted-foreground leading-tight">Add PDF, Word, Excel, CSV, or text files easily.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3.5 rounded-xl border border-border/70 bg-card/40 backdrop-blur-sm">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold text-xs border border-primary/20">
+                3
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-xs font-semibold text-foreground">Ask & Synthesize</p>
+                <p className="text-[11px] text-muted-foreground leading-tight">Get instant cited summaries and detailed research answers.</p>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* Live FastAPI Backend Communication Card */}
+        {/* Live Backend Connection Card */}
         <section>
           <ApiStatusCard />
         </section>
