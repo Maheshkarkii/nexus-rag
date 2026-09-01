@@ -68,52 +68,84 @@ export default function HomePage() {
     <AppShell onOpenCreateProject={() => setIsCreateModalOpen(true)}>
       <Container size="lg" className="space-y-8 py-2">
         {/* Hero Section */}
-        <section className="space-y-4 pt-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="default" className="gap-1.5 px-3 py-1 text-xs bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20">
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>AI Research & Document Intelligence</span>
+        <section className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-b from-primary/10 via-background to-background p-8 sm:p-12 space-y-6 shadow-xl">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <Badge variant="default" className="gap-2 px-3.5 py-1.5 text-xs font-semibold bg-primary text-primary-foreground shadow-md shadow-primary/20">
+              <Sparkles className="h-3.5 w-3.5 animate-pulse" />
+              <span>Next-Generation Research Intelligence</span>
             </Badge>
+
+            <div className="flex items-center gap-2">
+              <Link href="/projects">
+                <Button size="sm" variant="default" className="text-xs gap-1.5 shadow-md shadow-primary/20">
+                  <FolderKanban className="h-3.5 w-3.5" />
+                  <span>Launch Workspace</span>
+                </Button>
+              </Link>
+            </div>
           </div>
 
-          <div className="space-y-2 max-w-3xl">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-foreground">
-              Instant Answers from Your Research Documents
+          <div className="space-y-3 max-w-3xl">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-foreground leading-[1.15]">
+              Autonomous Research & Multi-Document Intelligence
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-              Upload research papers, PDFs, notes, or spreadsheets. Ask questions in natural language and receive grounded answers with exact source citations.
+              Upload papers, datasets, and reports. Execute grounded Q&amp;A with verifiable citations, compare studies side-by-side, and automate deep multi-step synthesis.
             </p>
           </div>
 
-          {/* Easy 3-Step Guide for Basic Users */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-            <div className="flex items-start gap-3 p-3.5 rounded-xl border border-border/70 bg-card/40 backdrop-blur-sm">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-xs">
+          {/* Quick Action Badges */}
+          <div className="flex flex-wrap items-center gap-2.5 pt-2">
+            <Button
+              size="sm"
+              variant="default"
+              onClick={() => setIsCreateModalOpen(true)}
+              className="gap-2 h-9 px-4 text-xs font-semibold shadow-lg shadow-primary/25 cursor-pointer"
+            >
+              <Plus className="h-4 w-4" />
+              <span>New Research Project</span>
+            </Button>
+            <Link href="/projects">
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-2 h-9 px-4 text-xs font-semibold bg-background/80 hover:bg-accent cursor-pointer"
+              >
+                <GitCompare className="h-4 w-4 text-primary" />
+                <span>Multi-Document Comparison Studio</span>
+              </Button>
+            </Link>
+          </div>
+
+          {/* Easy 3-Step Guide */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
+            <div className="flex items-start gap-3.5 p-4 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md transition-all hover:border-primary/40 hover:shadow-md">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground font-black text-xs shadow-sm">
                 1
               </div>
-              <div className="space-y-0.5">
-                <p className="text-xs font-semibold text-foreground">Create Workspace</p>
-                <p className="text-[11px] text-muted-foreground leading-tight">Create a project workspace for your topic or assignment.</p>
+              <div className="space-y-1">
+                <p className="text-xs font-bold text-foreground">Create Workspace</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">Isolate research papers, datasets, and knowledge graphs.</p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 p-3.5 rounded-xl border border-border/70 bg-card/40 backdrop-blur-sm">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold text-xs border border-primary/20">
+            <div className="flex items-start gap-3.5 p-4 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md transition-all hover:border-primary/40 hover:shadow-md">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary font-black text-xs border border-primary/30 shadow-sm">
                 2
               </div>
-              <div className="space-y-0.5">
-                <p className="text-xs font-semibold text-foreground">Upload Documents</p>
-                <p className="text-[11px] text-muted-foreground leading-tight">Add PDF, Word, Excel, CSV, or text files easily.</p>
+              <div className="space-y-1">
+                <p className="text-xs font-bold text-foreground">Ingest &amp; Number Files</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">PDF, Word, Excel, CSV, or text extracted and chunked automatically.</p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 p-3.5 rounded-xl border border-border/70 bg-card/40 backdrop-blur-sm">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold text-xs border border-primary/20">
+            <div className="flex items-start gap-3.5 p-4 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md transition-all hover:border-primary/40 hover:shadow-md">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary font-black text-xs border border-primary/30 shadow-sm">
                 3
               </div>
-              <div className="space-y-0.5">
-                <p className="text-xs font-semibold text-foreground">Ask & Synthesize</p>
-                <p className="text-[11px] text-muted-foreground leading-tight">Get instant cited summaries and detailed research answers.</p>
+              <div className="space-y-1">
+                <p className="text-xs font-bold text-foreground">Compare &amp; Synthesize</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">Side-by-side matrices, cited chat answers, and automated exports.</p>
               </div>
             </div>
           </div>
@@ -131,7 +163,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-semibold text-foreground tracking-tight">
+                <h2 className="text-lg font-bold text-foreground tracking-tight">
                   Research Projects
                 </h2>
                 <Badge variant="secondary" className="text-[10px] font-mono">
@@ -173,21 +205,21 @@ export default function HomePage() {
           )}
 
           {!isLoadingProjects && projects.length === 0 && (
-            <div className="rounded-xl border border-dashed border-border bg-card/30 p-8 text-center space-y-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary mx-auto border border-primary/20">
-                <FolderKanban className="h-5 w-5" />
+            <div className="rounded-2xl border border-dashed border-border bg-card/40 p-10 text-center space-y-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary mx-auto border border-primary/20">
+                <FolderKanban className="h-6 w-6" />
               </div>
               <div className="space-y-1">
-                <p className="text-xs font-semibold text-foreground">No research projects yet</p>
-                <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                  Create your first workspace to begin organizing documents, datasets, and research.
+                <p className="text-sm font-bold text-foreground">No research projects yet</p>
+                <p className="text-xs text-muted-foreground max-w-sm mx-auto leading-relaxed">
+                  Create your first workspace to begin organizing documents, datasets, and running comparative synthesis.
                 </p>
               </div>
               <Button
                 variant="default"
                 size="sm"
                 onClick={() => setIsCreateModalOpen(true)}
-                className="gap-1.5 text-xs"
+                className="gap-1.5 text-xs font-semibold shadow-md shadow-primary/20"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>Create Project</span>
@@ -197,7 +229,7 @@ export default function HomePage() {
 
           {!isLoadingProjects && projects.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {projects.slice(0, 3).map((project) => (
+              {projects.slice(0, 6).map((project) => (
                 <ProjectCard
                   key={project.id}
                   project={project}
@@ -211,92 +243,101 @@ export default function HomePage() {
 
         <Separator />
 
-        {/* Core Capabilities & Visual Placeholders for Future Stages */}
+        {/* Core Capabilities Section */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-base font-semibold text-foreground tracking-tight">
-                Core Research Capabilities
+              <h2 className="text-lg font-bold text-foreground tracking-tight">
+                Full-Spectrum Platform Capabilities
               </h2>
               <p className="text-xs text-muted-foreground">
-                Upcoming modules for document ingestion, grounded RAG, and multi-document comparison
+                Integrated modules for multi-document research, comparison, and grounded synthesis
               </p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Card 1: Start a Research Project */}
-            <Card className="glass-panel-hover group relative overflow-hidden border-border/80 bg-card/60">
+            {/* Card 1 */}
+            <Card className="glass-panel-hover group relative overflow-hidden border-border/80 bg-card/60 hover:border-primary/40 transition-all">
               <CardHeader className="p-5 pb-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 mb-3 group-hover:bg-primary/20 transition-colors">
                   <FolderPlus className="h-5 w-5" />
                 </div>
-                <CardTitle className="text-sm font-semibold">Research Workspaces</CardTitle>
-                <CardDescription className="text-xs line-clamp-2">
-                  Organize literature reviews, datasets, and analytical notes with full CRUD support.
+                <CardTitle className="text-sm font-bold">Research Workspaces</CardTitle>
+                <CardDescription className="text-xs leading-relaxed">
+                  Isolate documents, custom chunking parameters, and vector collections with strict project boundaries.
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-5 pt-2">
                 <Link href="/projects">
                   <Button size="sm" variant="outline" className="w-full text-xs gap-1.5 h-8">
-                    <span>Manage Projects</span>
+                    <span>Open Workspaces</span>
                     <ArrowRight className="h-3 w-3" />
                   </Button>
                 </Link>
               </CardContent>
             </Card>
 
-            {/* Card 2: Upload Documents */}
-            <Card className="glass-panel-hover group relative overflow-hidden border-border/80 bg-card/60">
+            {/* Card 2 */}
+            <Card className="glass-panel-hover group relative overflow-hidden border-border/80 bg-card/60 hover:border-primary/40 transition-all">
               <CardHeader className="p-5 pb-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-info/10 text-info border border-info/20 mb-3 group-hover:bg-info/20 transition-colors">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 mb-3 group-hover:bg-primary/20 transition-colors">
                   <Upload className="h-5 w-5" />
                 </div>
-                <CardTitle className="text-sm font-semibold">Upload Documents</CardTitle>
-                <CardDescription className="text-xs line-clamp-2">
-                  Ingest PDF, DOCX, TXT, Markdown, CSV, XLSX, and JSON files for semantic chunking.
+                <CardTitle className="text-sm font-bold">Multi-Format Ingestion</CardTitle>
+                <CardDescription className="text-xs leading-relaxed">
+                  Support for PDF, Word DOCX, Excel spreadsheets, CSVs, and hierarchical JSON text extraction.
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-5 pt-2">
-                <Button size="sm" variant="outline" disabled className="w-full text-xs gap-1.5 h-8 opacity-75">
-                  <span>Ingestion (Stage 8)</span>
-                </Button>
+                <Link href="/projects">
+                  <Button size="sm" variant="outline" className="w-full text-xs gap-1.5 h-8">
+                    <span>Upload &amp; Index</span>
+                    <ArrowRight className="h-3 w-3" />
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
-            {/* Card 3: Ask Questions */}
-            <Card className="glass-panel-hover group relative overflow-hidden border-border/80 bg-card/60">
+            {/* Card 3 */}
+            <Card className="glass-panel-hover group relative overflow-hidden border-border/80 bg-card/60 hover:border-primary/40 transition-all">
               <CardHeader className="p-5 pb-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10 text-success border border-success/20 mb-3 group-hover:bg-success/20 transition-colors">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 mb-3 group-hover:bg-primary/20 transition-colors">
                   <MessageSquareQuote className="h-5 w-5" />
                 </div>
-                <CardTitle className="text-sm font-semibold">Grounded RAG</CardTitle>
-                <CardDescription className="text-xs line-clamp-2">
-                  Perform grounded RAG synthesis with evidence citations and verifiable source links.
+                <CardTitle className="text-sm font-bold">Grounded RAG &amp; Citations</CardTitle>
+                <CardDescription className="text-xs leading-relaxed">
+                  Semantic retrieval with vector indexing (Qdrant), reranking, and interactive clickable citations.
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-5 pt-2">
-                <Button size="sm" variant="outline" disabled className="w-full text-xs gap-1.5 h-8 opacity-75">
-                  <span>RAG Query (Stage 10)</span>
-                </Button>
+                <Link href="/projects">
+                  <Button size="sm" variant="outline" className="w-full text-xs gap-1.5 h-8">
+                    <span>Query Assistant</span>
+                    <ArrowRight className="h-3 w-3" />
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
-            {/* Card 4: Compare Sources */}
-            <Card className="glass-panel-hover group relative overflow-hidden border-border/80 bg-card/60">
+            {/* Card 4 */}
+            <Card className="glass-panel-hover group relative overflow-hidden border-border/80 bg-card/60 hover:border-primary/40 transition-all">
               <CardHeader className="p-5 pb-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-warning/10 text-warning border border-warning/20 mb-3 group-hover:bg-warning/20 transition-colors">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 mb-3 group-hover:bg-primary/20 transition-colors">
                   <GitCompare className="h-5 w-5" />
                 </div>
-                <CardTitle className="text-sm font-semibold">Compare Sources</CardTitle>
-                <CardDescription className="text-xs line-clamp-2">
-                  Contrast methodologies, uncover research gaps, and generate cross-study matrices.
+                <CardTitle className="text-sm font-bold">Document Comparison</CardTitle>
+                <CardDescription className="text-xs leading-relaxed">
+                  Numbered document slots for side-by-side comparative analysis of methods, results, and findings.
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-5 pt-2">
-                <Button size="sm" variant="outline" disabled className="w-full text-xs gap-1.5 h-8 opacity-75">
-                  <span>Compare (Stage 11)</span>
-                </Button>
+                <Link href="/projects">
+                  <Button size="sm" variant="outline" className="w-full text-xs gap-1.5 h-8">
+                    <span>Compare Files</span>
+                    <ArrowRight className="h-3 w-3" />
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </div>

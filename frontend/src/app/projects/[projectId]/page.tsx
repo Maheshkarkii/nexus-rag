@@ -11,7 +11,6 @@ import {
   FileText,
   GitCompare,
   Bot,
-  AlertCircle,
   Plus,
   Upload,
   RefreshCw,
@@ -37,6 +36,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { EditProjectModal } from "@/components/projects/edit-project-modal";
 import { DeleteProjectModal } from "@/components/projects/delete-project-modal";
 import { RagConfigModal, RagConfig, DEFAULT_RAG_CONFIG } from "@/components/projects/rag-config-modal";
+import { DocumentComparisonView } from "@/components/projects/document-comparison-view";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -136,6 +136,9 @@ export default function ProjectWorkspacePage() {
   const [isEditOpen, setIsEditOpen] = React.useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = React.useState(false);
   const [isConfigModalOpen, setIsConfigModalOpen] = React.useState(false);
+
+  // Active Workspace Mode: "chat" | "compare"
+  const [activeTab, setActiveTab] = React.useState<"chat" | "compare">("chat");
 
   // RAG & Ingestion Hyperparameters State
   const [ragConfig, setRagConfig] = React.useState<RagConfig>(DEFAULT_RAG_CONFIG);
@@ -667,8 +670,46 @@ export default function ProjectWorkspacePage() {
 
       </div>
 
-      {/* Main Split Layout */}
-      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-4">
+      {/* Navigation Switcher: Interactive Assistant vs Document Comparison Studio */}
+      <div className="flex items-center gap-1.5 p-1 bg-muted/40 border border-border/70 rounded-xl w-fit shrink-0">
+        <button
+          onClick={() => setActiveTab("chat")}
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            activeTab === "chat"
+              ? "bg-background text-foreground shadow-xs border border-border/60"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Bot className="h-4 w-4 text-primary" />
+          <span>Research Chat & Knowledge Base</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("compare")}
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            activeTab === "compare"
+              ? "bg-background text-foreground shadow-xs border border-border/60"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <GitCompare className="h-4 w-4 text-primary" />
+          <span>Multi-Document Comparison</span>
+          <Badge variant="secondary" className="text-[9px] px-1.5 py-0 font-mono text-primary bg-primary/10">
+            Compare Files
+          </Badge>
+        </button>
+      </div>
+
+      {activeTab === "compare" ? (
+        <DocumentComparisonView
+          projectId={projectId}
+          documents={documents}
+          onRefreshDocuments={fetchDocuments}
+          onProcessDocument={handleProcessDoc}
+        />
+      ) : (
+        /* Main Split Layout */
+        <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-4">
         
         {/* Left Side: Document Manager & Sessions (4 columns) */}
         <div className="lg:col-span-4 flex flex-col gap-4 min-h-0">
@@ -1118,6 +1159,7 @@ export default function ProjectWorkspacePage() {
         </div>
 
       </div>
+      )}
 
       {/* Reports & Exports Modal Drawer (Stage 21) */}
       {isReportModalOpen && (
