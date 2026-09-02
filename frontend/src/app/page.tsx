@@ -28,8 +28,6 @@ import { Container } from "@/components/ui/container";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { ApiStatusCard } from "@/components/ui/api-status-card";
 import { DocumentComparisonView } from "@/components/projects/document-comparison-view";
 import { RagConfig, DEFAULT_RAG_CONFIG } from "@/components/projects/rag-config-modal";
 import ReactMarkdown from "react-markdown";
@@ -961,12 +959,6 @@ export default function HomePage() {
             </div>
           </div>
         )}
-
-        {/* Connection Status Footer */}
-        <Separator />
-        <section>
-          <ApiStatusCard />
-        </section>
       </Container>
     </AppShell>
   );
