@@ -156,6 +156,9 @@ async def run_full_ingestion_pipeline(
     doc = await processing_service.process_document(
         session=session, project_id=project_id, document_id=document_id, storage_service=storage_service
     )
+    if doc.status == "failed":
+        raise BadRequestException(doc.processing_error or "Text extraction failed for document.")
+
     # 2. Chunk with user-configured chunk_size & chunk_overlap
     await chunking_service.chunk_document(
         session=session,
@@ -170,6 +173,7 @@ async def run_full_ingestion_pipeline(
     await indexing_service.index_document(
         session=session, project_id=project_id, document_id=document_id, qdrant_service=qdrant_service, embedding_service=embedding_service
     )
+    await session.refresh(doc)
     return DocumentResponse.model_validate(doc)
 
 
